@@ -139,6 +139,7 @@ const ComprehensiveChatModal = ({
   // Local state
   const [userInput, setUserInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [botResponding,setBotResponding] = useState(false)
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   const [targetBotIndex, setTargetBotIndex] = useState(null);
   const [isSavingSuggestion, setIsSavingSuggestion] = useState(false);
@@ -197,16 +198,16 @@ const ComprehensiveChatModal = ({
       return;
     }
 
-    
     try {
-      setIsTyping(true);
       // Try WebSocket first if connected
       if (isConnected) {
         console.log("Sending message via WebSocket");
+      
         const isNewConvo = messages.length === 0;
         const sent = sendWebSocketMessage(userMessage, isNewConvo);
         if (sent) {
           // WebSocket message sent successfully, typing indicator will be handled by WebSocket response
+       
           return;
         }
       }
@@ -243,11 +244,10 @@ const ComprehensiveChatModal = ({
         timestamp: new Date().toLocaleTimeString(),
       };
       dispatch(addMessage(botResponse));
-      setIsTyping(false)
-    } catch (error) {
-      setIsTyping(false)
-      console.error("Chat Error:", error);
 
+    } catch (error) {
+      console.error("Chat Error:", error);
+setBotResponding(false)
       let errorMessage =
         "Sorry, I'm having trouble responding right now. Please try again.";
 
@@ -265,7 +265,7 @@ const ComprehensiveChatModal = ({
         timestamp: new Date().toLocaleTimeString(),
       };
       dispatch(addMessage(errorResponse));
-    }
+    } 
   };
 
   // Handle sending user message
@@ -292,6 +292,7 @@ const ComprehensiveChatModal = ({
     dispatch(resetChat());
     setUserInput("");
     setIsTyping(false);
+
     initializedRef.current = false;
     disconnectWebSocket();
     onClose();
@@ -344,6 +345,7 @@ const ComprehensiveChatModal = ({
     setIsSuggestOpen(false);
     setTargetBotIndex(null);
   };
+
 
   const handleSubmitSuggestion = async (instructionText) => {
     try {
@@ -400,7 +402,7 @@ const ComprehensiveChatModal = ({
             className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
             title="Start New Conversation"
           >
-            <RiRefreshLine className="w-4 h-4" />
+            <RiRefreshLine className="w-4 h-4"/>
           </button>
           <button
             onClick={handleClose}
@@ -456,10 +458,7 @@ const ComprehensiveChatModal = ({
           ))}
 
           {/* Typing Indicator */}
-          {(isTyping ||
-            isChatting ||
-            isStartingConversation ||
-            isContinuingConversation) && (
+          {botResponding===true ? (
             <div className="flex justify-start">
               <div className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg max-w-xs">
                 <div className="flex items-center space-x-1">
@@ -480,7 +479,7 @@ const ComprehensiveChatModal = ({
                 </div>
               </div>
             </div>
-          )}
+          ):null}
         </div>
         <div ref={messagesEndRef} />
       </div>
@@ -525,7 +524,6 @@ const ComprehensiveChatModal = ({
           ) : (
             <span>🔴 Connection in progress</span>
           )}
-          
         </p>
       </div>
 
