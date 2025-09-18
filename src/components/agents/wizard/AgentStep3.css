@@ -1,0 +1,50 @@
+/* AgentStep3 Component Styles */
+
+/* Rule template tooltip styles */
+.rule-template-container {
+  position: relative;
+  overflow: visible !important;
+}
+
+.rule-template-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+  background-color: #1f2937;
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 0.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  border: 1px solid #374151;
+  min-width: 300px;
+  max-width: 500px;
+  width: max-content;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.rule-template-container:hover .rule-template-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile responsive tooltip */
+@media (max-width: 768px) {
+  .rule-template-tooltip {
+    left: 0;
+    right: 0;
+    transform: none;
+    min-width: auto;
+    max-width: none;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+}

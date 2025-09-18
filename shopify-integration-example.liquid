@@ -1,0 +1,114 @@
+<!-- 
+  SHOPIFY THEME.LIQUID INTEGRATION EXAMPLE
+  Add this code to your theme.liquid file, preferably before the closing </body> tag
+-->
+
+<!-- Chatbot iframe integration -->
+<div id="shopify-chatbot-iframe-container">
+  <iframe 
+    id="shopify-chatbot-iframe"
+    src="http://localhost:5173/chatbot-iframe.html"
+    style="
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 400px;
+      height: 500px;
+      border: none;
+      pointer-events: auto;
+      z-index: 9999;
+      background: transparent;
+    "
+    allow="clipboard-write"
+    sandbox="allow-scripts allow-same-origin allow-forms"
+  ></iframe>
+</div>
+
+<style>
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    #shopify-chatbot-iframe {
+      width: 100vw !important;
+      height: 100vh !important;
+      bottom: 0 !important;
+      right: 0 !important;
+    }
+  }
+  
+  /* Ensure iframe doesn't block page content */
+  #shopify-chatbot-iframe {
+    max-width: 400px;
+    max-height: 500px;
+  }
+</style>
+
+<script>
+  // Additional safety to ensure page interactions work
+  document.addEventListener('DOMContentLoaded', function() {
+    const iframe = document.getElementById('shopify-chatbot-iframe');
+    if (iframe) {
+      // Only enable pointer events on the iframe itself
+      iframe.style.pointerEvents = 'auto';
+    }
+  });
+</script>
+
+<!-- Alternative: Direct HTML embed (if you prefer not to use iframe) -->
+<!-- 
+<div id="chatbot-direct-embed">
+  <!-- You can copy the entire content from chatbot-iframe.html here -->
+  <!-- This approach gives you more control but requires manual updates -->
+</div>
+-->
+
+<!-- 
+  TESTING WITH LOCALHOST:
+  
+  ⚠️ IMPORTANT LIMITATIONS:
+  - localhost:5173 will ONLY work when testing locally on your computer
+  - Other people visiting your Shopify store won't see the chatbot
+  - The iframe will fail to load on the live Shopify store for customers
+  - Shopify's servers cannot access your local development server
+  
+  ✅ FOR LOCAL TESTING:
+  1. Make sure your React dev server is running: npm run dev
+  2. Use: http://localhost:5173/chatbot-iframe.html
+  3. Test your Shopify store locally or in development mode
+  
+  🚀 FOR PRODUCTION:
+  You'll need to host the chatbot-iframe.html file on:
+  - Netlify (free hosting)
+  - Vercel (free hosting) 
+  - GitHub Pages (free hosting)
+  - Your own web server
+  - CDN service
+  
+  QUICK FREE HOSTING OPTIONS:
+  
+  1. NETLIFY (Easiest):
+     - Drag & drop chatbot-iframe.html to netlify.com/drop
+     - Get instant URL like: https://amazing-chatbot-123.netlify.app/chatbot-iframe.html
+  
+  2. GITHUB PAGES:
+     - Upload file to GitHub repository
+     - Enable GitHub Pages
+     - Access via: https://username.github.io/repo-name/chatbot-iframe.html
+  
+  3. VERCEL:
+     - Upload to vercel.com
+     - Get URL like: https://chatbot-abc123.vercel.app/chatbot-iframe.html
+-->
+
+<!-- 
+  INTEGRATION STEPS:
+  
+  1. Upload chatbot-iframe.html to your web server or CDN
+  2. Replace "https://your-domain.com/chatbot-iframe.html" with your actual URL
+  3. Add this code to your theme.liquid file before </body>
+  4. Test on your Shopify store
+  
+  CUSTOMIZATION OPTIONS:
+  - Change colors by modifying the iframe source
+  - Adjust positioning by changing CSS styles
+  - Add custom branding to the chatbot HTML file
+--> 
