@@ -7,6 +7,7 @@ import {
   fetchProductsList,
 } from "../../store/stores/storesThunk";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useNavigate } from "react-router-dom";
 
 const ProductsTab = ({ setShowProductsSyncModal }) => {
   const dispatch = useDispatch();
@@ -31,6 +32,7 @@ const ProductsTab = ({ setShowProductsSyncModal }) => {
   const [products, setProducts] = useState([]);
   const totalPages = Math.ceil(productCounts[selectedStoreId] / pageSize);
   const [fetchingProducts, setFetchingProducts] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!selectedStoreId) return;
@@ -293,7 +295,7 @@ const ProductsTab = ({ setShowProductsSyncModal }) => {
                         ) : (
                           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {/* Product Grid */}
-                            {products.length > 0 ? (
+                            {products.length < 0 ? (
                               products.map((product) => (
                                 <div
                                   key={product.id}
@@ -318,10 +320,7 @@ const ProductsTab = ({ setShowProductsSyncModal }) => {
                             ) : (
                               <div className="flex dark:text-white w-full gap-3 flex-col items-start">
                                 <p>No products found... </p>
-                                <p>Try reconnecting product database</p>
-                                <button className="w-fit bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
-                                  Connect Database
-                                </button>
+                                <p>Try reconnecting product database from product database</p>
                               </div>
                             )}
                           </div>
