@@ -1,286 +1,303 @@
-import { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { 
-  RiRobot2Fill, 
-  RiSettings3Line, 
-  RiAddLine, 
-  RiEditLine, 
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  RiRobot2Fill,
+  RiSettings3Line,
+  RiAddLine,
+  RiEditLine,
   RiDeleteBinLine,
   RiEyeLine,
   RiCloseLine,
   RiRefreshLine,
   RiPlayLine,
   RiArrowDownSLine,
-  RiArrowUpSLine
-} from 'react-icons/ri'
-import { 
-  fetchAgents, 
-  updateAgent, 
-  deleteAgent
-} from '../../store/agents/agentThunk'
-import { clearAgentError, setCurrentAgent } from '../../store/agents/agentSlice'
-import AgentCreationWizard from '../agents/AgentCreationWizard'
-import ComprehensiveChatModal from '../chat/ComprehensiveChatModal'
+  RiArrowUpSLine,
+} from "react-icons/ri";
+import {
+  fetchAgents,
+  updateAgent,
+  deleteAgent,
+} from "../../store/agents/agentThunk";
+import {
+  clearAgentError,
+} from "../../store/agents/agentSlice";
+import AgentCreationWizard from "../agents/AgentCreationWizard";
+import ComprehensiveChatModal from "../chat/ComprehensiveChatModal";
 
-const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
-  const dispatch = useDispatch()
-  const { 
-    agents, 
-    currentAgent, 
-    isLoading, 
-    isUpdating, 
-    isDeleting, 
-    error 
-  } = useSelector(state => state.agents)
-  
-  const { stores } = useSelector(state => state.stores)
-  
+const AgentsTab = ({  setShowOnboarding }) => {
+  const dispatch = useDispatch();
+  const { agents, isLoading, isUpdating, isDeleting, error } =
+    useSelector((state) => state.agents);
+
+  const { stores } = useSelector((state) => state.stores);
+
   // Debug log
   // console.log('AgentsTab render state:', { agents, isLoading, error })
 
   // Modal states
-  const [showCreateWizard, setShowCreateWizard] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showViewModal, setShowViewModal] = useState(false)
-  const [showChatModal, setShowChatModal] = useState(false)
-  const [showMessageModal, setShowMessageModal] = useState(false)
-  const [messageModalContent, setMessageModalContent] = useState({ title: '', message: '' })
-  const [selectedAgent, setSelectedAgent] = useState(null)
-  const [selectedStore, setSelectedStore] = useState(null)
-  const [showScrapeInstructions, setShowScrapeInstructions] = useState(false)
+  const [showCreateWizard, setShowCreateWizard] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageModalContent, setMessageModalContent] = useState({
+    title: "",
+    message: "",
+  });
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [selectedStore, setSelectedStore] = useState(null);
+  const [showScrapeInstructions, setShowScrapeInstructions] = useState(false);
 
   // Form states for editing
   const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    gender: '',
-    accent: '',
-    personality: '',
-    behavior_prompt: '',
-    tone: 'professional',
-    status: 'active',
-    instructions_text: ''
-  })
+    name: "",
+    age: "",
+    gender: "",
+    accent: "",
+    personality: "",
+    behavior_prompt: "",
+    tone: "professional",
+    status: "active",
+    instructions_text: "",
+  });
 
   // Available response tones
   const toneOptions = [
-    { value: 'professional', label: 'Professional' },
-    { value: 'friendly', label: 'Friendly' },
-    { value: 'casual', label: 'Casual' },
-    { value: 'formal', label: 'Formal' },
-    { value: 'enthusiastic', label: 'Enthusiastic' },
-    { value: 'calm', label: 'Calm' },
-    { value: 'energetic', label: 'Energetic' },
-    { value: 'warm', label: 'Warm' },
-    { value: 'confident', label: 'Confident' },
-    { value: 'helpful', label: 'Helpful' }
-  ]
+    { value: "professional", label: "Professional" },
+    { value: "friendly", label: "Friendly" },
+    { value: "casual", label: "Casual" },
+    { value: "formal", label: "Formal" },
+    { value: "enthusiastic", label: "Enthusiastic" },
+    { value: "calm", label: "Calm" },
+    { value: "energetic", label: "Energetic" },
+    { value: "warm", label: "Warm" },
+    { value: "confident", label: "Confident" },
+    { value: "helpful", label: "Helpful" },
+  ];
 
   // Available gender options
   const genderOptions = [
-    { value: 'Male', label: 'Male' },
-    { value: 'Female', label: 'Female' },
-    { value: 'Other', label: 'Other' }
-  ]
+    { value: "Male", label: "Male" },
+    { value: "Female", label: "Female" },
+    { value: "Other", label: "Other" },
+  ];
 
   // Available accent options
   const accentOptions = [
-    { value: 'American', label: 'American' },
-    { value: 'British', label: 'British' },
-    { value: 'Australian', label: 'Australian' },
-    { value: 'Canadian', label: 'Canadian' },
-    { value: 'Indian', label: 'Indian' },
-    { value: 'None', label: 'None' }
-  ]
+    { value: "American", label: "American" },
+    { value: "British", label: "British" },
+    { value: "Australian", label: "Australian" },
+    { value: "Canadian", label: "Canadian" },
+    { value: "Indian", label: "Indian" },
+    { value: "None", label: "None" },
+  ];
 
   // Status options
   const statusOptions = [
-    { value: 'active', label: 'Active', color: 'bg-green-100 text-green-800' },
-    { value: 'inactive', label: 'Inactive', color: 'bg-red-100 text-red-800' },
-    { value: 'draft', label: 'Draft', color: 'bg-yellow-100 text-yellow-800' }
-  ]
+    { value: "active", label: "Active", color: "bg-green-100 text-green-800" },
+    { value: "inactive", label: "Inactive", color: "bg-red-100 text-red-800" },
+    { value: "draft", label: "Draft", color: "bg-yellow-100 text-yellow-800" },
+  ];
 
   // Load agents on mount
   useEffect(() => {
-    console.log('AgentsTab: Loading agents...'); // Debug log
-    dispatch(fetchAgents())
-  }, [dispatch])
+    console.log("AgentsTab: Loading agents..."); // Debug log
+    dispatch(fetchAgents());
+  }, [dispatch]);
 
   // Clear error on unmount
   useEffect(() => {
     return () => {
-      dispatch(clearAgentError())
-    }
-  }, [dispatch])
+      dispatch(clearAgentError());
+    };
+  }, [dispatch]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   // Reset form data
   const resetForm = () => {
     setFormData({
-      name: '',
-      age: '',
-      gender: '',
-      accent: '',
-      personality: '',
-      behavior_prompt: '',
-      tone: 'professional',
-      status: 'active',
-      instructions_text: ''
-    })
-  }
+      name: "",
+      age: "",
+      gender: "",
+      accent: "",
+      personality: "",
+      behavior_prompt: "",
+      tone: "professional",
+      status: "active",
+      instructions_text: "",
+    });
+  };
 
   // Handle edit agent
   const handleEditAgent = async (e) => {
-    e.preventDefault()
-    if (!selectedAgent) return
-    
+    e.preventDefault();
+    if (!selectedAgent) return;
+
     try {
-      await dispatch(updateAgent({
-        agentId: selectedAgent.id,
-        updateData: formData
-      })).unwrap()
-      setShowEditModal(false)
-      setSelectedAgent(null)
-      resetForm()
-      dispatch(fetchAgents()) // Refresh list
+      await dispatch(
+        updateAgent({
+          agentId: selectedAgent.id,
+          updateData: formData,
+        })
+      ).unwrap();
+      setShowEditModal(false);
+      setSelectedAgent(null);
+      resetForm();
+      dispatch(fetchAgents()); // Refresh list
     } catch (error) {
       // Error handling is done in the slice
+      console.error("error in edit agent:",error)
     }
-  }
+  };
 
   // Handle delete agent
   const handleDeleteAgent = async () => {
-    if (!selectedAgent) return
-    
+    if (!selectedAgent) return;
+
     try {
-      await dispatch(deleteAgent(selectedAgent.id)).unwrap()
-      setShowDeleteModal(false)
-      setSelectedAgent(null)
+      await dispatch(deleteAgent(selectedAgent.id)).unwrap();
+      setShowDeleteModal(false);
+      setSelectedAgent(null);
     } catch (error) {
       // Error handling is done in the slice
+      console.error("error in delete agent:",error)
     }
-  }
+  };
 
   // Handle toggle agent status
   const handleToggleAgentStatus = async (agent) => {
+    console.log("all agents:",agents)
     try {
-      const newStatus = agent.status === 'active' ? 'inactive' : 'active'
-      
+      const newStatus = agent.status === "active" ? "inactive" : "active";
+      console.log("newStatus", newStatus);
+
       // If activating an agent, deactivate other agents for the same store
-      if (newStatus === 'active') {
-        const otherAgentsForStore = agents.filter(a => 
-          a.id !== agent.id && 
-          a.store === agent.store && 
-          a.status === 'active'
-        )
-        
+      if (newStatus === "active") {
+        const otherAgentsForStore = agents.filter(
+          (a) =>
+            a.id !== agent.id &&
+            a.store === agent.store &&
+            a.status === "active"
+        );
+
         // Deactivate other agents for the same store
         for (const otherAgent of otherAgentsForStore) {
-          await dispatch(updateAgent({
-            agentId: otherAgent.id,
-            updateData: { ...otherAgent, status: 'inactive' }
-          })).unwrap()
+          await dispatch(
+            updateAgent({
+              agentId: otherAgent.id,
+              updateData: { ...otherAgent, status: "inactive" },
+            })
+          ).unwrap();
         }
       }
-      
+
       // Update the current agent
-      await dispatch(updateAgent({
-        agentId: agent.id,
-        updateData: { ...agent, status: newStatus }
-      })).unwrap()
-      
+      await dispatch(
+        updateAgent({
+          agentId: agent.id,
+          updateData: { ...agent, status: newStatus },
+        })
+      ).unwrap();
+
       // Refresh the agents list
-      dispatch(fetchAgents())
-      
+      dispatch(fetchAgents());
+
       // Show success message
       setMessageModalContent({
-        title: 'Success',
-        message: `Agent ${agent.name} has been ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully.`
-      })
-      setShowMessageModal(true)
-      
+        title: "Success",
+        message: `Agent ${agent.name} has been ${
+          newStatus === "active" ? "activated" : "deactivated"
+        } successfully.`,
+      });
+      setShowMessageModal(true);
     } catch (error) {
       // Show error message
+      console.error("error in toggle agent status", error);
       setMessageModalContent({
-        title: 'Error',
-        message: `Failed to ${agent.status === 'active' ? 'deactivate' : 'activate'} agent. Please try again.`
-      })
-      setShowMessageModal(true)
+        title: "Error",
+        message: `Failed to ${
+          agent.status === "active" ? "deactivate" : "activate"
+        } agent. Please try again.`,
+      });
+      setShowMessageModal(true);
     }
-  }
+  };
 
   // Open edit modal
   const openEditModal = (agent) => {
-    setSelectedAgent(agent)
+    setSelectedAgent(agent);
     setFormData({
-      name: agent.name || '',
-      age: agent.age || '',
-      gender: agent.gender || '',
-      accent: agent.accent || '',
-      personality: agent.personality || '',
-      behavior_prompt: agent.behavior_prompt || '',
-      tone: agent.tone || 'professional',
-      status: agent.status || 'active',
-      instructions_text: agent.instructions_text || ''
-    })
-    setShowEditModal(true)
-  }
+      name: agent.name || "",
+      age: agent.age || "",
+      gender: agent.gender || "",
+      accent: agent.accent || "",
+      personality: agent.personality || "",
+      behavior_prompt: agent.behavior_prompt || "",
+      tone: agent.tone || "professional",
+      status: agent.status || "active",
+      instructions_text: agent.instructions_text || "",
+    });
+    setShowEditModal(true);
+  };
 
   // Open view modal
   const openViewModal = (agent) => {
-    setSelectedAgent(agent)
-    setShowViewModal(true)
-  }
+    setSelectedAgent(agent);
+    setShowViewModal(true);
+  };
 
   // Open delete modal
   const openDeleteModal = (agent) => {
-    setSelectedAgent(agent)
-    setShowDeleteModal(true)
-  }
+    setSelectedAgent(agent);
+    setShowDeleteModal(true);
+  };
 
   // Open chat modal with comprehensive chat
   const openChatModal = (agent) => {
     // Check if agent is active
-    if (agent.status !== 'active') {
+    if (agent.status !== "active") {
       setMessageModalContent({
-        title: 'Error testing agent',
-        message: 'Agent is inactive, kindly activate it first'
-      })
-      setShowMessageModal(true)
-      return
+        title: "Error testing agent",
+        message: "Agent is inactive, kindly activate it first",
+      });
+      setShowMessageModal(true);
+      return;
     }
-    
-    setSelectedAgent(agent)
-    
+
+    setSelectedAgent(agent);
+
     // Find the store for this agent
-    const agentStore = stores.find(store => store.id === agent.store) || stores[0]
-    setSelectedStore(agentStore)
-    
-    setShowChatModal(true)
-  }
+    const agentStore =
+      stores.find((store) => store.id === agent.store) || stores[0];
+    setSelectedStore(agentStore);
+
+    setShowChatModal(true);
+  };
 
   // Close chat modal
   const closeChatModal = () => {
-    setShowChatModal(false)
-    setSelectedAgent(null)
-    setSelectedStore(null)
-  }
+    setShowChatModal(false);
+    setSelectedAgent(null);
+    setSelectedStore(null);
+  };
 
   // Get status badge color
   const getStatusColor = (status) => {
-    const statusOption = statusOptions.find(option => option.value === status)
-    return statusOption ? statusOption.color : 'bg-gray-100 text-gray-800'
-  }
+    const statusOption = statusOptions.find(
+      (option) => option.value === status
+    );
+    return statusOption ? statusOption.color : "bg-gray-100 text-gray-800";
+  };
 
   // Add error boundary
   if (error) {
-    console.error('AgentsTab error:', error);
+    console.error("AgentsTab error:", error);
   }
 
   return (
@@ -289,15 +306,27 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
         <div className="flex items-center space-x-3">
           <RiRobot2Fill className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">AI Salespeople Management</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            AI Salespeople Management
+          </h2>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
           <button
             onClick={() => setShowOnboarding(true)}
             className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 transition-colors flex items-center justify-center text-sm sm:text-base"
           >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
             </svg>
             Show Tutorial
           </button>
@@ -315,7 +344,9 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
       {error && (
         <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
           <div className="flex items-center">
-            <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
+            <div className="text-red-600 dark:text-red-400 text-sm">
+              {error}
+            </div>
             <button
               onClick={() => dispatch(clearAgentError())}
               className="ml-auto text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
@@ -331,7 +362,9 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <RiRefreshLine className="w-8 h-8 text-gray-400 animate-spin mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">Loading agents...</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              Loading agents...
+            </p>
           </div>
         </div>
       ) : (
@@ -340,8 +373,12 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
           {agents.length === 0 ? (
             <div className="text-center py-12">
               <RiRobot2Fill className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No AI salespeople yet</h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">Create your first AI-powered salesperson to get started.</p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No AI salespeople yet
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6">
+                Create your first AI-powered salesperson to get started.
+              </p>
               <button
                 onClick={() => setShowCreateWizard(true)}
                 className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -351,51 +388,66 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
               </button>
             </div>
           ) : (
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid sm:grid-cols-2 grid-cols-1 gap-5">
               {agents.map((agent) => {
                 try {
                   return (
-                    <div key={agent.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-                                             {/* Agent Header */}
-                       <div className="flex items-start justify-between mb-3">
-                         <div className="flex items-center space-x-3">
-                           <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                             <RiRobot2Fill className="w-5 h-5 text-white" />
-                           </div>
-                           <div>
-                             <h3 className="font-medium text-gray-900 dark:text-white truncate">{agent.name || 'Unnamed Salesperson'}</h3>
-                             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(agent.status)}`}>
-                               {agent.status || 'draft'}
-                             </span>
-                           </div>
-                         </div>
-                         
-                         {/* Toggle Switch */}
-                         <div className="flex items-center">
-                           <button
-                             onClick={() => handleToggleAgentStatus(agent)}
-                             disabled={isUpdating}
-                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                               agent.status === 'active'
-                                 ? 'bg-green-600 hover:bg-green-700'
-                                 : 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500'
-                             }`}
-                             title={agent.status === 'active' ? 'Deactivate Agent' : 'Activate Agent'}
-                           >
-                             <span
-                               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                 agent.status === 'active' ? 'translate-x-6' : 'translate-x-1'
-                               }`}
-                             />
-                           </button>
-                         </div>
-                       </div>
+                    <div
+                      key={agent.id}
+                      className="bg-gray-50 dark:bg-gray-700 w-fit rounded-lg border border-gray-200 dark:border-gray-600 p-4"
+                    >
+                      {/* Agent Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                            <RiRobot2Fill className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                              {agent.name || "Unnamed Salesperson"}
+                            </h3>
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                agent.status
+                              )}`}
+                            >
+                              {agent.status || "draft"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Toggle Switch */}
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => handleToggleAgentStatus(agent)}
+                            disabled={isUpdating}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                              agent.status === "active"
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
+                            }`}
+                            title={
+                              agent.status === "active"
+                                ? "Deactivate Agent"
+                                : "Activate Agent"
+                            }
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                agent.status === "active"
+                                  ? "translate-x-6"
+                                  : "translate-x-1"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
 
                       {/* Agent Info */}
                       <div className="mb-4">
                         <div className="flex items-center justify-between mb-2">
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            <strong>Tone:</strong> {agent.tone || 'Not set'}
+                            <strong>Tone:</strong> {agent.tone || "Not set"}
                           </p>
                           {agent.age && (
                             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -403,13 +455,13 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                             </p>
                           )}
                         </div>
-                        
-                        {agent.country && agent.country !== 'None' && (
+
+                        {agent.country && agent.country !== "None" && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                             <strong>Country:</strong> {agent.country}
                           </p>
                         )}
-                        {agent.accent && agent.accent !== 'None' && (
+                        {agent.accent && agent.accent !== "None" && (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                             <strong>Accent:</strong> {agent.accent}
                           </p>
@@ -419,64 +471,73 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                             <strong>Gender:</strong> {agent.gender}
                           </p>
                         )}
-                        
+
                         <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                          {agent.behavior_prompt || 'No behavior prompt set'}
+                          {agent.behavior_prompt || "No behavior prompt set"}
                         </p>
                       </div>
 
-                                             {/* Store Info */}
-                       {agent.store_name && (
-                         <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
-                           <strong>Store:</strong> {agent.store_name}
-                           {/* {agent.status === 'active' && (
+                      {/* Store Info */}
+                      {agent.store_name && (
+                        <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+                          <strong>Store:</strong> {agent.store_name}
+                          {/* {agent.status === 'active' && (
                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
                                Active
                              </span>
                            )} */}
-                         </div>
-                       )}
+                        </div>
+                      )}
 
-                                             {/* Actions */}
-                       <div className="flex items-center justify-center pt-3 border-t border-gray-200 dark:border-gray-600">
-                         <div className="flex items-center space-x-2">
-                           <button
-                             onClick={() => openChatModal(agent)}
-                             className="p-2 text-green-400 hover:text-green-600 rounded hover:bg-green-50 dark:hover:bg-green-900/20"
-                             title={agent.status === 'active' ? "Test Agent" : "Agent is inactive, activate first"}
-                           >
-                             <RiPlayLine className="w-5 h-5" />
-                           </button>
-                           <button
-                             onClick={() => openViewModal(agent)}
-                             className="p-2 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-                             title="View Details"
-                           >
-                             <RiEyeLine className="w-5 h-5" />
-                           </button>
-                           <button
-                             onClick={() => openEditModal(agent)}
-                             className="p-2 text-blue-400 hover:text-blue-600 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                             title="Edit"
-                           >
-                             <RiEditLine className="w-5 h-5" />
-                           </button>
-                           <button
-                             onClick={() => openDeleteModal(agent)}
-                             className="p-2 text-red-400 hover:text-red-600 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
-                             title="Delete"
-                           >
-                             <RiDeleteBinLine className="w-5 h-5" />
-                           </button>
-                         </div>
-                       </div>
+                      {/* Actions */}
+                      <div className="flex items-center justify-center pt-3 border-t border-gray-200 dark:border-gray-600">
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => openChatModal(agent)}
+                            className="p-2 text-green-400 hover:text-green-600 rounded hover:bg-green-50 dark:hover:bg-green-900/20"
+                            title={
+                              agent.status === "active"
+                                ? "Test Agent"
+                                : "Agent is inactive, activate first"
+                            }
+                          >
+                            <RiPlayLine className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => openViewModal(agent)}
+                            className="p-2 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+                            title="View Details"
+                          >
+                            <RiEyeLine className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => openEditModal(agent)}
+                            className="p-2 text-blue-400 hover:text-blue-600 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            title="Edit"
+                          >
+                            <RiEditLine className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() => openDeleteModal(agent)}
+                            className="p-2 text-red-400 hover:text-red-600 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
+                            title="Delete"
+                          >
+                            <RiDeleteBinLine className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   );
                 } catch (error) {
-                  console.error('Error rendering agent:', agent, error);
+                  console.error("Error rendering agent:", agent, error);
                   return (
-                    <div key={agent.id || 'error'} className="bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 p-4">
-                      <p className="text-red-600 dark:text-red-400 text-sm">Error rendering agent</p>
+                    <div
+                      key={agent.id || "error"}
+                      className="bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 p-4"
+                    >
+                      <p className="text-red-600 dark:text-red-400 text-sm">
+                        Error rendering agent
+                      </p>
                     </div>
                   );
                 }
@@ -488,9 +549,7 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
 
       {/* AI Salesperson Creation Wizard */}
       {showCreateWizard && (
-        <AgentCreationWizard 
-          onClose={() => setShowCreateWizard(false)}
-        />
+        <AgentCreationWizard onClose={() => setShowCreateWizard(false)} />
       )}
 
       {/* Edit Modal - Similar to ChatbotTab but simplified for agents */}
@@ -498,7 +557,9 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Edit Agent</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Edit Agent
+              </h3>
               <button
                 onClick={() => setShowEditModal(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -506,7 +567,7 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                 <RiCloseLine className="w-5 h-5" />
               </button>
             </div>
-            
+
             <form onSubmit={handleEditAgent}>
               <div className="space-y-4">
                 <div>
@@ -643,7 +704,7 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                     placeholder="Additional instructions for the agent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Status
@@ -662,7 +723,7 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-3 mt-6">
                 <button
                   type="button"
@@ -681,7 +742,7 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                   ) : (
                     <RiSettings3Line className="w-4 h-4" />
                   )}
-                  <span>{isUpdating ? 'Updating...' : 'Update Agent'}</span>
+                  <span>{isUpdating ? "Updating..." : "Update Agent"}</span>
                 </button>
               </div>
             </form>
@@ -694,7 +755,9 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Agent Details</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Agent Details
+              </h3>
               <button
                 onClick={() => setShowViewModal(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -702,17 +765,27 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                 <RiCloseLine className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
-                  <p className="text-gray-900 dark:text-white font-medium">{selectedAgent.name}</p>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Name
+                  </label>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {selectedAgent.name}
+                  </p>
                 </div>
-                
+
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedAgent.status)}`}>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Status
+                  </label>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      selectedAgent.status
+                    )}`}
+                  >
                     {selectedAgent.status}
                   </span>
                 </div>
@@ -720,71 +793,111 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Age</label>
-                  <p className="text-gray-900 dark:text-white">{selectedAgent.age || 'Not specified'}</p>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Age
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {selectedAgent.age || "Not specified"}
+                  </p>
                 </div>
-                
+
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
-                  <p className="text-gray-900 dark:text-white">{selectedAgent.gender || 'Not specified'}</p>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Gender
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {selectedAgent.gender || "Not specified"}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Accent</label>
-                  <p className="text-gray-900 dark:text-white">{selectedAgent.accent || 'Not specified'}</p>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Accent
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {selectedAgent.accent || "Not specified"}
+                  </p>
                 </div>
-                
+
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Response Tone</label>
-                  <p className="text-gray-900 dark:text-white capitalize">{selectedAgent.tone || 'Not specified'}</p>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Response Tone
+                  </label>
+                  <p className="text-gray-900 dark:text-white capitalize">
+                    {selectedAgent.tone || "Not specified"}
+                  </p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Country</label>
-                  <p className="text-gray-900 dark:text-white">{selectedAgent.country || 'Not specified'}</p>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Country
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {selectedAgent.country || "Not specified"}
+                  </p>
                 </div>
               </div>
 
               {selectedAgent.personality && (
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Personality</label>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Personality
+                  </label>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
-                    <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">{selectedAgent.personality}</p>
+                    <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">
+                      {selectedAgent.personality}
+                    </p>
                   </div>
                 </div>
               )}
-              
+
               <div>
-                <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Behavior Prompt</label>
+                <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Behavior Prompt
+                </label>
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto">
-                  <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">{selectedAgent.behavior_prompt}</p>
+                  <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">
+                    {selectedAgent.behavior_prompt}
+                  </p>
                 </div>
               </div>
 
               {selectedAgent.instructions_text && (
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Instructions</label>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Instructions
+                  </label>
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto">
-                    <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">{selectedAgent.instructions_text}</p>
+                    <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">
+                      {selectedAgent.instructions_text}
+                    </p>
                   </div>
                 </div>
               )}
 
               {selectedAgent.store_name && (
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">Connected Store</label>
-                  <p className="text-gray-900 dark:text-white">{selectedAgent.store_name}</p>
+                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Connected Store
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {selectedAgent.store_name}
+                  </p>
                 </div>
               )}
               {selectedAgent.scrape_instructions && (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-lg font-medium text-gray-700 dark:text-gray-300">Website Information</label>
+                    <label className="block text-lg font-medium text-gray-700 dark:text-gray-300">
+                      Website Information
+                    </label>
                     <button
-                      onClick={() => setShowScrapeInstructions(!showScrapeInstructions)}
+                      onClick={() =>
+                        setShowScrapeInstructions(!showScrapeInstructions)
+                      }
                       className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg transition-colors"
                     >
                       {showScrapeInstructions ? (
@@ -812,24 +925,37 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
 
               {selectedAgent.external_websites_count > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">External Websites</label>
-                  <p className="text-gray-900 dark:text-white">{selectedAgent.external_websites_count} website(s) configured</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    External Websites
+                  </label>
+                  <p className="text-gray-900 dark:text-white">
+                    {selectedAgent.external_websites_count} website(s)
+                    configured
+                  </p>
                 </div>
               )}
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Created</label>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">{selectedAgent.created_at}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Created
+                  </label>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {selectedAgent.created_at}
+                  </p>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Updated</label>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">{selectedAgent.updated_at}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Last Updated
+                  </label>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    {selectedAgent.updated_at}
+                  </p>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-end mt-6">
               <button
                 onClick={() => setShowViewModal(false)}
@@ -847,7 +973,9 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Delete Agent</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Delete Agent
+              </h3>
               <button
                 onClick={() => setShowDeleteModal(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -855,14 +983,15 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                 <RiCloseLine className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="mb-6">
               <p className="text-gray-700 dark:text-gray-300">
-                Are you sure you want to delete <strong>{selectedAgent.name}</strong>? 
-                This action cannot be undone.
+                Are you sure you want to delete{" "}
+                <strong>{selectedAgent.name}</strong>? This action cannot be
+                undone.
               </p>
             </div>
-            
+
             <div className="flex items-center justify-end space-x-3">
               <button
                 onClick={() => setShowDeleteModal(false)}
@@ -880,7 +1009,7 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                 ) : (
                   <RiDeleteBinLine className="w-4 h-4" />
                 )}
-                <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                <span>{isDeleting ? "Deleting..." : "Delete"}</span>
               </button>
             </div>
           </div>
@@ -902,7 +1031,9 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">{messageModalContent.title}</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                {messageModalContent.title}
+              </h3>
               <button
                 onClick={() => setShowMessageModal(false)}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -910,11 +1041,13 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
                 <RiCloseLine className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="mb-6">
-              <p className="text-gray-700 dark:text-gray-300">{messageModalContent.message}</p>
+              <p className="text-gray-700 dark:text-gray-300">
+                {messageModalContent.message}
+              </p>
             </div>
-            
+
             <div className="flex items-center justify-end">
               <button
                 onClick={() => setShowMessageModal(false)}
@@ -927,7 +1060,7 @@ const AgentsTab = ({ showOnboarding, setShowOnboarding }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default AgentsTab 
+export default AgentsTab;

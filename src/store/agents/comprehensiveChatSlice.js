@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { 
+import {
   comprehensiveChat,
   startNewConversation,
-  continueConversation
+  continueConversation,
 } from "./comprehensiveChatThunk";
 import { toast } from "react-toastify";
 
@@ -13,17 +13,18 @@ const initialState = {
   conversationId: null,
   currentAgent: null,
   currentStore: null,
-  
+
   // Loading states
   isChatting: false,
+  isBotResponding: false,
   isStartingConversation: false,
   isContinuingConversation: false,
-  
+
   // Error state
   chatError: null,
-  
+
   // Chat settings
-  isNewConversation: false
+  isNewConversation: false,
 };
 
 export const comprehensiveChatSlice = createSlice({
@@ -62,7 +63,10 @@ export const comprehensiveChatSlice = createSlice({
     },
     setIsNewConversation: (state, action) => {
       state.isNewConversation = action.payload;
-    }
+    },
+    setIsBotResponding: (state, action) => {
+      state.isBotResponding = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -82,7 +86,7 @@ export const comprehensiveChatSlice = createSlice({
         state.chatError = action.payload?.message || "Failed to send message";
         toast.error(state.chatError);
       })
-      
+
       // Start new conversation cases
       .addCase(startNewConversation.pending, (state) => {
         state.isStartingConversation = true;
@@ -97,10 +101,11 @@ export const comprehensiveChatSlice = createSlice({
       })
       .addCase(startNewConversation.rejected, (state, action) => {
         state.isStartingConversation = false;
-        state.chatError = action.payload?.message || "Failed to start conversation";
+        state.chatError =
+          action.payload?.message || "Failed to start conversation";
         toast.error(state.chatError);
       })
-      
+
       // Continue conversation cases
       .addCase(continueConversation.pending, (state) => {
         state.isContinuingConversation = true;
@@ -114,22 +119,24 @@ export const comprehensiveChatSlice = createSlice({
       })
       .addCase(continueConversation.rejected, (state, action) => {
         state.isContinuingConversation = false;
-        state.chatError = action.payload?.message || "Failed to continue conversation";
+        state.chatError =
+          action.payload?.message || "Failed to continue conversation";
         toast.error(state.chatError);
       });
   },
 });
 
-export const { 
-  clearChatError, 
-  setCurrentAgent, 
+export const {
+  clearChatError,
+  setCurrentAgent,
   setCurrentStore,
   addMessage,
   clearMessages,
   setCustomerId,
   setConversationId,
   resetChat,
-  setIsNewConversation
+  setIsNewConversation,
+  setIsBotResponding
 } = comprehensiveChatSlice.actions;
 
-export default comprehensiveChatSlice.reducer; 
+export default comprehensiveChatSlice.reducer;

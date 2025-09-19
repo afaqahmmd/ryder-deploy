@@ -768,7 +768,7 @@ const Dashboard = () => {
         return (
           <div className="flex-1 p-4 sm:p-6 max-w-7xl mx-auto">
             <AgentsTab
-              showOnboarding={showOnboarding}
+              
               setShowOnboarding={setShowOnboarding}
             />
           </div>

@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { custom } from "zod";
+import { setIsBotResponding } from "../../store/agents/comprehensiveChatSlice";
 
 export const useWebSocketConnection = ({ agent, store }) => {
   const socketRef = useRef(null);
@@ -10,12 +11,10 @@ export const useWebSocketConnection = ({ agent, store }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
-
+  const dispatch = useDispatch();
   const maxReconnectAttempts = 5;
   const reconnectInterval = 3000;
-  const { customerId } = useSelector(
-    (state) => state.comprehensiveChat
-  );
+  const { customerId } = useSelector((state) => state.comprehensiveChat);
 
   const connect = useCallback(
     (agentId, storeId, customerId = null, onMessage, onError) => {
@@ -24,7 +23,9 @@ export const useWebSocketConnection = ({ agent, store }) => {
         socketRef.current.close();
       }
 
-      const wsUrl = import.meta.env.VITE_SOCKET_URL || "http://192.168.18.199:8000/ws/chat/";
+      const wsUrl =
+        import.meta.env.VITE_SOCKET_URL ||
+        "http://192.168.18.199:8000/ws/chat/";
 
       try {
         socketRef.current = new WebSocket(`${wsUrl}`);
@@ -46,6 +47,7 @@ export const useWebSocketConnection = ({ agent, store }) => {
           try {
             const data = JSON.parse(event.data);
             console.log("WebSocket message received:", data);
+            dispatch(setIsBotResponding(false));
             onMessage?.(data);
           } catch (error) {
             console.error("Error parsing WebSocket message:", error);
@@ -55,7 +57,7 @@ export const useWebSocketConnection = ({ agent, store }) => {
         socketRef.current.onclose = (event) => {
           console.log("WebSocket disconnected:", event);
           setIsConnected(false);
-
+          dispatch(setIsBotResponding(false));
           // Attempt reconnection if not intentionally closed
           if (event.code !== 1000 && reconnectAttempts < maxReconnectAttempts) {
             setReconnectAttempts((prev) => prev + 1);
@@ -80,15 +82,17 @@ export const useWebSocketConnection = ({ agent, store }) => {
         console.error("Failed to create WebSocket:", error);
         setConnectionError(error.message);
         onError?.(error);
+        dispatch(setIsBotResponding(false));
       }
     },
+    //eslint-disable-next-line react-hooks/exhaustive-deps
     [reconnectAttempts, maxReconnectAttempts]
   );
 
   const sendMessage = useCallback(
     (message, isNewConvo) => {
-     console.log("isnewconvo:",isNewConvo)
-     console.log("customerid:",customerId)
+      console.log("isnewconvo:", isNewConvo);
+      console.log("customerid:", customerId);
       const messageData = {
         type: "comprehensive_chat",
         message: message.trim(),
@@ -109,7 +113,7 @@ export const useWebSocketConnection = ({ agent, store }) => {
         return false;
       }
     },
-    [isConnected,customerId,agent.id, store.id]
+    [isConnected, customerId, agent.id, store.id]
   );
 
   const disconnect = useCallback(() => {
@@ -125,6 +129,7 @@ export const useWebSocketConnection = ({ agent, store }) => {
     setIsConnected(false);
     messageQueueRef.current = [];
     setReconnectAttempts(0);
+    dispatch(setIsBotResponding(false))
   }, []);
 
   // Cleanup on unmount

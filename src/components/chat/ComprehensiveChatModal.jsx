@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ReactMarkdown from "react-markdown";
 import {
@@ -21,95 +21,13 @@ import {
   resetChat,
   setCurrentAgent,
   setCurrentStore,
+  setIsBotResponding,
 } from "../../store/agents/comprehensiveChatSlice";
 import SuggestInstructionModal from "../instructions/SuggestInstructionModal";
 import { useInstructionsStore } from "../../store/instructions/instructionsStore";
 import { handleApiError } from "../../services/api";
 import { toast } from "react-toastify";
 import { useWebSocketChat } from "../../hooks/sockets/useWebSocketChat";
-
-// Utility function to format product messages (keeping your existing function)
-const formatProductMessage = (message) => {
-  try {
-    const productPattern =
-      /(\d+\.\s+\*\*[^*]+\*\*.*?)(?=\d+\.\s+\*\*|\n\n|$)/gs;
-
-    if (productPattern.test(message)) {
-      const parts = message.split(
-        /(\d+\.\s+\*\*[^*]+\*\*.*?)(?=\d+\.\s+\*\*|\n\n|$)/gs
-      );
-
-      return parts
-        .map((part, index) => {
-          if (part.match(/^\d+\.\s+\*\*[^*]+\*\*/)) {
-            const productName = part.match(/\*\*([^*]+)\*\*/)?.[1] || "";
-            const currentPriceMatch = part.match(
-              /\*\*[^*]+\*\*\s*[-–]\s*([^(]+)/
-            );
-            const priceInfo = currentPriceMatch
-              ? currentPriceMatch[1].trim()
-              : "";
-            const originalPriceMatch = part.match(/\(was\s+([^)]+)\)/);
-            const originalPrice = originalPriceMatch
-              ? originalPriceMatch[1].trim()
-              : "";
-            const stockInfo =
-              part.match(/We have (\d+) available/)?.[1] ||
-              part.match(/(\d+) in stock/)?.[1] ||
-              "";
-
-            if (productName) {
-              return (
-                <div
-                  key={index}
-                  className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 mb-3 shadow-sm"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-                      {productName}
-                    </h4>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      #{part.match(/^(\d+)\./)?.[1] || ""}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2">
-                      {priceInfo && (
-                        <span className="text-green-600 dark:text-green-400 font-medium">
-                          {priceInfo}
-                        </span>
-                      )}
-                      {originalPrice && (
-                        <span className="text-gray-400 line-through">
-                          {originalPrice}
-                        </span>
-                      )}
-                    </div>
-                    {stockInfo && (
-                      <span className="text-blue-600 dark:text-blue-400">
-                        {stockInfo} in stock
-                      </span>
-                    )}
-                  </div>
-                </div>
-              );
-            } else {
-              return <span key={index}>{part}</span>;
-            }
-          } else if (part.trim()) {
-            return <span key={index}>{part}</span>;
-          }
-          return null;
-        })
-        .filter(Boolean);
-    }
-
-    return message;
-  } catch (error) {
-    console.error("Error formatting product message:", error);
-    return message;
-  }
-};
 
 const ComprehensiveChatModal = ({
   isOpen,
@@ -128,18 +46,16 @@ const ComprehensiveChatModal = ({
     messages,
     customerId,
     conversationId,
-    currentAgent,
-    currentStore,
     isChatting,
     isStartingConversation,
     isContinuingConversation,
     chatError,
+    isBotResponding
   } = useSelector((state) => state.comprehensiveChat);
 
   // Local state
   const [userInput, setUserInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [botResponding,setBotResponding] = useState(false)
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   const [targetBotIndex, setTargetBotIndex] = useState(null);
   const [isSavingSuggestion, setIsSavingSuggestion] = useState(false);
@@ -151,7 +67,6 @@ const ComprehensiveChatModal = ({
     connectWebSocket,
     disconnect: disconnectWebSocket,
     isConnected,
-    connectionError,
   } = useWebSocketChat(agent, store, customerId);
 
   // Auto-scroll to bottom when new messages arrive
@@ -202,52 +117,51 @@ const ComprehensiveChatModal = ({
       // Try WebSocket first if connected
       if (isConnected) {
         console.log("Sending message via WebSocket");
-      
+
         const isNewConvo = messages.length === 0;
+        dispatch(setIsBotResponding(true));
         const sent = sendWebSocketMessage(userMessage, isNewConvo);
         if (sent) {
           // WebSocket message sent successfully, typing indicator will be handled by WebSocket response
-       
           return;
         }
       }
 
       // Fallback to HTTP API
-      console.log("Sending message via HTTP API (WebSocket not available)");
-      let response;
+      // console.log("Sending message via HTTP API (WebSocket not available)");
+      // let response;
 
-      if (!customerId) {
-        response = await dispatch(
-          startNewConversation({
-            message: userMessage,
-            agentId: agent.id,
-            storeId: store.id,
-            newConvo: true,
-          })
-        ).unwrap();
-      } else {
-        response = await dispatch(
-          continueConversation({
-            message: userMessage,
-            agentId: agent.id,
-            storeId: store.id,
-            customerId: customerId,
-          })
-        ).unwrap();
-      }
+      // if (!customerId) {
+      //   response = await dispatch(
+      //     startNewConversation({
+      //       message: userMessage,
+      //       agentId: agent.id,
+      //       storeId: store.id,
+      //       newConvo: true,
+      //     })
+      //   ).unwrap();
+      // } else {
+      //   response = await dispatch(
+      //     continueConversation({
+      //       message: userMessage,
+      //       agentId: agent.id,
+      //       storeId: store.id,
+      //       customerId: customerId,
+      //     })
+      //   ).unwrap();
+      // }
 
       // Add bot response for HTTP API
-      const botResponse = {
-        id: Date.now(),
-        sender: "bot",
-        message: response.response,
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      dispatch(addMessage(botResponse));
-
+      // const botResponse = {
+      //   id: Date.now(),
+      //   sender: "bot",
+      //   message: response.response,
+      //   timestamp: new Date().toLocaleTimeString(),
+      // };
+      // dispatch(addMessage(botResponse));
     } catch (error) {
       console.error("Chat Error:", error);
-setBotResponding(false)
+      dispatch(setIsBotResponding(false));
       let errorMessage =
         "Sorry, I'm having trouble responding right now. Please try again.";
 
@@ -265,7 +179,7 @@ setBotResponding(false)
         timestamp: new Date().toLocaleTimeString(),
       };
       dispatch(addMessage(errorResponse));
-    } 
+    }
   };
 
   // Handle sending user message
@@ -336,16 +250,15 @@ setBotResponding(false)
     };
   };
 
-  const openSuggest = (botIndex) => {
-    setTargetBotIndex(botIndex);
-    setIsSuggestOpen(true);
-  };
+  // const openSuggest = (botIndex) => {
+  //   setTargetBotIndex(botIndex);
+  //   setIsSuggestOpen(true);
+  // };
 
   const closeSuggest = () => {
     setIsSuggestOpen(false);
     setTargetBotIndex(null);
   };
-
 
   const handleSubmitSuggestion = async (instructionText) => {
     try {
@@ -402,7 +315,7 @@ setBotResponding(false)
             className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
             title="Start New Conversation"
           >
-            <RiRefreshLine className="w-4 h-4"/>
+            <RiRefreshLine className="w-4 h-4" />
           </button>
           <button
             onClick={handleClose}
@@ -416,7 +329,7 @@ setBotResponding(false)
       {/* Chat Messages */}
       <div className="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
         <div className="space-y-4">
-          {messages.map((message, idx) => (
+          {messages.map((message) => (
             <div key={message.id}>
               <div
                 className={`flex ${
@@ -431,12 +344,6 @@ setBotResponding(false)
                   }`}
                 >
                   {message.sender === "bot" ? (
-                    // <div
-                    //   className="text-sm"
-                    //   dangerouslySetInnerHTML={{
-                    //     __html: message.message,
-                    //   }}
-                    // />
                     <div className="prose dark:prose-invert max-w-none">
                       <ReactMarkdown>{message.message}</ReactMarkdown>
                     </div>
@@ -458,7 +365,7 @@ setBotResponding(false)
           ))}
 
           {/* Typing Indicator */}
-          {botResponding===true ? (
+          {isBotResponding ? (
             <div className="flex justify-start">
               <div className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg max-w-xs">
                 <div className="flex items-center space-x-1">
@@ -479,7 +386,7 @@ setBotResponding(false)
                 </div>
               </div>
             </div>
-          ):null}
+          ) : null}
         </div>
         <div ref={messagesEndRef} />
       </div>

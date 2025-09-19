@@ -4,6 +4,7 @@ import { useWebSocketConnection } from "./useWebSocketConnection";
 import {
   addMessage,
   setCustomerId,
+  setIsBotResponding,
 } from "../../store/agents/comprehensiveChatSlice";
 
 export const useWebSocketChat = (agent, store, customerId) => {
