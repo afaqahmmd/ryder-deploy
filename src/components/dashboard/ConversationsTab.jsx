@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { 
-  FiMessageSquare, 
-  FiSearch, 
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  FiMessageSquare,
+  FiSearch,
   FiFilter,
   FiChevronLeft,
   FiChevronRight,
@@ -12,149 +12,161 @@ import {
   FiEye,
   FiX,
   FiSend,
-  FiArrowLeft
-} from 'react-icons/fi'
-import { RiRobot2Fill } from 'react-icons/ri'
-import { 
-  fetchConversations, 
+  FiArrowLeft,
+} from "react-icons/fi";
+import { RiRobot2Fill } from "react-icons/ri";
+import {
+  fetchConversations,
   fetchConversationMessages,
-  fetchConversationByCustomerId
-} from '../../store/conversations/conversationsThunk'
-import { 
-  clearConversationError, 
+  fetchConversationByCustomerId,
+} from "../../store/conversations/conversationsThunk";
+import {
+  clearConversationError,
   clearCurrentConversation,
-  clearMessages
-} from '../../store/conversations/conversationsSlice'
+  clearMessages,
+} from "../../store/conversations/conversationsSlice";
 
 const ConversationsTab = () => {
-  const dispatch = useDispatch()
-  const { 
-    conversations, 
-    currentConversation, 
+  const dispatch = useDispatch();
+  const {
+    conversations,
+    currentConversation,
     currentMessages,
-    isLoading, 
-    isLoadingMessages, 
+    isLoading,
+    isLoadingMessages,
     error,
     pagination,
-    messagesPagination
-  } = useSelector(state => state.conversations)
-  
-  const { agents } = useSelector(state => state.agents)
-  const { stores } = useSelector(state => state.stores)
-  
+    messagesPagination,
+  } = useSelector((state) => state.conversations);
+
+  const { agents } = useSelector((state) => state.agents);
+  const { stores } = useSelector((state) => state.stores);
+
   // State for WhatsApp-like layout
-  const [selectedConversationId, setSelectedConversationId] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [messagesPage, setMessagesPage] = useState(1)
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [messagesPage, setMessagesPage] = useState(1);
 
   // Disable overall page scrolling when component mounts
   useEffect(() => {
     // Store original overflow values
-    const originalBodyOverflow = document.body.style.overflow
-    const originalHtmlOverflow = document.documentElement.style.overflow
-    
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+
     // Disable scrolling
-    document.body.style.overflow = 'hidden'
-    document.documentElement.style.overflow = 'hidden'
-    
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
     // Cleanup function to restore scrolling when component unmounts
     return () => {
-      document.body.style.overflow = originalBodyOverflow
-      document.documentElement.style.overflow = originalHtmlOverflow
-    }
-  }, [])
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+    };
+  }, []);
 
   // Load conversations on mount
   useEffect(() => {
-    dispatch(fetchConversations({ page: 1 }))
-  }, [dispatch])
+    dispatch(fetchConversations({ page: 1 }));
+  }, [dispatch]);
 
   // Clear error on unmount
   useEffect(() => {
     return () => {
-      dispatch(clearConversationError())
-    }
-  }, [dispatch])
+      dispatch(clearConversationError());
+    };
+  }, [dispatch]);
 
   // Handle conversation selection
   const handleConversationClick = async (conversationId) => {
-    setSelectedConversationId(conversationId)
-    setMessagesPage(1)
-    dispatch(clearMessages())
-    
+    setSelectedConversationId(conversationId);
+    setMessagesPage(1);
+    dispatch(clearMessages());
+
     try {
-      await dispatch(fetchConversationMessages({ 
-        conversationId, 
-        page: 1, 
-        pageSize: 50 
-      })).unwrap()
+      await dispatch(
+        fetchConversationMessages({
+          conversationId,
+          page: 1,
+          pageSize: 50,
+        })
+      ).unwrap();
     } catch (error) {
-      console.error('Error fetching conversation messages:', error)
+      console.error("Error fetching conversation messages:", error);
     }
-  }
+  };
 
   // Handle back to conversations list
   const handleBackToList = () => {
-    setSelectedConversationId(null)
-    dispatch(clearCurrentConversation())
-    dispatch(clearMessages())
-  }
+    setSelectedConversationId(null);
+    dispatch(clearCurrentConversation());
+    dispatch(clearMessages());
+  };
 
   // Filter conversations based on search query
-  const filteredConversations = conversations.filter(conversation =>
-    conversation.customer_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    conversation.customer_id?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredConversations = conversations.filter(
+    (conversation) =>
+      conversation.customer_name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      conversation.customer_id
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase())
+  );
 
   // Get selected conversation details
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId)
+  const selectedConversation = conversations.find(
+    (c) => c.id === selectedConversationId
+  );
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
-    if (!timestamp) return ''
-    const date = new Date(timestamp)
-    const now = new Date()
-    const diffInHours = (now - date) / (1000 * 60 * 60)
-    
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInHours = (now - date) / (1000 * 60 * 60);
+
     if (diffInHours < 24) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     } else if (diffInHours < 48) {
-      return 'Yesterday'
+      return "Yesterday";
     } else {
-      return date.toLocaleDateString()
+      return date.toLocaleDateString();
     }
-  }
+  };
 
   // Get agent name by ID
   const getAgentName = (agentId) => {
-    console.log('--------------------------------')
-    console.log(agentId)
-    console.log('--------------------------------')
-    console.log(agents)
-    console.log('--------------------------------')
-    console.log(agents.find(a => a.id === agentId))
-    const agent = agents.find(a => a.id === agentId)
-    console.log(agent)
-    return agent?.name || 'Unknown Agent'
-  }
+    console.log("--------------------------------");
+    console.log(agentId);
+    console.log("--------------------------------");
+    console.log(agents);
+    console.log("--------------------------------");
+    console.log(agents.find((a) => a.id === agentId));
+    const agent = agents.find((a) => a.id === agentId);
+    console.log(agent);
+    return agent?.name || "Unknown Agent";
+  };
 
   // Get store name by ID
   const getStoreName = (storeId) => {
-    const store = stores.find(s => s.id === storeId)
-    return store?.store_name || 'Unknown Store'
-  }
+    const store = stores.find((s) => s.id === storeId);
+    return store?.store_name || "Unknown Store";
+  };
 
   // Format message content with markdown support for bot messages
   const formatMessageContent = (content, isCustomerMessage) => {
     if (isCustomerMessage) {
       // For customer messages, just escape HTML and preserve line breaks
       return content
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/\n/g, '<br>')
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+        .replace(/\n/g, "<br>");
     }
 
     // For bot messages, apply markdown formatting
@@ -164,48 +176,75 @@ const ConversationsTab = () => {
       // Italic text: *text* -> <em>text</em>
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       // Headers: ### text -> <h3>text</h3>
-      .replace(/^### (.*$)/gm, '<h3 class="text-base font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">$1</h3>')
-      .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">$1</h2>')
-      .replace(/^# (.*$)/gm, '<h1 class="text-xl font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">$1</h1>')
+      .replace(
+        /^### (.*$)/gm,
+        '<h3 class="text-base font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">$1</h3>'
+      )
+      .replace(
+        /^## (.*$)/gm,
+        '<h2 class="text-lg font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">$1</h2>'
+      )
+      .replace(
+        /^# (.*$)/gm,
+        '<h1 class="text-xl font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">$1</h1>'
+      )
       // Lists: - item -> <li>item</li>
       .replace(/^- (.*$)/gm, '<li class="ml-4 mb-1">$1</li>')
       // Wrap consecutive list items in <ul>
-      .replace(/(<li.*<\/li>)/gs, '<ul class="list-disc space-y-1 mb-3 ml-4">$1</ul>')
+      .replace(
+        /(<li.*<\/li>)/gs,
+        '<ul class="list-disc space-y-1 mb-3 ml-4">$1</ul>'
+      )
       // Line breaks
-      .replace(/\n/g, '<br>')
+      .replace(/\n/g, "<br>")
       // Escape remaining HTML
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
       // Restore our formatted elements
       .replace(/&lt;strong.*?&gt;/g, '<strong class="font-semibold">')
-      .replace(/&lt;\/strong&gt;/g, '</strong>')
+      .replace(/&lt;\/strong&gt;/g, "</strong>")
       .replace(/&lt;em.*?&gt;/g, '<em class="italic">')
-      .replace(/&lt;\/em&gt;/g, '</em>')
-      .replace(/&lt;h1.*?&gt;/g, '<h1 class="text-xl font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">')
-      .replace(/&lt;h2.*?&gt;/g, '<h2 class="text-lg font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">')
-      .replace(/&lt;h3.*?&gt;/g, '<h3 class="text-base font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">')
-      .replace(/&lt;\/h[1-3]&gt;/g, '</h3>')
+      .replace(/&lt;\/em&gt;/g, "</em>")
+      .replace(
+        /&lt;h1.*?&gt;/g,
+        '<h1 class="text-xl font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">'
+      )
+      .replace(
+        /&lt;h2.*?&gt;/g,
+        '<h2 class="text-lg font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">'
+      )
+      .replace(
+        /&lt;h3.*?&gt;/g,
+        '<h3 class="text-base font-semibold mb-3 mt-4 first:mt-0 text-gray-800 dark:text-gray-200">'
+      )
+      .replace(/&lt;\/h[1-3]&gt;/g, "</h3>")
       .replace(/&lt;ul.*?&gt;/g, '<ul class="list-disc space-y-1 mb-3 ml-4">')
-      .replace(/&lt;\/ul&gt;/g, '</ul>')
+      .replace(/&lt;\/ul&gt;/g, "</ul>")
       .replace(/&lt;li.*?&gt;/g, '<li class="ml-4 mb-1">')
-      .replace(/&lt;\/li&gt;/g, '</li>')
-      .replace(/&lt;br&gt;/g, '<br>')
+      .replace(/&lt;\/li&gt;/g, "</li>")
+      .replace(/&lt;br&gt;/g, "<br>");
 
-    return formattedContent
-  }
+    return formattedContent;
+  };
 
   return (
     <div className="h-full flex flex-col">
       {/* WhatsApp-like Layout */}
-      <div className="flex h-full bg-gray-50 dark:bg-gray-900">
+      <div className="flex h-full max-h-[1080px] bg-gray-50 dark:bg-gray-900">
         {/* Conversations List - Left Side - Static */}
-        <div className={`${selectedConversationId ? 'hidden md:block' : 'block'} w-full md:w-1/3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col sticky top-0 h-[calc(100vh-2rem)]`}>
+        <div
+          className={`${
+            selectedConversationId ? "hidden md:block" : "block"
+          } w-full md:w-1/3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col sticky top-0 h-[calc(100vh-2rem)] `}
+        >
           {/* Header - Fixed */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">Conversations</h1>
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Conversations
+            </h1>
             <div className="relative">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -219,10 +258,13 @@ const ConversationsTab = () => {
           </div>
 
           {/* Conversations List - Scrollable */}
-          <div className="flex-1 overflow-y-auto" style={{
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgb(209 213 219) transparent'
-          }}>
+          <div
+            className="flex-1 h-full border-sm overflow-y-scroll"
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgb(209 213 219) transparent",
+            }}
+          >
             {isLoading ? (
               <div className="flex items-center justify-center h-32">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -233,51 +275,61 @@ const ConversationsTab = () => {
                 <p>No conversations found</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredConversations.map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    onClick={() => handleConversationClick(conversation.id)}
-                    className={`p-3 sm:p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                      selectedConversationId === conversation.id ? 'bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500' : ''
-                    }`}
-                  >
-                    <div className="flex items-start space-x-2 sm:space-x-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
-                        <FiUser className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                            {conversation.customer_name || 'Unknown Customer'}
-                          </h3>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatTimestamp(conversation.created_at)}
-                          </span>
+              <div className="flex flex-col max-h-[500px] overflow-auto">
+                <div className="divide-y divide-gray-200 dark:divide-gray-700 ">
+                  {filteredConversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      onClick={() => handleConversationClick(conversation.id)}
+                      className={`p-3 sm:p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                        selectedConversationId === conversation.id
+                          ? "bg-blue-50 dark:bg-blue-900/20 border-r-2 border-blue-500"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex items-start space-x-2 sm:space-x-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center flex-shrink-0">
+                          <FiUser className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                          Customer ID: {conversation.customer_id}
-                        </p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
-                            {conversation.agent_name}
-                          </span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500">
-                            {conversation.store_name}
-                          </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                              {conversation.customer_name || "Unknown Customer"}
+                            </h3>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {formatTimestamp(conversation.created_at)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            Customer ID: {conversation.customer_id}
+                          </p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {conversation.agent_name}
+                            </span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              •
+                            </span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {conversation.store_name}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Chat Detail - Right Side - Scrollable */}
-        <div className={`${selectedConversationId ? 'block' : 'hidden md:block'} flex-1 flex flex-col bg-white dark:bg-gray-800 h-[calc(100vh-2rem)] overflow-hidden`}>
+        <div
+          className={`${
+            selectedConversationId ? "block" : "hidden md:block"
+          } flex-1 flex flex-col bg-white dark:bg-gray-800 h-[calc(100vh-2rem)] overflow-hidden`}
+        >
           {selectedConversationId && selectedConversation ? (
             <>
               {/* Chat Header - Fixed */}
@@ -294,7 +346,7 @@ const ConversationsTab = () => {
                   </div>
                   <div className="flex-1">
                     <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {selectedConversation.customer_name || 'Unknown Customer'}
+                      {selectedConversation.customer_name || "Unknown Customer"}
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       Customer ID: {selectedConversation.customer_id}
@@ -314,10 +366,13 @@ const ConversationsTab = () => {
               </div>
 
               {/* Messages Area - Scrollable */}
-              <div className="flex-1 overflow-y-auto p-4" style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgb(209 213 219) transparent'
-              }}>
+              <div
+                className="flex-1 overflow-y-auto p-4"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "rgb(209 213 219) transparent",
+                }}
+              >
                 {isLoadingMessages ? (
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -331,24 +386,35 @@ const ConversationsTab = () => {
                   currentMessages.map((message, index) => (
                     <div
                       key={message.id || index}
-                      className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'} mb-4`}
+                      className={`flex ${
+                        message.sender === "customer"
+                          ? "justify-end"
+                          : "justify-start"
+                      } mb-4`}
                     >
                       <div
                         className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
-                          message.sender === 'customer'
-                            ? 'bg-blue-600 text-white rounded-br-md'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md'
+                          message.sender === "customer"
+                            ? "bg-blue-600 text-white rounded-br-md"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md"
                         }`}
                       >
-                        <div 
+                        <div
                           className="text-sm whitespace-pre-wrap break-words leading-relaxed"
                           dangerouslySetInnerHTML={{
-                            __html: formatMessageContent(message.content, message.sender === 'customer')
+                            __html: formatMessageContent(
+                              message.content,
+                              message.sender === "customer"
+                            ),
                           }}
                         />
-                        <p className={`text-xs mt-2 opacity-75 ${
-                          message.sender === 'customer' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'
-                        }`}>
+                        <p
+                          className={`text-xs mt-2 opacity-75 ${
+                            message.sender === "customer"
+                              ? "text-blue-100"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
                           {formatTimestamp(message.timestamp)}
                         </p>
                       </div>
@@ -379,7 +445,9 @@ const ConversationsTab = () => {
             <div className="flex-1 flex items-center justify-center h-full">
               <div className="text-center text-gray-500 dark:text-gray-400">
                 <FiMessageSquare className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Select a conversation</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  Select a conversation
+                </h3>
                 <p>Choose a conversation from the list to view the chat</p>
               </div>
             </div>
@@ -402,7 +470,7 @@ const ConversationsTab = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ConversationsTab
+export default ConversationsTab;
