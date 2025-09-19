@@ -295,7 +295,7 @@ const ProductsTab = ({ setShowProductsSyncModal }) => {
                         ) : (
                           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                             {/* Product Grid */}
-                            {products.length < 0 ? (
+                            {products.length > 0 ? (
                               products.map((product) => (
                                 <div
                                   key={product.id}
