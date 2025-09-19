@@ -300,7 +300,7 @@ const ProductsTab = ({ setShowProductsSyncModal }) => {
                                   className="bg-white shadow-md rounded-2xl overflow-hidden border hover:shadow-lg transition"
                                 >
                                   <img
-                                    src={product.primary_image.src}
+                                    src={product.primary_image?.src || "" }
                                     alt={product.title}
                                     className="h-48 w-full object-contain"
                                   />
@@ -316,7 +316,7 @@ const ProductsTab = ({ setShowProductsSyncModal }) => {
                                 </div>
                               ))
                             ) : (
-                              <div className="flex w-full gap-3 flex-col items-start">
+                              <div className="flex dark:text-white w-full gap-3 flex-col items-start">
                                 <p>No products found... </p>
                                 <p>Try reconnecting product database</p>
                                 <button className="w-fit bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
@@ -377,13 +377,13 @@ const ProductsTab = ({ setShowProductsSyncModal }) => {
 
                             return pages.map((p, idx) =>
                               p === "..." ? (
-                                <span key={`dots-${idx}`} className="px-3 py-2">
+                                <span key={`dots-${idx}`} className="px-3 py-2 dark:text-white">
                                   ...
                                 </span>
                               ) : (
                                 <button
                                   key={p}
-                                  className={`px-4 py-2 border text-white rounded-md ${
+                                  className={`px-4 py-2 border dark:text-white rounded-md ${
                                     p === page
                                       ? isDark
                                         ? "bg-blue-600 text-white"
