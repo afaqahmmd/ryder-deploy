@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import {
   RiRobot2Fill,
   RiSettings3Line,
@@ -12,22 +13,17 @@ import {
   RiPlayLine,
   RiArrowDownSLine,
   RiArrowUpSLine,
+  RiCodeSSlashFill,
 } from "react-icons/ri";
-import {
-  fetchAgents,
-  updateAgent,
-  deleteAgent,
-} from "../../store/agents/agentThunk";
-import {
-  clearAgentError,
-} from "../../store/agents/agentSlice";
+import { fetchAgents, updateAgent, deleteAgent } from "../../store/agents/agentThunk";
+import { clearAgentError } from "../../store/agents/agentSlice";
 import AgentCreationWizard from "../agents/AgentCreationWizard";
 import ComprehensiveChatModal from "../chat/ComprehensiveChatModal";
+import { getEmbedCode } from "../../utils/embedcode";
 
-const AgentsTab = ({  setShowOnboarding }) => {
+const AgentsTab = ({ setShowOnboarding }) => {
   const dispatch = useDispatch();
-  const { agents, isLoading, isUpdating, isDeleting, error } =
-    useSelector((state) => state.agents);
+  const { agents, isLoading, isUpdating, isDeleting, error } = useSelector((state) => state.agents);
 
   const { stores } = useSelector((state) => state.stores);
 
@@ -100,6 +96,23 @@ const AgentsTab = ({  setShowOnboarding }) => {
     { value: "draft", label: "Draft", color: "bg-yellow-100 text-yellow-800" },
   ];
 
+  const getAgentEmbedCode = async (agent) => {
+    try {
+      const embedCode = getEmbedCode(agent);
+      console.log("agent", agent);
+      // console.log("embed code", embedCode);
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(embedCode);
+
+      // Show success toast
+      toast.success("Copied!");
+    } catch (error) {
+      console.error("Failed to copy embed code:", error);
+      toast.error("Failed to copy embed code");
+    }
+  };
+
   // Load agents on mount
   useEffect(() => {
     console.log("AgentsTab: Loading agents..."); // Debug log
@@ -152,7 +165,7 @@ const AgentsTab = ({  setShowOnboarding }) => {
       dispatch(fetchAgents()); // Refresh list
     } catch (error) {
       // Error handling is done in the slice
-      console.error("error in edit agent:",error)
+      console.error("error in edit agent:", error);
     }
   };
 
@@ -166,13 +179,13 @@ const AgentsTab = ({  setShowOnboarding }) => {
       setSelectedAgent(null);
     } catch (error) {
       // Error handling is done in the slice
-      console.error("error in delete agent:",error)
+      console.error("error in delete agent:", error);
     }
   };
 
   // Handle toggle agent status
   const handleToggleAgentStatus = async (agent) => {
-    console.log("all agents:",agents)
+    console.log("all agents:", agents);
     try {
       const newStatus = agent.status === "active" ? "inactive" : "active";
       console.log("newStatus", newStatus);
@@ -180,14 +193,12 @@ const AgentsTab = ({  setShowOnboarding }) => {
       // If activating an agent, deactivate other agents for the same store
       if (newStatus === "active") {
         const otherAgentsForStore = agents.filter(
-          (a) =>
-            a.id !== agent.id &&
-            a.store === agent.store &&
-            a.status === "active"
+          (a) => a.id !== agent.id && a.store === agent.store && a.status === "active"
         );
-
+        console.log("other agents for store:", otherAgentsForStore, agents);
         // Deactivate other agents for the same store
         for (const otherAgent of otherAgentsForStore) {
+          console.log("updating other agent:", otherAgent);
           await dispatch(
             updateAgent({
               agentId: otherAgent.id,
@@ -273,8 +284,7 @@ const AgentsTab = ({  setShowOnboarding }) => {
     setSelectedAgent(agent);
 
     // Find the store for this agent
-    const agentStore =
-      stores.find((store) => store.id === agent.store) || stores[0];
+    const agentStore = stores.find((store) => store.id === agent.store) || stores[0];
     setSelectedStore(agentStore);
 
     setShowChatModal(true);
@@ -289,9 +299,7 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
   // Get status badge color
   const getStatusColor = (status) => {
-    const statusOption = statusOptions.find(
-      (option) => option.value === status
-    );
+    const statusOption = statusOptions.find((option) => option.value === status);
     return statusOption ? statusOption.color : "bg-gray-100 text-gray-800";
   };
 
@@ -301,40 +309,35 @@ const AgentsTab = ({  setShowOnboarding }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+    <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6'>
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0">
-        <div className="flex items-center space-x-3">
-          <RiRobot2Fill className="w-6 h-6 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-4 sm:space-y-0'>
+        <div className='flex items-center space-x-3'>
+          <RiRobot2Fill className='w-6 h-6 text-blue-600' />
+          <h2 className='text-lg font-semibold text-gray-900 dark:text-white'>
             AI Salespeople Management
           </h2>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+        <div className='flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3'>
           <button
             onClick={() => setShowOnboarding(true)}
-            className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 transition-colors flex items-center justify-center text-sm sm:text-base"
+            className='bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 transition-colors flex items-center justify-center text-sm sm:text-base'
           >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className='w-4 h-4 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeLinecap='round'
+                strokeLinejoin='round'
                 strokeWidth={2}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                d='M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
               />
             </svg>
             Show Tutorial
           </button>
           <button
             onClick={() => setShowCreateWizard(true)}
-            className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+            className='flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base'
           >
-            <RiAddLine className="w-4 h-4" />
+            <RiAddLine className='w-4 h-4' />
             <span>Create Salesperson</span>
           </button>
         </div>
@@ -342,16 +345,14 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
       {/* Error Display */}
       {error && (
-        <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <div className="flex items-center">
-            <div className="text-red-600 dark:text-red-400 text-sm">
-              {error}
-            </div>
+        <div className='mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4'>
+          <div className='flex items-center'>
+            <div className='text-red-600 dark:text-red-400 text-sm'>{error}</div>
             <button
               onClick={() => dispatch(clearAgentError())}
-              className="ml-auto text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+              className='ml-auto text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300'
             >
-              <RiCloseLine className="w-4 h-4" />
+              <RiCloseLine className='w-4 h-4' />
             </button>
           </div>
         </div>
@@ -359,51 +360,49 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
       {/* Loading State */}
       {isLoading && agents.length === 0 ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-center">
-            <RiRefreshLine className="w-8 h-8 text-gray-400 animate-spin mx-auto mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
-              Loading agents...
-            </p>
+        <div className='flex items-center justify-center py-12'>
+          <div className='text-center'>
+            <RiRefreshLine className='w-8 h-8 text-gray-400 animate-spin mx-auto mb-4' />
+            <p className='text-gray-500 dark:text-gray-400'>Loading agents...</p>
           </div>
         </div>
       ) : (
         <>
           {/* Agents List */}
           {agents.length === 0 ? (
-            <div className="text-center py-12">
-              <RiRobot2Fill className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <div className='text-center py-12'>
+              <RiRobot2Fill className='w-16 h-16 text-gray-300 mx-auto mb-4' />
+              <h3 className='text-lg font-medium text-gray-900 dark:text-white mb-2'>
                 No AI salespeople yet
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">
+              <p className='text-gray-500 dark:text-gray-400 mb-6'>
                 Create your first AI-powered salesperson to get started.
               </p>
               <button
                 onClick={() => setShowCreateWizard(true)}
-                className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                className='inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'
               >
-                <RiAddLine className="w-4 h-4" />
+                <RiAddLine className='w-4 h-4' />
                 <span>Create Your First Salesperson</span>
               </button>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 grid-cols-1 gap-5">
+            <div className='grid sm:grid-cols-2 grid-cols-1 gap-5'>
               {agents.map((agent) => {
                 try {
                   return (
                     <div
                       key={agent.id}
-                      className="bg-gray-50 dark:bg-gray-700 w-fit rounded-lg border border-gray-200 dark:border-gray-600 p-4"
+                      className='bg-gray-50 dark:bg-gray-700 w-fit rounded-lg border border-gray-200 dark:border-gray-600 p-4'
                     >
                       {/* Agent Header */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                            <RiRobot2Fill className="w-5 h-5 text-white" />
+                      <div className='flex items-start justify-between mb-3'>
+                        <div className='flex items-center space-x-3'>
+                          <div className='w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center'>
+                            <RiRobot2Fill className='w-5 h-5 text-white' />
                           </div>
                           <div>
-                            <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                            <h3 className='font-medium text-gray-900 dark:text-white truncate'>
                               {agent.name || "Unnamed Salesperson"}
                             </h3>
                             <span
@@ -417,7 +416,7 @@ const AgentsTab = ({  setShowOnboarding }) => {
                         </div>
 
                         {/* Toggle Switch */}
-                        <div className="flex items-center">
+                        <div className='flex items-center'>
                           <button
                             onClick={() => handleToggleAgentStatus(agent)}
                             disabled={isUpdating}
@@ -427,16 +426,12 @@ const AgentsTab = ({  setShowOnboarding }) => {
                                 : "bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500"
                             }`}
                             title={
-                              agent.status === "active"
-                                ? "Deactivate Agent"
-                                : "Activate Agent"
+                              agent.status === "active" ? "Deactivate Agent" : "Activate Agent"
                             }
                           >
                             <span
                               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                agent.status === "active"
-                                  ? "translate-x-6"
-                                  : "translate-x-1"
+                                agent.status === "active" ? "translate-x-6" : "translate-x-1"
                               }`}
                             />
                           </button>
@@ -444,42 +439,42 @@ const AgentsTab = ({  setShowOnboarding }) => {
                       </div>
 
                       {/* Agent Info */}
-                      <div className="mb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                      <div className='mb-4'>
+                        <div className='flex items-center justify-between mb-2'>
+                          <p className='text-sm text-gray-600 dark:text-gray-300'>
                             <strong>Tone:</strong> {agent.tone || "Not set"}
                           </p>
                           {agent.age && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className='text-xs text-gray-500 dark:text-gray-400'>
                               Age: {agent.age}
                             </p>
                           )}
                         </div>
 
                         {agent.country && agent.country !== "None" && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                          <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
                             <strong>Country:</strong> {agent.country}
                           </p>
                         )}
                         {agent.accent && agent.accent !== "None" && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                          <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
                             <strong>Accent:</strong> {agent.accent}
                           </p>
                         )}
                         {agent.gender && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                          <p className='text-xs text-gray-500 dark:text-gray-400 mb-2'>
                             <strong>Gender:</strong> {agent.gender}
                           </p>
                         )}
 
-                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                        <p className='text-xs text-gray-500 dark:text-gray-400 line-clamp-2'>
                           {agent.behavior_prompt || "No behavior prompt set"}
                         </p>
                       </div>
 
                       {/* Store Info */}
                       {agent.store_name && (
-                        <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+                        <div className='mb-4 text-xs text-gray-500 dark:text-gray-400'>
                           <strong>Store:</strong> {agent.store_name}
                           {/* {agent.status === 'active' && (
                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
@@ -490,40 +485,50 @@ const AgentsTab = ({  setShowOnboarding }) => {
                       )}
 
                       {/* Actions */}
-                      <div className="flex items-center justify-center pt-3 border-t border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center space-x-2">
+                      <div className='flex items-center justify-center pt-3 border-t border-gray-200 dark:border-gray-600'>
+                        <div className='flex items-center space-x-2'>
                           <button
                             onClick={() => openChatModal(agent)}
-                            className="p-2 text-green-400 hover:text-green-600 rounded hover:bg-green-50 dark:hover:bg-green-900/20"
+                            className='p-2 text-green-400 hover:text-green-600 rounded hover:bg-green-50 dark:hover:bg-green-900/20'
                             title={
                               agent.status === "active"
                                 ? "Test Agent"
                                 : "Agent is inactive, activate first"
                             }
                           >
-                            <RiPlayLine className="w-5 h-5" />
+                            <RiPlayLine className='w-5 h-5' />
                           </button>
                           <button
                             onClick={() => openViewModal(agent)}
-                            className="p-2 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
-                            title="View Details"
+                            className='p-2 text-gray-400 hover:text-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700'
+                            title='View Details'
                           >
-                            <RiEyeLine className="w-5 h-5" />
+                            <RiEyeLine className='w-5 h-5' />
                           </button>
                           <button
                             onClick={() => openEditModal(agent)}
-                            className="p-2 text-blue-400 hover:text-blue-600 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                            title="Edit"
+                            className='p-2 text-blue-400 hover:text-blue-600 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                            title='Edit'
                           >
-                            <RiEditLine className="w-5 h-5" />
+                            <RiEditLine className='w-5 h-5' />
                           </button>
                           <button
                             onClick={() => openDeleteModal(agent)}
-                            className="p-2 text-red-400 hover:text-red-600 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
-                            title="Delete"
+                            className='p-2 text-red-400 hover:text-red-600 rounded hover:bg-red-50 dark:hover:bg-red-900/20'
+                            title='Delete'
                           >
-                            <RiDeleteBinLine className="w-5 h-5" />
+                            <RiDeleteBinLine className='w-5 h-5' />
                           </button>
+                          {agent.status === "active" && (
+                            <button
+                              onClick={() => getAgentEmbedCode(agent)}
+                              className='p-2 text-green-400 hover:text-green-600 rounded hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center space-x-2'
+                              title='Test Agent'
+                            >
+                              <RiCodeSSlashFill className='w-5 h-5' />
+                              <span className='text-sm'>Get Embed Code</span>
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -533,9 +538,9 @@ const AgentsTab = ({  setShowOnboarding }) => {
                   return (
                     <div
                       key={agent.id || "error"}
-                      className="bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 p-4"
+                      className='bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 p-4'
                     >
-                      <p className="text-red-600 dark:text-red-400 text-sm">
+                      <p className='text-red-600 dark:text-red-400 text-sm'>
                         Error rendering agent
                       </p>
                     </div>
@@ -548,71 +553,67 @@ const AgentsTab = ({  setShowOnboarding }) => {
       )}
 
       {/* AI Salesperson Creation Wizard */}
-      {showCreateWizard && (
-        <AgentCreationWizard onClose={() => setShowCreateWizard(false)} />
-      )}
+      {showCreateWizard && <AgentCreationWizard onClose={() => setShowCreateWizard(false)} />}
 
       {/* Edit Modal - Similar to ChatbotTab but simplified for agents */}
       {showEditModal && selectedAgent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Edit Agent
-              </h3>
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-lg font-medium text-gray-900 dark:text-white'>Edit Agent</h3>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
               >
-                <RiCloseLine className="w-5 h-5" />
+                <RiCloseLine className='w-5 h-5' />
               </button>
             </div>
 
             <form onSubmit={handleEditAgent}>
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Name *
                   </label>
                   <input
-                    type="text"
-                    name="name"
+                    type='text'
+                    name='name'
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                    placeholder="Enter agent name"
+                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
+                    placeholder='Enter agent name'
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className='grid grid-cols-2 gap-4'>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                       Age
                     </label>
                     <input
-                      type="number"
-                      name="age"
+                      type='number'
+                      name='age'
                       value={formData.age}
                       onChange={handleInputChange}
-                      min="0"
-                      max="150"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                      placeholder="Enter age"
+                      min='0'
+                      max='150'
+                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
+                      placeholder='Enter age'
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                       Gender
                     </label>
                     <select
-                      name="gender"
+                      name='gender'
                       value={formData.gender}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
                     >
-                      <option value="">Select gender</option>
+                      <option value=''>Select gender</option>
                       {genderOptions.map((gender) => (
                         <option key={gender.value} value={gender.value}>
                           {gender.label}
@@ -622,18 +623,18 @@ const AgentsTab = ({  setShowOnboarding }) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className='grid grid-cols-2 gap-4'>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                       Accent
                     </label>
                     <select
-                      name="accent"
+                      name='accent'
                       value={formData.accent}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
                     >
-                      <option value="">Select accent</option>
+                      <option value=''>Select accent</option>
                       {accentOptions.map((accent) => (
                         <option key={accent.value} value={accent.value}>
                           {accent.label}
@@ -643,15 +644,15 @@ const AgentsTab = ({  setShowOnboarding }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                       Response Tone *
                     </label>
                     <select
-                      name="tone"
+                      name='tone'
                       value={formData.tone}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
                     >
                       {toneOptions.map((tone) => (
                         <option key={tone.value} value={tone.value}>
@@ -663,57 +664,57 @@ const AgentsTab = ({  setShowOnboarding }) => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Personality
                   </label>
                   <textarea
-                    name="personality"
+                    name='personality'
                     value={formData.personality}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none'
                     placeholder="Describe the agent's personality"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Behavior Prompt *
                   </label>
                   <textarea
-                    name="behavior_prompt"
+                    name='behavior_prompt'
                     value={formData.behavior_prompt}
                     onChange={handleInputChange}
                     rows={4}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
-                    placeholder="Describe how the agent should behave"
+                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none'
+                    placeholder='Describe how the agent should behave'
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Instructions Text
                   </label>
                   <textarea
-                    name="instructions_text"
+                    name='instructions_text'
                     value={formData.instructions_text}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
-                    placeholder="Additional instructions for the agent"
+                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none'
+                    placeholder='Additional instructions for the agent'
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Status
                   </label>
                   <select
-                    name="status"
+                    name='status'
                     value={formData.status}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
                   >
                     {statusOptions.map((status) => (
                       <option key={status.value} value={status.value}>
@@ -724,23 +725,23 @@ const AgentsTab = ({  setShowOnboarding }) => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-3 mt-6">
+              <div className='flex items-center justify-end space-x-3 mt-6'>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className='px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700'
                 >
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type='submit'
                   disabled={isUpdating}
-                  className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className='flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50'
                 >
                   {isUpdating ? (
-                    <RiRefreshLine className="w-4 h-4 animate-spin" />
+                    <RiRefreshLine className='w-4 h-4 animate-spin' />
                   ) : (
-                    <RiSettings3Line className="w-4 h-4" />
+                    <RiSettings3Line className='w-4 h-4' />
                   )}
                   <span>{isUpdating ? "Updating..." : "Update Agent"}</span>
                 </button>
@@ -752,33 +753,29 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
       {/* View Modal */}
       {showViewModal && selectedAgent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Agent Details
-              </h3>
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-lg font-medium text-gray-900 dark:text-white'>Agent Details</h3>
               <button
                 onClick={() => setShowViewModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
               >
-                <RiCloseLine className="w-5 h-5" />
+                <RiCloseLine className='w-5 h-5' />
               </button>
             </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className='space-y-4'>
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Name
                   </label>
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {selectedAgent.name}
-                  </p>
+                  <p className='text-gray-900 dark:text-white font-medium'>{selectedAgent.name}</p>
                 </div>
 
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Status
                   </label>
                   <span
@@ -791,51 +788,51 @@ const AgentsTab = ({  setShowOnboarding }) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Age
                   </label>
-                  <p className="text-gray-900 dark:text-white">
+                  <p className='text-gray-900 dark:text-white'>
                     {selectedAgent.age || "Not specified"}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Gender
                   </label>
-                  <p className="text-gray-900 dark:text-white">
+                  <p className='text-gray-900 dark:text-white'>
                     {selectedAgent.gender || "Not specified"}
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Accent
                   </label>
-                  <p className="text-gray-900 dark:text-white">
+                  <p className='text-gray-900 dark:text-white'>
                     {selectedAgent.accent || "Not specified"}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Response Tone
                   </label>
-                  <p className="text-gray-900 dark:text-white capitalize">
+                  <p className='text-gray-900 dark:text-white capitalize'>
                     {selectedAgent.tone || "Not specified"}
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Country
                   </label>
-                  <p className="text-gray-900 dark:text-white">
+                  <p className='text-gray-900 dark:text-white'>
                     {selectedAgent.country || "Not specified"}
                   </p>
                 </div>
@@ -843,11 +840,11 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
               {selectedAgent.personality && (
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Personality
                   </label>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
-                    <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">
+                  <div className='bg-gray-50 dark:bg-gray-700 rounded-md p-3'>
+                    <p className='text-gray-900 dark:text-white text-sm whitespace-pre-wrap'>
                       {selectedAgent.personality}
                     </p>
                   </div>
@@ -855,11 +852,11 @@ const AgentsTab = ({  setShowOnboarding }) => {
               )}
 
               <div>
-                <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                   Behavior Prompt
                 </label>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto">
-                  <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">
+                <div className='bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto'>
+                  <p className='text-gray-900 dark:text-white text-sm whitespace-pre-wrap'>
                     {selectedAgent.behavior_prompt}
                   </p>
                 </div>
@@ -867,11 +864,11 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
               {selectedAgent.instructions_text && (
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Instructions
                   </label>
-                  <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto">
-                    <p className="text-gray-900 dark:text-white text-sm whitespace-pre-wrap">
+                  <div className='bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto'>
+                    <p className='text-gray-900 dark:text-white text-sm whitespace-pre-wrap'>
                       {selectedAgent.instructions_text}
                     </p>
                   </div>
@@ -880,42 +877,38 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
               {selectedAgent.store_name && (
                 <div>
-                  <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Connected Store
                   </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {selectedAgent.store_name}
-                  </p>
+                  <p className='text-gray-900 dark:text-white'>{selectedAgent.store_name}</p>
                 </div>
               )}
               {selectedAgent.scrape_instructions && (
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-lg font-medium text-gray-700 dark:text-gray-300">
+                  <div className='flex items-center justify-between mb-1'>
+                    <label className='block text-lg font-medium text-gray-700 dark:text-gray-300'>
                       Website Information
                     </label>
                     <button
-                      onClick={() =>
-                        setShowScrapeInstructions(!showScrapeInstructions)
-                      }
-                      className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg transition-colors"
+                      onClick={() => setShowScrapeInstructions(!showScrapeInstructions)}
+                      className='flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded-lg transition-colors'
                     >
                       {showScrapeInstructions ? (
                         <>
-                          <RiArrowUpSLine className="w-4 h-4" />
+                          <RiArrowUpSLine className='w-4 h-4' />
                           Hide
                         </>
                       ) : (
                         <>
-                          <RiArrowDownSLine className="w-4 h-4" />
+                          <RiArrowDownSLine className='w-4 h-4' />
                           View
                         </>
                       )}
                     </button>
                   </div>
                   {showScrapeInstructions && (
-                    <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border">
-                      <p className="text-gray-900 dark:text-white whitespace-pre-wrap text-sm leading-relaxed">
+                    <div className='mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border'>
+                      <p className='text-gray-900 dark:text-white whitespace-pre-wrap text-sm leading-relaxed'>
                         {selectedAgent.scrape_instructions}
                       </p>
                     </div>
@@ -925,41 +918,40 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
               {selectedAgent.external_websites_count > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     External Websites
                   </label>
-                  <p className="text-gray-900 dark:text-white">
-                    {selectedAgent.external_websites_count} website(s)
-                    configured
+                  <p className='text-gray-900 dark:text-white'>
+                    {selectedAgent.external_websites_count} website(s) configured
                   </p>
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Created
                   </label>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  <p className='text-gray-600 dark:text-gray-400 text-sm'>
                     {selectedAgent.created_at}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                     Last Updated
                   </label>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  <p className='text-gray-600 dark:text-gray-400 text-sm'>
                     {selectedAgent.updated_at}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end mt-6">
+            <div className='flex items-center justify-end mt-6'>
               <button
                 onClick={() => setShowViewModal(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                className='px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700'
               >
                 Close
               </button>
@@ -970,44 +962,41 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
       {/* Delete Modal */}
       {showDeleteModal && selectedAgent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Delete Agent
-              </h3>
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-lg font-medium text-gray-900 dark:text-white'>Delete Agent</h3>
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
               >
-                <RiCloseLine className="w-5 h-5" />
+                <RiCloseLine className='w-5 h-5' />
               </button>
             </div>
 
-            <div className="mb-6">
-              <p className="text-gray-700 dark:text-gray-300">
-                Are you sure you want to delete{" "}
-                <strong>{selectedAgent.name}</strong>? This action cannot be
-                undone.
+            <div className='mb-6'>
+              <p className='text-gray-700 dark:text-gray-300'>
+                Are you sure you want to delete <strong>{selectedAgent.name}</strong>? This action
+                cannot be undone.
               </p>
             </div>
 
-            <div className="flex items-center justify-end space-x-3">
+            <div className='flex items-center justify-end space-x-3'>
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                className='px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700'
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAgent}
                 disabled={isDeleting}
-                className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50"
+                className='flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50'
               >
                 {isDeleting ? (
-                  <RiRefreshLine className="w-4 h-4 animate-spin" />
+                  <RiRefreshLine className='w-4 h-4 animate-spin' />
                 ) : (
-                  <RiDeleteBinLine className="w-4 h-4" />
+                  <RiDeleteBinLine className='w-4 h-4' />
                 )}
                 <span>{isDeleting ? "Deleting..." : "Delete"}</span>
               </button>
@@ -1028,30 +1017,28 @@ const AgentsTab = ({  setShowOnboarding }) => {
 
       {/* Message Modal */}
       {showMessageModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md mx-4'>
+            <div className='flex items-center justify-between mb-4'>
+              <h3 className='text-lg font-medium text-gray-900 dark:text-white'>
                 {messageModalContent.title}
               </h3>
               <button
                 onClick={() => setShowMessageModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
               >
-                <RiCloseLine className="w-5 h-5" />
+                <RiCloseLine className='w-5 h-5' />
               </button>
             </div>
 
-            <div className="mb-6">
-              <p className="text-gray-700 dark:text-gray-300">
-                {messageModalContent.message}
-              </p>
+            <div className='mb-6'>
+              <p className='text-gray-700 dark:text-gray-300'>{messageModalContent.message}</p>
             </div>
 
-            <div className="flex items-center justify-end">
+            <div className='flex items-center justify-end'>
               <button
                 onClick={() => setShowMessageModal(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
               >
                 OK
               </button>

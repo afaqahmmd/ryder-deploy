@@ -50,7 +50,7 @@ const ComprehensiveChatModal = ({
     isStartingConversation,
     isContinuingConversation,
     chatError,
-    isBotResponding
+    isBotResponding,
   } = useSelector((state) => state.comprehensiveChat);
 
   // Local state
@@ -162,12 +162,10 @@ const ComprehensiveChatModal = ({
     } catch (error) {
       console.error("Chat Error:", error);
       dispatch(setIsBotResponding(false));
-      let errorMessage =
-        "Sorry, I'm having trouble responding right now. Please try again.";
+      let errorMessage = "Sorry, I'm having trouble responding right now. Please try again.";
 
       if (error.message && error.message.includes("1000 characters")) {
-        errorMessage =
-          "Message is too long. Please keep it under 1000 characters.";
+        errorMessage = "Message is too long. Please keep it under 1000 characters.";
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -226,13 +224,7 @@ const ComprehensiveChatModal = ({
   };
 
   // Build instruction item from messages (keeping your existing function)
-  const buildInstructionItem = (
-    allMessages,
-    botIndex,
-    instructionText,
-    convId,
-    custId
-  ) => {
+  const buildInstructionItem = (allMessages, botIndex, instructionText, convId, custId) => {
     const botMsg = allMessages[botIndex];
     let prevUserMsg = null;
     for (let i = botIndex - 1; i >= 0; i--) {
@@ -283,58 +275,54 @@ const ComprehensiveChatModal = ({
   if (!embed && !isOpen) return null;
 
   const content = (
-    <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl h-[600px] flex flex-col">
+    <div className='bg-white dark:bg-gray-800 rounded-lg w-full max-w-2xl h-[600px] flex flex-col'>
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-            <RiRobot2Fill className="w-4 h-4 text-white" />
+      <div className='flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700'>
+        <div className='flex items-center space-x-3'>
+          <div className='w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center'>
+            <RiRobot2Fill className='w-4 h-4 text-white' />
           </div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              {agent.name}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <h3 className='text-lg font-medium text-gray-900 dark:text-white'>{agent.name}</h3>
+            <p className='text-sm text-gray-500 dark:text-gray-400'>
               {isConnected ? (
-                <span className="flex items-center">
-                  <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                <span className='flex items-center'>
+                  <span className='w-2 h-2 bg-green-500 rounded-full mr-2'></span>
                   Connected
                 </span>
               ) : (
-                <span className="flex items-center">
-                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                <span className='flex items-center'>
+                  <span className='w-2 h-2 bg-yellow-500 rounded-full mr-2'></span>
                   Connecting...
                 </span>
               )}
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className='flex items-center space-x-2'>
           <button
             onClick={handleRefreshChat}
-            className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
-            title="Start New Conversation"
+            className='p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded'
+            title='Start New Conversation'
           >
-            <RiRefreshLine className="w-4 h-4" />
+            <RiRefreshLine className='w-4 h-4' />
           </button>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
           >
-            <RiCloseLine className="w-5 h-5" />
+            <RiCloseLine className='w-5 h-5' />
           </button>
         </div>
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
-        <div className="space-y-4">
+      <div className='flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900'>
+        <div className='space-y-4'>
           {messages.map((message) => (
             <div key={message.id}>
               <div
-                className={`flex ${
-                  message.sender === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
@@ -344,11 +332,11 @@ const ComprehensiveChatModal = ({
                   }`}
                 >
                   {message.sender === "bot" ? (
-                    <div className="prose dark:prose-invert max-w-none">
+                    <div className='prose dark:prose-invert max-w-none'>
                       <ReactMarkdown>{message.message}</ReactMarkdown>
                     </div>
                   ) : (
-                    <p className="text-sm">{message.message}</p>
+                    <p className='text-sm'>{message.message}</p>
                   )}
                   <p
                     className={`text-xs mt-1 ${
@@ -366,21 +354,21 @@ const ComprehensiveChatModal = ({
 
           {/* Typing Indicator */}
           {isBotResponding ? (
-            <div className="flex justify-start">
-              <div className="bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg max-w-xs">
-                <div className="flex items-center space-x-1">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+            <div className='flex justify-start'>
+              <div className='bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200 dark:border-gray-600 px-4 py-2 rounded-lg max-w-xs'>
+                <div className='flex items-center space-x-1'>
+                  <div className='flex space-x-1'>
+                    <div className='w-2 h-2 bg-gray-400 rounded-full animate-pulse'></div>
                     <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                      className='w-2 h-2 bg-gray-400 rounded-full animate-pulse'
                       style={{ animationDelay: "0.2s" }}
                     ></div>
                     <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"
+                      className='w-2 h-2 bg-gray-400 rounded-full animate-pulse'
                       style={{ animationDelay: "0.4s" }}
                     ></div>
                   </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  <span className='text-xs text-gray-500 dark:text-gray-400 ml-2'>
                     {agent.name} is typing...
                   </span>
                 </div>
@@ -392,16 +380,13 @@ const ComprehensiveChatModal = ({
       </div>
 
       {/* Chat Input */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <form
-          onSubmit={handleSendMessage}
-          className="flex items-center space-x-3"
-        >
+      <div className='p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'>
+        <form onSubmit={handleSendMessage} className='flex items-center space-x-3'>
           <input
-            type="text"
+            type='text'
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder='Type your message...'
             disabled={
               !isConnected ||
               isTyping ||
@@ -409,10 +394,10 @@ const ComprehensiveChatModal = ({
               isStartingConversation ||
               isContinuingConversation
             }
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 dark:bg-gray-700 dark:text-white"
+            className='flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 dark:bg-gray-700 dark:text-white'
           />
           <button
-            type="submit"
+            type='submit'
             disabled={
               !userInput.trim() ||
               isTyping ||
@@ -420,32 +405,26 @@ const ComprehensiveChatModal = ({
               isStartingConversation ||
               isContinuingConversation
             }
-            className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className='bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            <RiSendPlaneLine className="w-5 h-5" />
+            <RiSendPlaneLine className='w-5 h-5' />
           </button>
         </form>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-          {isConnected ? (
-            <span>🟢 Real-time chat</span>
-          ) : (
-            <span>🔴 Connection in progress</span>
-          )}
+        <p className='text-xs text-gray-500 dark:text-gray-400 mt-2'>
+          {isConnected ? <span>🟢 Real-time chat</span> : <span>🔴 Connection in progress</span>}
         </p>
       </div>
 
       {/* Error Display */}
       {chatError && (
-        <div className="p-4 border-t border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
-          <div className="flex items-center">
-            <div className="text-red-600 dark:text-red-400 text-sm">
-              {chatError}
-            </div>
+        <div className='p-4 border-t border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20'>
+          <div className='flex items-center'>
+            <div className='text-red-600 dark:text-red-400 text-sm'>{chatError}</div>
             <button
               onClick={() => dispatch(clearChatError())}
-              className="ml-auto text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+              className='ml-auto text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300'
             >
-              <RiCloseLine className="w-4 h-4" />
+              <RiCloseLine className='w-4 h-4' />
             </button>
           </div>
         </div>
@@ -459,7 +438,7 @@ const ComprehensiveChatModal = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
         {content}
       </div>
       {showInlineSuggest && (

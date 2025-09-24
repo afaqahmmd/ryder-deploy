@@ -146,7 +146,7 @@
       */
       const socket = new WebSocket("http://16.16.70.39:8000/ws/chat/");
       const payload = {
-        agent_id: null,
+        agent_id: 39,
         store_id: 25,
         customer_id: null,
         new_convo: true,
@@ -191,7 +191,9 @@
             payload.customer_id = data.customer_id;
             payload.new_convo = false;
           }
-          if (data.response) {
+          if (data.type === "connection_established") {
+            addMessage(data.message, "bot");
+          } else if (data.response) {
             addMessage(data.response, "bot");
           } else if (data.error) {
             addMessage("Error: " + data.error, "bot");
@@ -275,9 +277,9 @@
       const createMessageElement = (message) => {
         const messageDiv = document.createElement("div");
         messageDiv.className = `flex 
-        w-full  break-words overflow-auto
-        
-        ${message.sender === "user" ? "justify-end" : "justify-start"}`;
+              w-full  break-words overflow-auto
+              
+              ${message.sender === "user" ? "justify-end" : "justify-start"}`;
 
         const bubbleClass =
           message.sender === "user"
@@ -287,13 +289,13 @@
         const timeClass = message.sender === "user" ? "text-blue-100" : "text-gray-500";
 
         messageDiv.innerHTML = `
-      <div class="max-w-xs px-3 py-2 rounded-lg text-sm ${bubbleClass}">
-        <p class="break-words whitespace-pre-line whitespace-pre-line">${message.text}</p>
-        <p class="text-xs mt-1 opacity-70 ${timeClass}">
-          ${formatTime(message.timestamp)}
-        </p>
-      </div>
-    `;
+            <div class="max-w-xs px-3 py-2 rounded-lg text-sm ${bubbleClass}">
+              <p class="break-words whitespace-pre-line whitespace-pre-line">${message.text}</p>
+              <p class="text-xs mt-1 opacity-70 ${timeClass}">
+                ${formatTime(message.timestamp)}
+              </p>
+            </div>
+          `;
 
         return messageDiv;
       };
@@ -318,14 +320,14 @@
         typingDiv.id = "typing-indicator";
         typingDiv.className = "flex justify-start";
         typingDiv.innerHTML = `
-      <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-xs">
-        <div class="flex space-x-1">
-          <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-          <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-          <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-        </div>
-      </div>
-    `;
+            <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-xs">
+              <div class="flex space-x-1">
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+              </div>
+            </div>
+          `;
         messagesContainer.appendChild(typingDiv);
         scrollToBottom();
       };
