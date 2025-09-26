@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import {
   RiRobot2Fill,
-  RiSettings3Line,
   RiAddLine,
   RiEditLine,
   RiDeleteBinLine,
@@ -19,6 +18,7 @@ import { fetchAgents, updateAgent, deleteAgent } from "../../store/agents/agentT
 import { clearAgentError } from "../../store/agents/agentSlice";
 import AgentCreationWizard from "../agents/AgentCreationWizard";
 import ComprehensiveChatModal from "../chat/ComprehensiveChatModal";
+import EditAgentModal from "./EditAgentModal";
 import { getEmbedCode } from "../../utils/embedcode";
 
 const AgentsTab = ({ setShowOnboarding }) => {
@@ -45,51 +45,7 @@ const AgentsTab = ({ setShowOnboarding }) => {
   const [selectedStore, setSelectedStore] = useState(null);
   const [showScrapeInstructions, setShowScrapeInstructions] = useState(false);
 
-  // Form states for editing
-  const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    gender: "",
-    accent: "",
-    personality: "",
-    behavior_prompt: "",
-    tone: "professional",
-    status: "active",
-    instructions_text: "",
-  });
-
-  // Available response tones
-  const toneOptions = [
-    { value: "professional", label: "Professional" },
-    { value: "friendly", label: "Friendly" },
-    { value: "casual", label: "Casual" },
-    { value: "formal", label: "Formal" },
-    { value: "enthusiastic", label: "Enthusiastic" },
-    { value: "calm", label: "Calm" },
-    { value: "energetic", label: "Energetic" },
-    { value: "warm", label: "Warm" },
-    { value: "confident", label: "Confident" },
-    { value: "helpful", label: "Helpful" },
-  ];
-
-  // Available gender options
-  const genderOptions = [
-    { value: "Male", label: "Male" },
-    { value: "Female", label: "Female" },
-    { value: "Other", label: "Other" },
-  ];
-
-  // Available accent options
-  const accentOptions = [
-    { value: "American", label: "American" },
-    { value: "British", label: "British" },
-    { value: "Australian", label: "Australian" },
-    { value: "Canadian", label: "Canadian" },
-    { value: "Indian", label: "Indian" },
-    { value: "None", label: "None" },
-  ];
-
-  // Status options
+  // Status options for display
   const statusOptions = [
     { value: "active", label: "Active", color: "bg-green-100 text-green-800" },
     { value: "inactive", label: "Inactive", color: "bg-red-100 text-red-800" },
@@ -125,49 +81,6 @@ const AgentsTab = ({ setShowOnboarding }) => {
       dispatch(clearAgentError());
     };
   }, [dispatch]);
-
-  // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Reset form data
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      age: "",
-      gender: "",
-      accent: "",
-      personality: "",
-      behavior_prompt: "",
-      tone: "professional",
-      status: "active",
-      instructions_text: "",
-    });
-  };
-
-  // Handle edit agent
-  const handleEditAgent = async (e) => {
-    e.preventDefault();
-    if (!selectedAgent) return;
-
-    try {
-      await dispatch(
-        updateAgent({
-          agentId: selectedAgent.id,
-          updateData: formData,
-        })
-      ).unwrap();
-      setShowEditModal(false);
-      setSelectedAgent(null);
-      resetForm();
-      dispatch(fetchAgents()); // Refresh list
-    } catch (error) {
-      // Error handling is done in the slice
-      console.error("error in edit agent:", error);
-    }
-  };
 
   // Handle delete agent
   const handleDeleteAgent = async () => {
@@ -243,17 +156,6 @@ const AgentsTab = ({ setShowOnboarding }) => {
   // Open edit modal
   const openEditModal = (agent) => {
     setSelectedAgent(agent);
-    setFormData({
-      name: agent.name || "",
-      age: agent.age || "",
-      gender: agent.gender || "",
-      accent: agent.accent || "",
-      personality: agent.personality || "",
-      behavior_prompt: agent.behavior_prompt || "",
-      tone: agent.tone || "professional",
-      status: agent.status || "active",
-      instructions_text: agent.instructions_text || "",
-    });
     setShowEditModal(true);
   };
 
@@ -405,18 +307,18 @@ const AgentsTab = ({ setShowOnboarding }) => {
                             <h3 className='font-medium text-gray-900 dark:text-white truncate'>
                               {agent.name || "Unnamed Salesperson"}
                             </h3>
-                            <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                agent.status
-                              )}`}
-                            >
-                              {agent.status || "draft"}
-                            </span>
                           </div>
                         </div>
 
                         {/* Toggle Switch */}
-                        <div className='flex items-center'>
+                        <div className='flex gap-2 items-center'>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                              agent.status
+                            )}`}
+                          >
+                            {agent.status || "draft"}
+                          </span>
                           <button
                             onClick={() => handleToggleAgentStatus(agent)}
                             disabled={isUpdating}
@@ -555,201 +457,15 @@ const AgentsTab = ({ setShowOnboarding }) => {
       {/* AI Salesperson Creation Wizard */}
       {showCreateWizard && <AgentCreationWizard onClose={() => setShowCreateWizard(false)} />}
 
-      {/* Edit Modal - Similar to ChatbotTab but simplified for agents */}
-      {showEditModal && selectedAgent && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-          <div className='bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto'>
-            <div className='flex items-center justify-between mb-4'>
-              <h3 className='text-lg font-medium text-gray-900 dark:text-white'>Edit Agent</h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className='text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-              >
-                <RiCloseLine className='w-5 h-5' />
-              </button>
-            </div>
-
-            <form onSubmit={handleEditAgent}>
-              <div className='space-y-4'>
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                    Name *
-                  </label>
-                  <input
-                    type='text'
-                    name='name'
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-                    placeholder='Enter agent name'
-                  />
-                </div>
-
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                      Age
-                    </label>
-                    <input
-                      type='number'
-                      name='age'
-                      value={formData.age}
-                      onChange={handleInputChange}
-                      min='0'
-                      max='150'
-                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-                      placeholder='Enter age'
-                    />
-                  </div>
-
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                      Gender
-                    </label>
-                    <select
-                      name='gender'
-                      value={formData.gender}
-                      onChange={handleInputChange}
-                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-                    >
-                      <option value=''>Select gender</option>
-                      {genderOptions.map((gender) => (
-                        <option key={gender.value} value={gender.value}>
-                          {gender.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className='grid grid-cols-2 gap-4'>
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                      Accent
-                    </label>
-                    <select
-                      name='accent'
-                      value={formData.accent}
-                      onChange={handleInputChange}
-                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-                    >
-                      <option value=''>Select accent</option>
-                      {accentOptions.map((accent) => (
-                        <option key={accent.value} value={accent.value}>
-                          {accent.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                      Response Tone *
-                    </label>
-                    <select
-                      name='tone'
-                      value={formData.tone}
-                      onChange={handleInputChange}
-                      required
-                      className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-                    >
-                      {toneOptions.map((tone) => (
-                        <option key={tone.value} value={tone.value}>
-                          {tone.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                    Personality
-                  </label>
-                  <textarea
-                    name='personality'
-                    value={formData.personality}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none'
-                    placeholder="Describe the agent's personality"
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                    Behavior Prompt *
-                  </label>
-                  <textarea
-                    name='behavior_prompt'
-                    value={formData.behavior_prompt}
-                    onChange={handleInputChange}
-                    rows={4}
-                    required
-                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none'
-                    placeholder='Describe how the agent should behave'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                    Instructions Text
-                  </label>
-                  <textarea
-                    name='instructions_text'
-                    value={formData.instructions_text}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none'
-                    placeholder='Additional instructions for the agent'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                    Status
-                  </label>
-                  <select
-                    name='status'
-                    value={formData.status}
-                    onChange={handleInputChange}
-                    className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
-                  >
-                    {statusOptions.map((status) => (
-                      <option key={status.value} value={status.value}>
-                        {status.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className='flex items-center justify-end space-x-3 mt-6'>
-                <button
-                  type='button'
-                  onClick={() => setShowEditModal(false)}
-                  className='px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700'
-                >
-                  Cancel
-                </button>
-                <button
-                  type='submit'
-                  disabled={isUpdating}
-                  className='flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50'
-                >
-                  {isUpdating ? (
-                    <RiRefreshLine className='w-4 h-4 animate-spin' />
-                  ) : (
-                    <RiSettings3Line className='w-4 h-4' />
-                  )}
-                  <span>{isUpdating ? "Updating..." : "Update Agent"}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Edit Agent Modal */}
+      <EditAgentModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedAgent(null);
+        }}
+        agent={selectedAgent}
+      />
 
       {/* View Modal */}
       {showViewModal && selectedAgent && (

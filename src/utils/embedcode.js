@@ -6,6 +6,7 @@ export const getEmbedCode = (agent) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shopify Chatbot</title>
     <script src="https://cdn.tailwindcss.com" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -81,7 +82,7 @@ export const getEmbedCode = (agent) => {
       <!-- Chat Window -->
       <div
         id="chat-window"
-        class="fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex-col hidden"
+        class="fixed bottom-24 right-6 w-96 h-[28rem] bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex-col hidden"
       >
         <!-- Header -->
         <div class="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
@@ -107,7 +108,7 @@ export const getEmbedCode = (agent) => {
         </div>
 
         <!-- Messages -->
-        <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 h-64">
+        <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 h-80">
           <!-- Messages will be populated by JavaScript -->
         </div>
 
@@ -275,42 +276,62 @@ export const getEmbedCode = (agent) => {
           return message;
       };
 
-      const createMessageElement = (message) => {
-          const messageDiv = document.createElement("div");
-          messageDiv.className = \`flex 
+    const createMessageElement = (message) => {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = \`flex 
               w-full  break-words overflow-auto
               
               \${message.sender === "user" ? "justify-end" : "justify-start"}\`;
 
-          const bubbleClass =
-              message.sender === "user"
-                  ? "bg-blue-600 text-white rounded-br-none"
-                  : "bg-gray-100 text-gray-800 rounded-bl-none";
+        const bubbleClass =
+          message.sender === "user"
+            ? "bg-blue-600 text-white rounded-br-none"
+            : "bg-gray-100 text-gray-800 rounded-bl-none";
 
-          const timeClass = message.sender === "user" ? "text-blue-100" : "text-gray-500";
+        const timeClass = message.sender === "user" ? "text-blue-100" : "text-gray-500";
 
-          messageDiv.innerHTML = \`
-            <div class="max-w-xs px-3 py-2 rounded-lg text-sm \${bubbleClass}">
-              <p class="break-words whitespace-pre-line whitespace-pre-line">\${message.text}</p>
+        // Parse Markdown for bot messages, keep plain text for user messages
+        let content;
+        if (message.sender === "bot" && typeof marked !== "undefined") {
+          try {
+            // Configure marked for better chat display
+            marked.setOptions({
+              breaks: true, // Convert line breaks to <br>
+              gfm: true, // GitHub Flavored Markdown
+            });
+            content = marked.parse(message.text);
+          } catch (error) {
+            console.warn("Markdown parsing failed, falling back to plain text:", error);
+            content = message.text;
+          }
+        } else {
+          content = message.text;
+        }
+
+        messageDiv.innerHTML = \`
+            <div class="max-w-sm px-3 py-2 rounded-lg text-sm \${bubbleClass}">
+              <div class="break-words \${
+                message.sender === "bot" ? "markdown-content" : "whitespace-pre-line"
+              }">\${content}</div>
               <p class="text-xs mt-1 opacity-70 \${timeClass}">
                 \${formatTime(message.timestamp)}
               </p>
             </div>
           \`;
 
-          return messageDiv;
+        return messageDiv;
       };
 
       const renderMessages = () => {
-          const { messagesContainer } = getDOMElements();
-          messagesContainer.innerHTML = "";
+        const { messagesContainer } = getDOMElements();
+        messagesContainer.innerHTML = "";
 
-          chatState.messages.forEach((message) => {
-              const messageElement = createMessageElement(message);
-              messagesContainer.appendChild(messageElement);
-          });
+        chatState.messages.forEach((message) => {
+          const messageElement = createMessageElement(message);
+          messagesContainer.appendChild(messageElement);
+        });
 
-          scrollToBottom();
+        scrollToBottom();
       };
 
       // Typing indicator functions
@@ -321,7 +342,7 @@ export const getEmbedCode = (agent) => {
           typingDiv.id = "typing-indicator";
           typingDiv.className = "flex justify-start";
           typingDiv.innerHTML = \`
-            <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-xs">
+            <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">
               <div class="flex space-x-1">
                 <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>

@@ -29,9 +29,7 @@ import TestAndSuggestPanel from "../chat/TestAndSuggestPanel";
 const AgentCreationWizard = ({ onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { creationCache, currentStep, isCompleting, error } = useSelector(
-    (state) => state.agents
-  );
+  const { creationCache, currentStep, isCompleting, error } = useSelector((state) => state.agents);
   const { stores: storesList } = useSelector((state) => state.stores);
 
   const [isClosing, setIsClosing] = useState(false);
@@ -83,19 +81,45 @@ const AgentCreationWizard = ({ onClose }) => {
 
     switch (currentStep) {
       case 1: {
+        console.log("creationCache", creationCache);
         const step1 = creationCache.step1;
         // Name and behavior prompt are required
-        const isNameValid = step1.name?.length >= 2;
+        const isAccentValid = !step1.accent || step1.accent.length > 0;
         const isAgeValid = !step1.age || (step1.age >= 0 && step1.age <= 150);
         const isBehaviorPromptValid =
           step1.behavior_prompt?.length > 0 && step1.behavior_prompt.length <= 2000;
+        const isCommunicationStyleValid = step1.communication_style?.length > 0;
+        const isNameValid = step1.name?.length >= 2;
+        const isPersonalityValid = step1.personality?.length > 0;
+        const isSelectedTraitsValid = step1.selectedTraits?.length > 0;
+        const isToneValid = step1.tone?.length > 0;
+        const isGenderValid = step1.gender?.length > 0;
+
         const isCountryValid = !step1.country || step1.country.length > 0;
 
         return (
-          isNameValid && isAgeValid && isBehaviorPromptValid && isCountryValid
+          isNameValid &&
+          isAgeValid &&
+          isBehaviorPromptValid &&
+          isCountryValid &&
+          isCommunicationStyleValid &&
+          //  &&
+          // isPersonalityValid
+          isSelectedTraitsValid &&
+          isToneValid &&
+          isGenderValid &&
+          isAccentValid
         );
       }
       case 2:
+        {
+          console.log("step2", creationCache);
+          const step2 = creationCache.step2;
+          const isStoreValid = step2.store;
+
+          return isStoreValid;
+          // const
+        }
         // Store connection is optional
         return true;
       case 3:
@@ -107,14 +131,14 @@ const AgentCreationWizard = ({ onClose }) => {
         if (!step5?.external_websites || step5.external_websites.length === 0) {
           return true; // Step is optional if no websites added
         }
-        
+
         // Validate each website that has been added
-        return step5.external_websites.every(website => {
+        return step5.external_websites.every((website) => {
           if (!website.url.trim()) return true; // Empty URLs are allowed (they will be filtered out)
           // Validate URL format
           try {
             const url = new URL(website.url);
-            return url.protocol === 'http:' || url.protocol === 'https:';
+            return url.protocol === "http:" || url.protocol === "https:";
           } catch {
             return false;
           }
@@ -149,10 +173,7 @@ const AgentCreationWizard = ({ onClose }) => {
     setIsClosing(true);
 
     // Show confirmation if there's unsaved data
-    if (
-      creationCache &&
-      (creationCache.step1.name || creationCache.step2.instructions_text)
-    ) {
+    if (creationCache && (creationCache.step1.name || creationCache.step2.instructions_text)) {
       const shouldClose = window.confirm(
         "You have unsaved changes. Are you sure you want to close the wizard? Your progress will be saved locally."
       );
@@ -185,9 +206,7 @@ const AgentCreationWizard = ({ onClose }) => {
 
       console.log("completeData", completeData);
 
-      const created = await dispatch(
-        completeAgentCreation(completeData)
-      ).unwrap();
+      const created = await dispatch(completeAgentCreation(completeData)).unwrap();
 
       if (activateAgent) {
         setActivatedAgent(created);
@@ -214,10 +233,10 @@ const AgentCreationWizard = ({ onClose }) => {
   // Don't render until cache is loaded
   if (!creationCache) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-center mt-2 text-gray-600">Loading wizard...</p>
+      <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+        <div className='bg-white rounded-lg p-6'>
+          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto'></div>
+          <p className='text-center mt-2 text-gray-600'>Loading wizard...</p>
         </div>
       </div>
     );
@@ -227,32 +246,35 @@ const AgentCreationWizard = ({ onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
+        <div className='bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col'>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className='flex items-center justify-between p-6 border-b border-gray-200'>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                Create New AI Salesperson
-              </h2>
-              <p className="text-gray-500 mt-1">
+              <h2 className='text-2xl font-bold text-gray-900'>Create New AI Salesperson</h2>
+              <p className='text-gray-500 mt-1'>
                 Step {currentStep} of {steps.length}: {currentStepConfig?.title}
               </p>
             </div>
             <button
               onClick={handleClose}
               disabled={isClosing || isCompleting}
-              className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+              className='text-gray-400 hover:text-gray-600 disabled:opacity-50'
             >
-              <RiCloseLine className="w-6 h-6" />
+              <RiCloseLine className='w-6 h-6' />
             </button>
           </div>
 
           {/* Progress Indicator */}
-          <div className="px-6 py-4  flex justify-center">
-            <div className="flex items-center justify-center w-full">
+          <div className='px-6 py-4  flex justify-center'>
+            <div className='flex items-center justify-center w-full'>
               {steps.map((step, index) => (
-                <div key={step.id} className={`flex items-center w-full ${index >= steps.length - 1 ? "max-w-fit" : ""}`}>
+                <div
+                  key={step.id}
+                  className={`flex items-center w-full ${
+                    index >= steps.length - 1 ? "max-w-fit" : ""
+                  }`}
+                >
                   <div
                     className={`
                     w-8 h-8 aspect-square rounded-full flex items-center justify-center text-sm font-medium
@@ -265,11 +287,7 @@ const AgentCreationWizard = ({ onClose }) => {
                     }
                   `}
                   >
-                    {currentStep > step.id ? (
-                      <RiCheckLine className="w-4 h-4" />
-                    ) : (
-                      step.id
-                    )}
+                    {currentStep > step.id ? <RiCheckLine className='w-4 h-4' /> : step.id}
                   </div>
 
                   {index < steps.length - 1 && (
@@ -285,36 +303,35 @@ const AgentCreationWizard = ({ onClose }) => {
             </div>
           </div>
 
-         
           {/* Step Content */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className='flex-1 p-6 overflow-y-auto'>
             {StepComponent && (
               <StepComponent
                 data={creationCache}
                 onUpdate={handleStepUpdate}
-                onComplete={currentStep === 5 ? handleComplete : undefined} 
+                onComplete={currentStep === 5 ? handleComplete : undefined}
               />
             )}
           </div>
 
           {/* Footer Navigation */}
-          <div className="flex items-center justify-between p-6 border-t border-gray-200">
+          <div className='flex items-center justify-between p-6 border-t border-gray-200'>
             <button
               onClick={handlePrevious}
               disabled={currentStep === 1 || isCompleting}
-              className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+              className='flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              <RiArrowLeftLine className="w-4 h-4" />
+              <RiArrowLeftLine className='w-4 h-4' />
               <span>Previous</span>
             </button>
 
-            <div className="flex items-center space-x-3">
+            <div className='flex items-center space-x-3'>
               {/* Save Draft Button */}
               {currentStep < 5 && (
                 <button
                   onClick={handleClose}
                   disabled={isCompleting}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50"
+                  className='px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50'
                 >
                   Save & Close
                 </button>
@@ -322,23 +339,25 @@ const AgentCreationWizard = ({ onClose }) => {
 
               {/* Next/Complete Button */}
               {currentStep < 5 ? ( // Updated to 6
-                <div className="flex flex-col items-end">
-                  {!isCurrentStepValid() && currentStep === 4 && creationCache?.step5?.external_websites?.some(w => w.url.trim()) && (
-                    <p className="text-red-600 text-sm mb-2">
-                      Please ensure all URLs are valid and start with http:// or https://
-                    </p>
-                  )}
+                <div className='flex flex-col items-end'>
+                  {!isCurrentStepValid() &&
+                    currentStep === 4 &&
+                    creationCache?.step5?.external_websites?.some((w) => w.url.trim()) && (
+                      <p className='text-red-600 text-sm mb-2'>
+                        Please ensure all URLs are valid and start with http:// or https://
+                      </p>
+                    )}
                   <button
                     onClick={handleNext}
                     disabled={!isCurrentStepValid() || isCompleting}
-                    className="flex items-center space-x-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className='flex items-center space-x-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
                   >
                     <span>Next</span>
-                    <RiArrowRightLine className="w-4 h-4" />
+                    <RiArrowRightLine className='w-4 h-4' />
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className='flex items-center space-x-3'>
                   {/* <button
                     onClick={() => handleComplete(false)}
                     disabled={isCompleting}
@@ -350,16 +369,16 @@ const AgentCreationWizard = ({ onClose }) => {
                   <button
                     onClick={() => handleComplete(true)}
                     disabled={isCompleting}
-                    className="flex items-center space-x-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                    className='flex items-center space-x-2 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50'
                   >
                     {isCompleting ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
                         <span>Creating...</span>
                       </>
                     ) : (
                       <>
-                        <RiCheckLine className="w-4 h-4" />
+                        <RiCheckLine className='w-4 h-4' />
                         <span>Create & Activate</span>
                       </>
                     )}

@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { 
-  fetchAgents, 
-  createAgent, 
-  updateAgent, 
+import {
+  fetchAgents,
+  createAgent,
+  updateAgent,
   deleteAgent,
   fetchAgentById,
   completeAgentCreation
@@ -41,16 +41,16 @@ export const agentSlice = createSlice({
     // Multi-step creation cache management
     initializeCreationCache: (state) => {
       state.creationCache = {
-        step1: { 
-          name: '', 
-          behavior_prompt: '', 
+        step1: {
+          name: '',
+          behavior_prompt: '',
           age: null,
           gender: '',
           accent: '',
           personality: '',
           tone: 'friendly' // Changed from response_tone to tone
         },
-        step2: { instructions_text: '', instructions_file: null },
+        step2: { instructions_text: '', instructions_file: null, store: null },
         step3: { store: null },
         step4: { external_websites: [] }
       };
@@ -116,7 +116,7 @@ export const agentSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload?.message || "Failed to fetch agents";
       })
-      
+
       // Fetch single agent cases
       .addCase(fetchAgentById.pending, (state) => {
         state.isLoading = true;
@@ -131,7 +131,7 @@ export const agentSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload?.message || "Failed to fetch agent";
       })
-      
+
       // Create agent cases (not used in multi-step flow)
       .addCase(createAgent.pending, (state) => {
         state.isCreating = true;
@@ -171,7 +171,7 @@ export const agentSlice = createSlice({
         state.error = action.payload?.message || "Failed to complete agent creation";
         toast.error(state.error);
       })
-      
+
       // Update agent cases
       .addCase(updateAgent.pending, (state) => {
         state.isUpdating = true;
@@ -194,7 +194,7 @@ export const agentSlice = createSlice({
         state.error = action.payload?.message || "Failed to update agent";
         toast.error(state.error);
       })
-      
+
       // Delete agent cases
       .addCase(deleteAgent.pending, (state) => {
         state.isDeleting = true;
@@ -218,9 +218,9 @@ export const agentSlice = createSlice({
   },
 });
 
-export const { 
-  clearAgentError, 
-  setCurrentAgent, 
+export const {
+  clearAgentError,
+  setCurrentAgent,
   clearCurrentAgent,
   initializeCreationCache,
   updateCreationCache,
