@@ -59,7 +59,7 @@ const ChartContainer = ({ data }) => {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="conversations"
+                dataKey="engaged_conversations"
                 stroke="#6366f1"
                 strokeWidth={3}
                 dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}

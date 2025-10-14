@@ -260,15 +260,11 @@ export const apiService = {
   // Analytics APIs
   // Analytics APIs
   analytics: {
-    // Store-level summary analytics
-    getStoreAnalytics: async (storeId) => {
-      return await axiosInstance.get(`/api/core/analytics/store/${storeId}/`);
-    },
-
+   
     // Store-level graph data (sales trends, revenue, etc.)
     getStoreGraph: async (storeId) => {
       return await axiosInstance.get(
-        `/api/core/analytics/store/${storeId}/graph/`
+        `/api/core/analytics/store/${storeId}/engaged/graph/`
       );
     },
 

@@ -73,8 +73,6 @@ const AnalyticsTab = () => {
         return productAnalytics?.[storeId] || {};
       case "charts":
         return storeGraph?.[storeId] || {};
-      case "engaged":
-        return engagedAnalytics?.[storeId] || {};
       default:
         return defaultAnalytics;
     }
