@@ -7,6 +7,7 @@ import comprehensiveChatSlice from "./agents/comprehensiveChatSlice";
 import storesSlice from "./stores/storesSlice";
 import dashboardSlice from "./dashboard/dashboardSlice";
 import conversationsSlice from "./conversations/conversationsSlice";
+import analyticsSlice from "./analytics/analyticsSlice";
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     stores: storesSlice,
     dashboard: dashboardSlice,
     conversations: conversationsSlice,
+    analytics: analyticsSlice,
   },
   devTools: process.env.NODE_ENV !== "production",
 });

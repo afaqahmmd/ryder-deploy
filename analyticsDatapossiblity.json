@@ -1,0 +1,580 @@
+{
+    "Store Analytics": {
+      "store_id": 25,
+      "period_days": 7,
+      "summary": {
+        "total_conversations": 27,
+        "total_webhook_events": 66,
+        "total_cart_value": 186345,
+        "total_checkout_value": 79326.64,
+        "total_order_value": 40601.76
+      },
+      "events": {
+        "cart_creates": 13,
+        "cart_updates": 35,
+        "checkout_creates": 12,
+        "order_creates": 6
+      },
+      "conversion_rates": {
+        "cart_to_checkout": 92.31,
+        "checkout_to_order": 50,
+        "overall_conversion": 22.22
+      },
+      "products": {
+        "total_products_added": 76,
+        "unique_products": 10,
+        "top_products": [
+          {
+            "title": "Bundle of 5 cotton shirts",
+            "product_id": 8914808209634,
+            "total_quantity": 23,
+            "total_value": "4893.00"
+          },
+          {
+            "title": "Men's Checkered Cotton Shirt",
+            "product_id": 8929532281058,
+            "total_quantity": 10,
+            "total_value": "15992.00"
+          },
+          {
+            "title": "3 PENTS",
+            "product_id": 8914809782498,
+            "total_quantity": 9,
+            "total_value": "160000.00"
+          },
+          {
+            "title": "Classic Slim Fit Pants",
+            "product_id": 8929530904802,
+            "total_quantity": 9,
+            "total_value": "18392.00"
+          },
+          {
+            "title": "2 pents",
+            "product_id": 8914808930530,
+            "total_quantity": 8,
+            "total_value": "18584.00"
+          },
+          {
+            "title": "Men's Classic Slip-On Loafers",
+            "product_id": 8929544831202,
+            "total_quantity": 7,
+            "total_value": "15594.00"
+          },
+          {
+            "title": "Men's Classic Formal Dress Pants",
+            "product_id": 8929534738658,
+            "total_quantity": 3,
+            "total_value": "4998.00"
+          },
+          {
+            "title": "Men's Tactical Cargo Pants",
+            "product_id": 8929531625698,
+            "total_quantity": 3,
+            "total_value": "6998.00"
+          },
+          {
+            "title": "Short Sleeve T-Shirt",
+            "product_id": 8929530642658,
+            "total_quantity": 2,
+            "total_value": "2998.00"
+          },
+          {
+            "title": "Men's High-Top Streetwear Sneakers",
+            "product_id": 8929544437986,
+            "total_quantity": 2,
+            "total_value": "6998.00"
+          }
+        ]
+      }
+    },
+    "Store Analytics Graph": {
+      "store_id": 25,
+      "period_days": 7,
+      "graph_data": [
+        {
+          "date": "2025-10-04",
+          "conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          }
+        },
+        {
+          "date": "2025-10-05",
+          "conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          }
+        },
+        {
+          "date": "2025-10-06",
+          "conversations": 11,
+          "events": {
+            "cart_creates": 6,
+            "cart_updates": 19,
+            "checkout_creates": 4,
+            "order_creates": 3
+          },
+          "values": {
+            "cart_value": 82476,
+            "checkout_value": 36648.48,
+            "order_value": 10753.8
+          }
+        },
+        {
+          "date": "2025-10-07",
+          "conversations": 8,
+          "events": {
+            "cart_creates": 4,
+            "cart_updates": 9,
+            "checkout_creates": 4,
+            "order_creates": 1
+          },
+          "values": {
+            "cart_value": 92308,
+            "checkout_value": 30494.08,
+            "order_value": 23470.28
+          }
+        },
+        {
+          "date": "2025-10-08",
+          "conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          }
+        },
+        {
+          "date": "2025-10-09",
+          "conversations": 8,
+          "events": {
+            "cart_creates": 3,
+            "cart_updates": 7,
+            "checkout_creates": 4,
+            "order_creates": 2
+          },
+          "values": {
+            "cart_value": 11561,
+            "checkout_value": 12184.08,
+            "order_value": 6377.68
+          }
+        },
+        {
+          "date": "2025-10-10",
+          "conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          }
+        }
+      ]
+    },
+    "Store Analytics Graph Engaged Users": {
+      "store_id": 25,
+      "period_days": 7,
+      "filter": "engaged_users_min_5_messages",
+      "graph_data": [
+        {
+          "date": "2025-10-04",
+          "engaged_conversations": 0,
+          "total_conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          },
+          "products": {
+            "total_added": 0,
+            "unique_products": 0
+          }
+        },
+        {
+          "date": "2025-10-05",
+          "engaged_conversations": 0,
+          "total_conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          },
+          "products": {
+            "total_added": 0,
+            "unique_products": 0
+          }
+        },
+        {
+          "date": "2025-10-06",
+          "engaged_conversations": 0,
+          "total_conversations": 11,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          },
+          "products": {
+            "total_added": 0,
+            "unique_products": 0
+          }
+        },
+        {
+          "date": "2025-10-07",
+          "engaged_conversations": 5,
+          "total_conversations": 8,
+          "events": {
+            "cart_creates": 4,
+            "cart_updates": 9,
+            "checkout_creates": 3,
+            "order_creates": 1
+          },
+          "values": {
+            "cart_value": 92308,
+            "checkout_value": 27799.4,
+            "order_value": 23470.28
+          },
+          "products": {
+            "total_added": 20,
+            "unique_products": 5
+          }
+        },
+        {
+          "date": "2025-10-08",
+          "engaged_conversations": 0,
+          "total_conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          },
+          "products": {
+            "total_added": 0,
+            "unique_products": 0
+          }
+        },
+        {
+          "date": "2025-10-09",
+          "engaged_conversations": 1,
+          "total_conversations": 8,
+          "events": {
+            "cart_creates": 1,
+            "cart_updates": 3,
+            "checkout_creates": 2,
+            "order_creates": 1
+          },
+          "values": {
+            "cart_value": 7363,
+            "checkout_value": 7854.96,
+            "order_value": 2318.84
+          },
+          "products": {
+            "total_added": 10,
+            "unique_products": 4
+          }
+        },
+        {
+          "date": "2025-10-10",
+          "engaged_conversations": 0,
+          "total_conversations": 0,
+          "events": {
+            "cart_creates": 0,
+            "cart_updates": 0,
+            "checkout_creates": 0,
+            "order_creates": 0
+          },
+          "values": {
+            "cart_value": 0,
+            "checkout_value": 0,
+            "order_value": 0
+          },
+          "products": {
+            "total_added": 0,
+            "unique_products": 0
+          }
+        }
+      ]
+    },
+    "Store Analytics Engaged Users": {
+      "store_id": 25,
+      "period_days": 7,
+      "filter": "engaged_users_min_5_messages",
+      "summary": {
+        "total_engaged_conversations": 6,
+        "total_webhook_events": 24,
+        "total_cart_value": 99671,
+        "total_checkout_value": 35654.36,
+        "total_order_value": 25789.12
+      },
+      "events": {
+        "cart_creates": 5,
+        "cart_updates": 12,
+        "checkout_creates": 5,
+        "order_creates": 2
+      },
+      "conversion_rates": {
+        "cart_to_checkout": 100,
+        "checkout_to_order": 40,
+        "overall_conversion": 33.33
+      },
+      "products": {
+        "total_products_added": 30,
+        "unique_products": 8,
+        "top_products": [
+          {
+            "title": "Bundle of 5 cotton shirts",
+            "product_id": 8914808209634,
+            "total_quantity": 11,
+            "total_value": "2330.00"
+          },
+          {
+            "title": "3 PENTS",
+            "product_id": 8914809782498,
+            "total_quantity": 6,
+            "total_value": "100000.00"
+          },
+          {
+            "title": "Men's Checkered Cotton Shirt",
+            "product_id": 8929532281058,
+            "total_quantity": 3,
+            "total_value": "3998.00"
+          },
+          {
+            "title": "Classic Slim Fit Pants",
+            "product_id": 8929530904802,
+            "total_quantity": 2,
+            "total_value": "4598.00"
+          },
+          {
+            "title": "Men's Classic Slip-On Loafers",
+            "product_id": 8929544831202,
+            "total_quantity": 2,
+            "total_value": "5198.00"
+          },
+          {
+            "title": "2 pents",
+            "product_id": 8914808930530,
+            "total_quantity": 2,
+            "total_value": "4646.00"
+          },
+          {
+            "title": "Short Sleeve T-Shirt",
+            "product_id": 8929530642658,
+            "total_quantity": 2,
+            "total_value": "2998.00"
+          },
+          {
+            "title": "Men's High-Top Streetwear Sneakers",
+            "product_id": 8929544437986,
+            "total_quantity": 2,
+            "total_value": "6998.00"
+          }
+        ]
+      },
+      "engaged_users": [
+        {
+          "customer_id": "customer_2f225354",
+          "customer_name": "Customer",
+          "message_count": 112,
+          "webhook_events_count": 112,
+          "total_cart_value": "702880.00",
+          "total_order_value": "375524.48"
+        },
+        {
+          "customer_id": "customer_7289205b",
+          "customer_name": "Customer",
+          "message_count": 84,
+          "webhook_events_count": 84,
+          "total_cart_value": "88356.00",
+          "total_order_value": "27826.08"
+        },
+        {
+          "customer_id": "customer_a499726e",
+          "customer_name": "Customer",
+          "message_count": 48,
+          "webhook_events_count": 48,
+          "total_cart_value": "3728.00",
+          "total_order_value": null
+        },
+        {
+          "customer_id": "customer_4af789f4",
+          "customer_name": "Customer",
+          "message_count": 48,
+          "webhook_events_count": 48,
+          "total_cart_value": "677168.00",
+          "total_order_value": null
+        },
+        {
+          "customer_id": "customer_d6332fe7",
+          "customer_name": "Customer",
+          "message_count": 32,
+          "webhook_events_count": 32,
+          "total_cart_value": "55984.00",
+          "total_order_value": null
+        },
+        {
+          "customer_id": "customer_bbdf1af2",
+          "customer_name": "Customer",
+          "message_count": 32,
+          "webhook_events_count": 32,
+          "total_cart_value": "37168.00",
+          "total_order_value": null
+        },
+        {
+          "customer_id": "customer_4ea558b4",
+          "customer_name": "Customer",
+          "message_count": 24,
+          "webhook_events_count": 24,
+          "total_cart_value": "11992.00",
+          "total_order_value": "1081.12"
+        },
+        {
+          "customer_id": "customer_4b46e71b",
+          "customer_name": "Customer",
+          "message_count": 16,
+          "webhook_events_count": 16,
+          "total_cart_value": "18584.00",
+          "total_order_value": null
+        },
+        {
+          "customer_id": "customer_2910c93a",
+          "customer_name": "Customer",
+          "message_count": 14,
+          "webhook_events_count": 14,
+          "total_cart_value": "46396.00",
+          "total_order_value": "5797.68"
+        },
+        {
+          "customer_id": "customer_9aee516c",
+          "customer_name": "Customer",
+          "message_count": 12,
+          "webhook_events_count": 12,
+          "total_cart_value": "26988.00",
+          "total_order_value": "15169.36"
+        }
+      ],
+      "recent_activity": [
+        {
+          "event_type": "checkouts/create",
+          "customer_id": "customer_7289205b",
+          "total_price": "5536.12",
+          "currency": "PKR",
+          "created_at": "2025-10-09T07:50:01.340Z"
+        },
+        {
+          "event_type": "carts/update",
+          "customer_id": "customer_7289205b",
+          "total_price": "5131.00",
+          "currency": "PKR",
+          "created_at": "2025-10-09T07:49:53.246Z"
+        },
+        {
+          "event_type": "carts/update",
+          "customer_id": "customer_7289205b",
+          "total_price": "233.00",
+          "currency": "PKR",
+          "created_at": "2025-10-09T07:49:47.857Z"
+        },
+        {
+          "event_type": "carts/create",
+          "customer_id": "customer_7289205b",
+          "total_price": "0.00",
+          "currency": "USD",
+          "created_at": "2025-10-09T07:49:44.493Z"
+        },
+        {
+          "event_type": "orders/create",
+          "customer_id": "customer_7289205b",
+          "total_price": "2318.84",
+          "currency": "PKR",
+          "created_at": "2025-10-09T07:42:14.691Z"
+        },
+        {
+          "event_type": "checkouts/create",
+          "customer_id": "customer_7289205b",
+          "total_price": "2318.84",
+          "currency": "PKR",
+          "created_at": "2025-10-09T07:41:51.262Z"
+        },
+        {
+          "event_type": "carts/update",
+          "customer_id": "customer_7289205b",
+          "total_price": "1999.00",
+          "currency": "PKR",
+          "created_at": "2025-10-09T07:40:47.472Z"
+        },
+        {
+          "event_type": "carts/update",
+          "customer_id": "customer_4af789f4",
+          "total_price": "22323.00",
+          "currency": "PKR",
+          "created_at": "2025-10-07T05:53:26.538Z"
+        },
+        {
+          "event_type": "carts/update",
+          "customer_id": "customer_4af789f4",
+          "total_price": "20000.00",
+          "currency": "PKR",
+          "created_at": "2025-10-07T05:53:22.073Z"
+        },
+        {
+          "event_type": "carts/create",
+          "customer_id": "customer_4af789f4",
+          "total_price": "0.00",
+          "currency": "USD",
+          "created_at": "2025-10-07T05:48:31.434Z"
+        }
+      ]
+    }
+  }
+  

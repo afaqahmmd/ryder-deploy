@@ -171,7 +171,7 @@ export const apiService = {
   embeddings: {
     // Create embeddings for a store
     create: async (storeId) => {
-      console.log("inside apiiiiii creating embedingggg databaseeeeeeeeeeeee")
+      console.log("inside apiiiiii creating embedingggg databaseeeeeeeeeeeee");
 
       return await axiosInstance.get("/api/stores/fetch-products/", {
         params: {
@@ -252,6 +252,44 @@ export const apiService = {
     getByCustomerId: async (customerId) => {
       return await axiosInstance.get(
         `/api/agents/conversations/customer/${customerId}/`
+      );
+    },
+  },
+
+  // Analytics API
+  // Analytics APIs
+  // Analytics APIs
+  analytics: {
+    // Store-level summary analytics
+    getStoreAnalytics: async (storeId) => {
+      return await axiosInstance.get(`/api/core/analytics/store/${storeId}/`);
+    },
+
+    // Store-level graph data (sales trends, revenue, etc.)
+    getStoreGraph: async (storeId) => {
+      return await axiosInstance.get(
+        `/api/core/analytics/store/${storeId}/graph/`
+      );
+    },
+
+    // Engaged user analytics (visits, interactions)
+    getEngagedAnalytics: async (storeId) => {
+      return await axiosInstance.get(
+        `/api/core/analytics/store/${storeId}/engaged/`
+      );
+    },
+
+    // Engaged user graph data
+    getEngagedGraph: async (storeId) => {
+      return await axiosInstance.get(
+        `/api/core/analytics/store/${storeId}/engaged/graph/`
+      );
+    },
+
+    // Top-performing products for a store
+    getProductAnalytics: async (storeId) => {
+      return await axiosInstance.get(
+        `/api/core/analytics/products/${storeId}/`
       );
     },
   },

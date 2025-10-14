@@ -8,7 +8,8 @@ import {
   MdMenu,
   MdClose,
   MdDarkMode,
-  MdLightMode
+  MdLightMode,
+  MdAnalytics
 } from 'react-icons/md'
 import { FiShoppingBag, FiBarChart2, FiMessageSquare } from 'react-icons/fi'
 import { RiRobot2Fill } from 'react-icons/ri'
@@ -17,7 +18,6 @@ import { useTheme } from '../contexts/ThemeContext'
 const Sidebar = ({ activeMainTab, setActiveMainTab, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { isDark, toggleTheme } = useTheme()
-  
   // Get user data from Redux store
   const { user } = useSelector(state => state.login)
 
@@ -51,6 +51,11 @@ const Sidebar = ({ activeMainTab, setActiveMainTab, onLogout }) => {
       id: 'conversations',
       label: 'Conversations',
       icon: FiMessageSquare
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics',
+      icon: MdAnalytics
     },
     {
       id: 'settings',

@@ -23,6 +23,7 @@ import ProductsTab from "./dashboard/ProductsTab";
 import KnowledgeBaseTab from "./dashboard/KnowledgeBaseTab";
 import AgentsTab from "./dashboard/AgentsTab";
 import ConversationsTab from "./dashboard/ConversationsTab";
+import AnalyticsTab from "./dashboard/AnalyticsTab";
 import ConnectStoreModal from "./walkthroughGuide/ConnectStoreModal";
 import { SiShopify } from "react-icons/si";
 import SyncProductsModal from "./walkthroughGuide/ProductsModal";
@@ -737,6 +738,13 @@ const Dashboard = () => {
         return (
           <div className='flex-1 p-4 sm:p-6 max-w-7xl mx-auto'>
             <ConversationsTab />
+          </div>
+        );
+
+      case "analytics":
+        return (
+          <div className='flex-1 p-4 sm:p-6 max-w-7xl mx-auto'>
+            <AnalyticsTab />
           </div>
         );
 
