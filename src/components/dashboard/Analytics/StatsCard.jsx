@@ -1,55 +1,59 @@
-import { MessageCircle, Package, ShoppingCart, DollarSign, Users } from 'lucide-react';
+import {
+  MessageCircle,
+  Package,
+  ShoppingCart,
+  DollarSign,
+  Users,
+} from "lucide-react";
 
 const StatsCard = ({ data }) => {
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'PKR',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      currencyDisplay: "code", // shows USD instead of $
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
   };
-
   const stats = [];
 
   if (data.summary) {
     stats.push(
       {
         icon: MessageCircle,
-        label: 'Total Engaged Conversations',
+        label: "Total Engaged Conversations",
         value: data.summary.total_engaged_conversations || 0,
-        color: 'blue'
+        color: "blue",
       },
       {
         icon: Package,
-        label: 'Webhook Events',
+        label: "Webhook Events",
         value: data.summary.total_webhook_events || 0,
-        color: 'purple'
+        color: "purple",
       },
       {
         icon: ShoppingCart,
-        label: 'Cart Value',
+        label: "Cart Value",
         value: formatCurrency(data.summary.total_cart_value || 0),
-        color: 'green'
+        color: "green",
       },
       {
         icon: DollarSign,
-        label: 'Order Value',
+        label: "Order Value",
         value: formatCurrency(data.summary.total_order_value || 0),
-        color: 'orange'
+        color: "orange",
       }
     );
   }
 
   if (data.total_engaged_conversations !== undefined) {
-    stats.push(
-      {
-        icon: Users,
-        label: 'Engaged Conversations',
-        value: data.total_engaged_conversations || 0,
-        color: 'indigo'
-      }
-    );
+    stats.push({
+      icon: Users,
+      label: "Engaged Conversations",
+      value: data.total_engaged_conversations || 0,
+      color: "indigo",
+    });
   }
 
   return (
@@ -68,13 +72,19 @@ const StatsCard = ({ data }) => {
                 {stat.label}
               </div>
             </div>
-            <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${
-              stat.color === 'blue' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
-              stat.color === 'purple' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' :
-              stat.color === 'green' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
-              stat.color === 'orange' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400' :
-              'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-            }`}>
+            <div
+              className={`w-12 h-12 rounded-lg flex items-center justify-center text-xl ${
+                stat.color === "blue"
+                  ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                  : stat.color === "purple"
+                  ? "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
+                  : stat.color === "green"
+                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                  : stat.color === "orange"
+                  ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+                  : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
+              }`}
+            >
               <stat.icon className="w-6 h-6" />
             </div>
           </div>
