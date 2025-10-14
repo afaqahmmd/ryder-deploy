@@ -1,14 +1,16 @@
 import { MessageCircle, Package, ShoppingCart, DollarSign, Users } from 'lucide-react';
 
 const StatsCard = ({ data }) => {
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'PKR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    currencyDisplay: 'code', // shows USD instead of $
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
 
   const stats = [];
 
