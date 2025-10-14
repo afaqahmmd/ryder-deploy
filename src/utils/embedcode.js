@@ -186,28 +186,36 @@ export const getEmbedCode = (agent) => {
       socket.onmessage = (event) => {
           hideTyping();
 
-          try {
-              const data = JSON.parse(event.data);
-              console.log("data", data);
-              if (data.customer_id) {
-                  payload.customer_id = data.customer_id;
-                  payload.new_convo = false;
-              }
-              if (data.type === "connection_established") {
-                  addMessage(data.message, "bot");
-              } else if (data.response) {
-                  addMessage(data.response, "bot");
-              } else if (data.error) {
-                  addMessage("Error: " + data.error, "bot");
-              } else {
-                  addMessage(event.data, "bot");
-              }
-          } catch (e) {
-              // If message isn't JSON, just show raw text
-              addMessage(event.data, "bot");
+           try {
+          const data = JSON.parse(event.data);
+          console.log("data", data);
+          if (data.customer_id) {
+            hideTyping();
+            payload.customer_id = data.customer_id;
+            payload.new_convo = false;
           }
+          if (data.type === "connection_established") {
+            hideTyping();
+            addMessage(data.message, "bot");
+            hideTyping();
+          } else if (
+            data.response &&
+            data.response.type !== "processing_status"
+          ) {
+            hideTyping();
+            addMessage(data.response, "bot");
+          } else if (data.error) {
+            hideTyping();
+            addMessage("Error: " + data.error, "bot");
+          }
+        } 
+        catch (e) {
+            hideTyping();
+          // If message isn't JSON, just show raw text
+          addMessage(event.data, "bot");
+        }
 
-          renderMessages();
+        renderMessages();
       };
 
       socket.onclose = () => {
