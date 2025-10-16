@@ -60,6 +60,7 @@ const ChartContainer = ({ data }) => {
               <Line
                 type="monotone"
                 dataKey="engaged_conversations"
+                 name="Engaged Customers" 
                 stroke="#6366f1"
                 strokeWidth={3}
                 dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}

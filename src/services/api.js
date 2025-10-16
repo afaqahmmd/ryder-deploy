@@ -255,37 +255,44 @@ export const apiService = {
       );
     },
   },
-
-  // Analytics API
-  // Analytics APIs
   // Analytics APIs
   analytics: {
-   
-    // Store-level graph data (sales trends, revenue, etc.)
-    getStoreGraph: async (storeId) => {
+    // 🧩 Store overview analytics (summary)
+    getStoreAnalytics: async (storeId, params = {}) => {
+      return await axiosInstance.get(`/api/core/analytics/store/${storeId}/`, {
+        params,
+      });
+    },
+
+    // 📊 Store-level graph data (sales trends, revenue, etc.)
+    getStoreGraph: async (storeId, params = {}) => {
       return await axiosInstance.get(
-        `/api/core/analytics/store/${storeId}/engaged/graph/`
+        `/api/core/analytics/store/${storeId}/engaged/graph/`,
+        { params }
       );
     },
 
-    // Engaged user analytics (visits, interactions)
-    getEngagedAnalytics: async (storeId) => {
+    // 👥 Engaged user analytics (visits, interactions)
+    getEngagedAnalytics: async (storeId, params = {}) => {
       return await axiosInstance.get(
-        `/api/core/analytics/store/${storeId}/engaged/`
+        `/api/core/analytics/store/${storeId}/engaged/`,
+        { params }
       );
     },
 
-    // Engaged user graph data
-    getEngagedGraph: async (storeId) => {
+    // 📈 Engaged user graph data
+    getEngagedGraph: async (storeId, params = {}) => {
       return await axiosInstance.get(
-        `/api/core/analytics/store/${storeId}/engaged/graph/`
+        `/api/core/analytics/store/${storeId}/engaged/graph/`,
+        { params }
       );
     },
 
-    // Top-performing products for a store
-    getProductAnalytics: async (storeId) => {
+    // 🛍️ Top-performing products for a store
+    getProductAnalytics: async (storeId, params = {}) => {
       return await axiosInstance.get(
-        `/api/core/analytics/products/${storeId}/`
+        `/api/core/analytics/products/${storeId}/`,
+        { params }
       );
     },
   },

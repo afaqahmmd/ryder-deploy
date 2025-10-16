@@ -6,7 +6,7 @@ import {
   Users,
   Activity,
 } from "lucide-react";
-import StatsCard from "./Analytics/StatsCard";
+import EngagementCard from "./Analytics/EngagementCard";
 import EventsBreakdown from "./Analytics/EventsBreakdown";
 import ConversionRates from "./Analytics/ConversionRates";
 import ProductsTable from "./Analytics/ProductsTable";
@@ -20,38 +20,33 @@ import {
   fetchEngagedGraph,
   fetchProductAnalytics,
 } from "@/store/analytics/analyticsThunk";
+import WorkflowCard from "./Analytics/WorkflowCard";
 
 const AnalyticsTab = () => {
   const [activeView, setActiveView] = useState("overview");
   const [selectedStore, setSelectedStore] = useState(null);
+  const [startDate, setStartDate] = useState("2025-10-14");
+  const [endDate, setEndDate] = useState("2025-10-15");
+
   const dispatch = useDispatch();
   const { stores } = useSelector((state) => state.stores);
+
   // Use the selected store from dropdown for fetching analytics
-
-  // const {
-  //   storeAnalytics,
-  //   storeGraph,
-  //   engagedAnalytics,
-  //   engagedGraph,
-  //   productAnalytics,
-  //   isLoading,
-  //   error,
-  // } = useSelector((state) => state.analytics);
-
-   const { storeAnalytics, storeGraph, productAnalytics, engagedAnalytics } = useSelector((state) => state.analytics);
-
- useEffect(() => {
-  console.log("stores", stores);
-  if (!selectedStore && stores?.length > 0) {
-    setSelectedStore(stores[0]);
-  }
-}, [stores, selectedStore]);
+  const { storeAnalytics, storeGraph, productAnalytics, engagedAnalytics } =
+    useSelector((state) => state.analytics);
 
   const views = [
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "products", label: "Products", icon: ShoppingBag },
     { id: "charts", label: "Charts", icon: TrendingUp },
   ];
+
+  useEffect(() => {
+    console.log("stores", stores);
+    if (!selectedStore && stores?.length > 0) {
+      setSelectedStore(stores[0]);
+    }
+  }, [stores, selectedStore]);
 
   const getCurrentData = () => {
     const storeId = selectedStore?.id;
@@ -61,7 +56,9 @@ const AnalyticsTab = () => {
       case "overview": {
         const engaged = engagedAnalytics?.[storeId] || {};
         return {
+          customer_comparison: engaged.customer_comparison || {},
           summary: engaged.summary || {},
+          workflow: engaged.workflow || {},
           events: engaged.events || {},
           conversion_rates: engaged.conversion_rates || {},
           products: engaged.products || {},
@@ -104,17 +101,27 @@ const AnalyticsTab = () => {
     const storeId = e.target.value;
     const store = stores.find((s) => s.id.toString() === storeId);
     setSelectedStore(store);
-    console.log("Selected Store:", store);
 
-    // Dispatch API calls for the newly selected store id
     if (store?.id) {
-      dispatch(fetchStoreAnalytics(store.id));
-      dispatch(fetchStoreGraph(store.id));
-      dispatch(fetchEngagedAnalytics(store.id));
-      dispatch(fetchEngagedGraph(store.id));
-      dispatch(fetchProductAnalytics(store.id));
+      triggerAnalyticsFetch(store.id, startDate, endDate);
     }
   };
+
+  useEffect(() => {
+    if (!selectedStore?.id) return;
+    triggerAnalyticsFetch(selectedStore.id, startDate, endDate);
+  }, [startDate, endDate]);
+
+const triggerAnalyticsFetch = (storeId, start, end) => {
+  const dateParams = { start_date: start, end_date: end };
+
+  dispatch(fetchStoreAnalytics({ storeId, ...dateParams }));
+  dispatch(fetchProductAnalytics({ storeId, ...dateParams }));
+  dispatch(fetchEngagedAnalytics({ storeId, ...dateParams }));
+  dispatch(fetchEngagedGraph({ storeId, ...dateParams }));
+  dispatch(fetchStoreGraph({ storeId, ...dateParams }));
+};
+
 
   // 🧠 Fetch analytics automatically when selectedStore changes
   useEffect(() => {
@@ -122,7 +129,7 @@ const AnalyticsTab = () => {
     if (!storeId) return;
     console.log(`Fetching analytics for store ID: ${storeId}`);
 
-    dispatch(fetchStoreAnalytics(storeId))
+    dispatch(fetchStoreAnalytics({ storeId, start_date: startDate, end_date: endDate }))
       .unwrap()
       .then((data) => {
         console.group(`✅ Store Analytics Loaded [Store ID: ${storeId}]`);
@@ -132,22 +139,10 @@ const AnalyticsTab = () => {
       .catch((err) => {
         console.error("❌ Failed to fetch store analytics:", err);
       });
-    dispatch(fetchProductAnalytics(storeId));
+    dispatch(fetchProductAnalytics({ storeId, start_date: startDate, end_date: endDate }));
     // also fetch graph on selection
-    dispatch(fetchStoreGraph(storeId));
-  }, [dispatch, selectedStore]);
-
-
-useEffect(() => {
-  const storeId = selectedStore?.id;
-  if (!storeId) return;
-  console.group(`📊 Current Analytics Data for Store ID: ${storeId}`);
-  console.log("Store Analytics:", storeAnalytics);
-  console.log("Store Graph:", storeGraph);
-  console.log("Product Analytics:", productAnalytics);
-  console.log("Engaged Analytics:", engagedAnalytics);
-  console.groupEnd();
-}, [storeAnalytics, storeGraph, productAnalytics, engagedAnalytics, selectedStore]);
+    dispatch(fetchStoreGraph({ storeId, start_date: startDate, end_date: endDate }));
+  }, [dispatch, selectedStore, startDate, endDate]);
 
   // Ensure chart graph data are fetched when switching to charts view
   useEffect(() => {
@@ -155,7 +150,7 @@ useEffect(() => {
     const storeId = selectedStore?.id;
     if (!storeId) return;
     if (!storeGraph?.[storeId]) {
-      dispatch(fetchStoreGraph(storeId));
+      dispatch(fetchStoreGraph({ storeId , start_date: startDate, end_date: endDate }));
     }
   }, [activeView, storeGraph, dispatch, selectedStore]);
 
@@ -165,14 +160,13 @@ useEffect(() => {
     const storeId = selectedStore?.id;
     if (!storeId) return;
     if (!engagedAnalytics?.[storeId]) {
-      dispatch(fetchEngagedAnalytics(storeId));
+      dispatch(fetchEngagedAnalytics({ storeId, start_date: startDate, end_date: endDate }));
     }
   }, [activeView, engagedAnalytics, dispatch, selectedStore]);
 
-
   return (
     <div className="flex-1 p-6 w-full">
-      <div className="mb-8  flex sm:flex-row flex-col items-center justify-between ">
+      <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex flex-col">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center">
             <Activity className="w-8 h-8 mr-3" />
@@ -183,25 +177,49 @@ useEffect(() => {
             engagement
           </p>
         </div>
-        <div className="flex flex-col items-start">
+
+        {/* Right side controls */}
+        <div className="flex flex-col md:flex-row md:items-center items-end md:w-auto w-full gap-3">
+          {/* Date Range Inputs */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-700 dark:text-gray-300">
+              Start:
+            </label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-700 dark:text-gray-300">
+              End:
+            </label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border border-gray-300 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200"
+            />
+          </div>
+
           {/* Store Dropdown */}
           {stores?.length > 0 && (
-            <div className=" sm:mt-0 w-full sm:w-64">
-              <select
-                value={selectedStore?.id || ""}
-                onChange={handleStoreChange}
-                className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="" disabled>
-                  Select Store
+            <select
+              value={selectedStore?.id || ""}
+              onChange={handleStoreChange}
+              className="w-48 p-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>
+                Select Store
+              </option>
+              {stores.map((store) => (
+                <option key={store.id} value={store.id}>
+                  {store.store_name}
                 </option>
-                {stores.map((store) => (
-                  <option key={store.id} value={store.id}>
-                    {store.store_name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </select>
           )}
         </div>
       </div>
@@ -224,7 +242,7 @@ useEffect(() => {
         </div>
 
         {/* Desktop: Tabs */}
-        <div className="hidden sm:flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+        <div className="hidden sm:flex space-x-1 bg-gray-200 dark:bg-gray-800 p-1 rounded-lg">
           {views.map((view) => (
             <button
               key={view.id}
@@ -241,21 +259,14 @@ useEffect(() => {
           ))}
         </div>
       </div>
-
-      {/* Loading State
-      {!currentData && (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      )} */}
-
+      
       {/* Analytics Content */}
       {currentData ? (
         <div className="space-y-8">
           {activeView === "overview" && (
             <>
-              <StatsCard data={currentData} />
-              <EventsBreakdown data={currentData} />
+              <EngagementCard data={currentData} />
+              <WorkflowCard data={currentData} />
               <ConversionRates data={currentData} />
             </>
           )}
