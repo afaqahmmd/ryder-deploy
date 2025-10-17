@@ -410,6 +410,9 @@ export const getEmbedCode = (agent) => {
         renderMessages();
         await fetchActiveAgent();
         monitorCart();
+         setTimeout(() => {
+        openChat();
+      }, 2500);
       };
 
       document.addEventListener("DOMContentLoaded", initializeChatbot);
