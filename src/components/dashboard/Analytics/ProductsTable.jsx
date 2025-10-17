@@ -3,6 +3,7 @@ import { ShoppingBag } from 'lucide-react';
 const ProductsTable = ({ data }) => {
   // New API shape provides arrays: product_metrics, top_by_value, top_by_quantity
   // Also support old overview shape under data.products.top_products
+  const currency = data?.currency || '';
   const products =
     data?.product_metrics ||
     data?.top_by_value ||
@@ -76,10 +77,10 @@ const ProductsTable = ({ data }) => {
                   {product.total_quantity || 0}
                 </td>
                 <td className="py-4 px-4 text-right font-medium text-gray-900 dark:text-white">
-                  ₨{parseFloat(product.total_value || 0).toLocaleString()}
+                 {currency==='USD' ? '$' : currency}{parseFloat(product.total_value || 0).toLocaleString()}
                 </td>
                 <td className="py-4 px-4 text-right font-medium text-gray-900 dark:text-white">
-                  ₨{product.avg_price ? parseFloat(product.avg_price).toLocaleString() : '0'}
+                {currency==='USD' ? '$' : currency}{product.avg_price ? parseFloat(product.avg_price).toLocaleString() : '0'}
                 </td>
               </tr>
             ))}

@@ -23,11 +23,23 @@ import {
 import WorkflowCard from "./Analytics/WorkflowCard";
 
 const AnalyticsTab = () => {
+  const today = new Date();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(today.getDate() - 7);
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const [activeView, setActiveView] = useState("overview");
   const [selectedStore, setSelectedStore] = useState(null);
-  const [startDate, setStartDate] = useState("2025-10-14");
-  const [endDate, setEndDate] = useState("2025-10-15");
+  const [startDate, setStartDate] = useState(formatDate(sevenDaysAgo));
+  const [endDate, setEndDate] = useState(formatDate(today));
 
+  console.log("start date and end date", startDate, endDate);
   const dispatch = useDispatch();
   const { stores } = useSelector((state) => state.stores);
 
@@ -41,12 +53,16 @@ const AnalyticsTab = () => {
     { id: "charts", label: "Charts", icon: TrendingUp },
   ];
 
-  useEffect(() => {
-    console.log("stores", stores);
-    if (!selectedStore && stores?.length > 0) {
-      setSelectedStore(stores[0]);
-    }
-  }, [stores, selectedStore]);
+useEffect(() => {
+  if (!selectedStore && stores?.length > 0) {
+    const defaultStore = stores[0];
+    setSelectedStore(defaultStore);
+
+    // 👇 Immediately trigger analytics fetch for the first store
+    triggerAnalyticsFetch(defaultStore.id, startDate, endDate);
+  }
+}, [stores]);
+
 
   const getCurrentData = () => {
     const storeId = selectedStore?.id;
@@ -56,6 +72,7 @@ const AnalyticsTab = () => {
       case "overview": {
         const engaged = engagedAnalytics?.[storeId] || {};
         return {
+          currency: engaged.currency,
           customer_comparison: engaged.customer_comparison || {},
           summary: engaged.summary || {},
           workflow: engaged.workflow || {},
@@ -85,7 +102,7 @@ const AnalyticsTab = () => {
     if (!productAnalytics?.[storeId]) {
       dispatch(fetchProductAnalytics(storeId));
     }
-  }, [activeView, productAnalytics, dispatch, selectedStore]);
+  }, [activeView, productAnalytics, dispatch, selectedStore,startDate, endDate]);
 
   // Ensure overview uses engaged analytics for store 25
   useEffect(() => {
@@ -95,7 +112,7 @@ const AnalyticsTab = () => {
     if (!engagedAnalytics?.[storeId]) {
       dispatch(fetchEngagedAnalytics(storeId));
     }
-  }, [activeView, engagedAnalytics, dispatch, selectedStore]);
+  }, [activeView, engagedAnalytics, dispatch, selectedStore,startDate, endDate]);
 
   const handleStoreChange = (e) => {
     const storeId = e.target.value;
@@ -112,16 +129,15 @@ const AnalyticsTab = () => {
     triggerAnalyticsFetch(selectedStore.id, startDate, endDate);
   }, [startDate, endDate]);
 
-const triggerAnalyticsFetch = (storeId, start, end) => {
-  const dateParams = { start_date: start, end_date: end };
+  const triggerAnalyticsFetch = (storeId, start, end) => {
+    const dateParams = { start_date: start, end_date: end };
 
-  dispatch(fetchStoreAnalytics({ storeId, ...dateParams }));
-  dispatch(fetchProductAnalytics({ storeId, ...dateParams }));
-  dispatch(fetchEngagedAnalytics({ storeId, ...dateParams }));
-  dispatch(fetchEngagedGraph({ storeId, ...dateParams }));
-  dispatch(fetchStoreGraph({ storeId, ...dateParams }));
-};
-
+    dispatch(fetchStoreAnalytics({ storeId, ...dateParams }));
+    dispatch(fetchProductAnalytics({ storeId, ...dateParams }));
+    dispatch(fetchEngagedAnalytics({ storeId, ...dateParams }));
+    dispatch(fetchEngagedGraph({ storeId, ...dateParams }));
+    dispatch(fetchStoreGraph({ storeId, ...dateParams }));
+  };
 
   // 🧠 Fetch analytics automatically when selectedStore changes
   useEffect(() => {
@@ -129,7 +145,9 @@ const triggerAnalyticsFetch = (storeId, start, end) => {
     if (!storeId) return;
     console.log(`Fetching analytics for store ID: ${storeId}`);
 
-    dispatch(fetchStoreAnalytics({ storeId, start_date: startDate, end_date: endDate }))
+    dispatch(
+      fetchStoreAnalytics({ storeId, start_date: startDate, end_date: endDate })
+    )
       .unwrap()
       .then((data) => {
         console.group(`✅ Store Analytics Loaded [Store ID: ${storeId}]`);
@@ -139,9 +157,17 @@ const triggerAnalyticsFetch = (storeId, start, end) => {
       .catch((err) => {
         console.error("❌ Failed to fetch store analytics:", err);
       });
-    dispatch(fetchProductAnalytics({ storeId, start_date: startDate, end_date: endDate }));
+    dispatch(
+      fetchProductAnalytics({
+        storeId,
+        start_date: startDate,
+        end_date: endDate,
+      })
+    );
     // also fetch graph on selection
-    dispatch(fetchStoreGraph({ storeId, start_date: startDate, end_date: endDate }));
+    dispatch(
+      fetchStoreGraph({ storeId, start_date: startDate, end_date: endDate })
+    );
   }, [dispatch, selectedStore, startDate, endDate]);
 
   // Ensure chart graph data are fetched when switching to charts view
@@ -150,9 +176,11 @@ const triggerAnalyticsFetch = (storeId, start, end) => {
     const storeId = selectedStore?.id;
     if (!storeId) return;
     if (!storeGraph?.[storeId]) {
-      dispatch(fetchStoreGraph({ storeId , start_date: startDate, end_date: endDate }));
+      dispatch(
+        fetchStoreGraph({ storeId, start_date: startDate, end_date: endDate })
+      );
     }
-  }, [activeView, storeGraph, dispatch, selectedStore]);
+  }, [activeView, storeGraph, dispatch, selectedStore, startDate, endDate]);
 
   // Ensure engaged analytics are fetched when switching to engaged view
   useEffect(() => {
@@ -160,9 +188,15 @@ const triggerAnalyticsFetch = (storeId, start, end) => {
     const storeId = selectedStore?.id;
     if (!storeId) return;
     if (!engagedAnalytics?.[storeId]) {
-      dispatch(fetchEngagedAnalytics({ storeId, start_date: startDate, end_date: endDate }));
+      dispatch(
+        fetchEngagedAnalytics({
+          storeId,
+          start_date: startDate,
+          end_date: endDate,
+        })
+      );
     }
-  }, [activeView, engagedAnalytics, dispatch, selectedStore]);
+  }, [activeView, engagedAnalytics, dispatch, selectedStore, startDate, endDate]);
 
   return (
     <div className="flex-1 p-6 w-full">
@@ -259,7 +293,7 @@ const triggerAnalyticsFetch = (storeId, start, end) => {
           ))}
         </div>
       </div>
-      
+
       {/* Analytics Content */}
       {currentData ? (
         <div className="space-y-8">

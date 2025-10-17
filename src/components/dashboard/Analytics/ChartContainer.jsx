@@ -2,6 +2,8 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { TrendingUp, DollarSign, ShoppingCart } from 'lucide-react';
 
 const ChartContainer = ({ data }) => {
+
+  console.log("chart data received:", data);
   if (!data?.graph_data) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
