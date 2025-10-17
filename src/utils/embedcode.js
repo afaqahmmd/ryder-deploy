@@ -17,11 +17,21 @@ export const getEmbedCode = (agent) => {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
         background: transparent;
       }
+      .bred { border: 1px solid red; }
       .animate-bounce { animation: bounce 1s infinite; }
       @keyframes bounce {
-        0%, 20%, 53%, 80%, 100% { transform: translate3d(0, 0, 0); }
-        40%, 43% { transform: translate3d(0, -8px, 0); }
-        70% { transform: translate3d(0, -4px, 0); }
+        0%, 20%, 53%, 80%, 100% {
+          animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+          transform: translate3d(0, 0, 0);
+        }
+        40%, 43% {
+          animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+          transform: translate3d(0, -8px, 0);
+        }
+        70% {
+          animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+          transform: translate3d(0, -4px, 0);
+        }
         90% { transform: translate3d(0, -1px, 0); }
       }
     </style>
@@ -31,7 +41,11 @@ export const getEmbedCode = (agent) => {
     <div id="chatbot-container">
       <!-- Floating Chat Icon -->
       <div class="fixed bottom-6 right-6 z-50">
-        <button id="chat-toggle" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110" aria-label="Open chat">
+        <button
+          id="chat-toggle"
+          class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
+          aria-label="Open chat"
+        >
           <svg id="chat-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -98,6 +112,94 @@ export const getEmbedCode = (agent) => {
       };
 
       let socket;
+
+      const fetchActiveAgent = async () => {
+        try {
+          const response = await fetch(
+            \`https://ryder-partner.cortechsocial.com/api/agents/public/active-agent/?store_id=\${payload.store_id}\`
+          );
+          const data = await response.json();
+          if (data?.details?.data?.id) {
+            payload.agent_id = data.details.data.id;
+            trackingData.chatbot_agent_id = data.details.data.id;
+          }
+          if (data?.details?.data?.name) {
+            const agentNameElement = document.getElementById("agent-name");
+            if (agentNameElement) agentNameElement.textContent = data.details.data.name;
+          }
+          return data;
+        } catch (error) {
+          console.error("Error fetching active agent:", error);
+        }
+      };
+
+      const monitorCart = async () => {
+        try {
+          const response = await fetch("/cart.js");
+          const cart = await response.json();
+          if (cart.token && cart.token !== trackingData.cart_token) {
+            trackingData.cart_token = cart.token;
+            console.log("Cart token captured:", cart.token);
+          }
+        } catch (error) {
+          console.error("Error monitoring cart:", error);
+        }
+      };
+
+      const sendToWebhook = async (cartData) => {
+        try {
+          const webhookUrl = "https://ryder-partner.cortechsocial.com/api/core/track/event/";
+          const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(cartData),
+          });
+          if (response.ok) console.log("✅ Cart data sent to webhook successfully");
+          else console.error("❌ Error sending cart data:", response.statusText);
+        } catch (error) {
+          console.error("❌ Error sending to webhook:", error);
+        }
+      };
+
+      const updateCartNoteIfNeeded = async (customerId) => {
+        try {
+          const cartResponse = await fetch("/cart.js");
+          const currentCart = await cartResponse.json();
+          let currentNoteData = {};
+          if (currentCart.note) {
+            try { currentNoteData = JSON.parse(currentCart.note); }
+            catch { currentNoteData = {}; }
+          }
+
+          if (!currentNoteData.Chatbot_Session || currentNoteData.Chatbot_Session !== customerId) {
+            const newNoteData = {
+              ...currentNoteData,
+              Chatbot_Session: customerId,
+              agent_id: payload.agent_id,
+              store_id: payload.store_id,
+            };
+            const sessionNote = JSON.stringify(newNoteData);
+            const updateResponse = await fetch("/cart/update.js", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify({ note: sessionNote }),
+            });
+
+            if (updateResponse.ok) {
+              const updatedCart = await updateResponse.json();
+              console.log("✅ Cart note updated with customer ID:", customerId);
+              trackingData.cart_token = updatedCart.token;
+              await sendToWebhook(updatedCart);
+            } else console.error("❌ Error updating cart note");
+          } else {
+            console.log("✅ Cart note already contains correct session info, skipping");
+            trackingData.cart_token = currentCart.token;
+          }
+        } catch (error) {
+          console.error("❌ Error updating cart note:", error);
+        }
+      };
+
       let chatState = { isOpen: false, isTyping: false, messages: [] };
 
       const getDOMElements = () => ({
@@ -166,36 +268,41 @@ export const getEmbedCode = (agent) => {
       };
 
       const showTyping = () => {
-        chatState.isTyping = true;
-        const { messagesContainer, messageInput, sendButton } = getDOMElements();
-        if (messageInput) messageInput.disabled = true;
-        if (sendButton) sendButton.disabled = true;
-        if (messagesContainer) {
-          const typingDiv = document.createElement("div");
-          typingDiv.id = "typing-indicator";
-          typingDiv.className = "flex justify-start";
-          typingDiv.innerHTML =
-            '<div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">' +
-            '  <div class="flex space-x-1">' +
-            '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>' +
-            '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>' +
-            '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>' +
-            '  </div>' +
-            '</div>';
-          messagesContainer.appendChild(typingDiv);
-          scrollToBottom();
-        }
-      };
+      chatState.isTyping = true;
+      const { messagesContainer, messageInput, sendButton } = getDOMElements();
+
+      // Disable input and send button
+      if (messageInput) messageInput.disabled = true;
+      if (sendButton) sendButton.disabled = true;
+
+      if (messagesContainer) {
+        const typingDiv = document.createElement("div");
+        typingDiv.id = "typing-indicator";
+        typingDiv.className = "flex justify-start";
+        typingDiv.innerHTML =
+          '<div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">' +
+          '  <div class="flex space-x-1">' +
+          '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>' +
+          '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>' +
+          '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>' +
+          '  </div>' +
+          '</div>';
+        messagesContainer.appendChild(typingDiv);
+        scrollToBottom();
+      }
+    };
 
       const hideTyping = () => {
         chatState.isTyping = false;
         const { messageInput, sendButton } = getDOMElements();
-        if (messageInput) { messageInput.disabled = false; messageInput.focus(); }
+
+        // Re-enable input and send button
+        if (messageInput) messageInput.disabled = false;
         if (sendButton) sendButton.disabled = false;
+
         const typingIndicator = document.getElementById("typing-indicator");
         if (typingIndicator) typingIndicator.remove();
       };
-
       const openChat = () => {
         chatState.isOpen = true;
         const { chatWindow, chatIcon, closeIcon } = getDOMElements();
@@ -220,28 +327,6 @@ export const getEmbedCode = (agent) => {
       };
 
       const toggleChat = () => (chatState.isOpen ? closeChat() : openChat());
-
-      // 🔹 Fetch and render previous conversation from API
-      const loadConversationHistory = async (conversationId) => {
-        try {
-          const res = await fetch(\`https://ryder-partner.cortechsocial.com/api/agents/conversations/\${conversationId}/messages/\`);
-          const data = await res.json();
-          const messages = data?.details?.data?.messages || [];
-          chatState.messages = [];
-          messages.forEach((msg) => {
-            chatState.messages.push({
-              id: msg.id,
-              text: msg.content,
-              sender: msg.sender === "customer" ? "user" : "bot",
-              timestamp: new Date(msg.timestamp),
-            });
-          });
-          renderMessages();
-          console.log("✅ Conversation history loaded:", messages.length, "messages");
-        } catch (err) {
-          console.error("❌ Failed to load conversation history:", err);
-        }
-      };
 
       const sendMessage = () => {
         const { messageInput } = getDOMElements();
@@ -275,21 +360,16 @@ export const getEmbedCode = (agent) => {
 
       const initializeChatbot = async () => {
         const storedCustomerId = localStorage.getItem("chatbot_customer_id");
-        const storedConversationId = localStorage.getItem("chatbot_conversation_id");
-
-        if (storedConversationId) {
-          console.log("📜 Found previous conversation:", storedConversationId);
-          await loadConversationHistory(storedConversationId);
-        }
-
         if (storedCustomerId) {
           payload.customer_id = storedCustomerId;
           payload.new_convo = false;
           trackingData.chatbot_customer_id = storedCustomerId;
           console.log("Loaded customer ID from localStorage:", storedCustomerId);
+          await updateCartNoteIfNeeded(storedCustomerId);
         }
 
         socket = new WebSocket("wss://ryder-partner.cortechsocial.com/ws/chat/");
+
         socket.onopen = () => {
           console.log("✅ Connected to server");
           if (!payload.customer_id) {
@@ -303,6 +383,7 @@ export const getEmbedCode = (agent) => {
             }));
           }
         };
+
         socket.onclose = () => console.log("❌ Disconnected from server");
         socket.onerror = (error) => console.error("⚠️ WebSocket Error:", error);
 
@@ -314,15 +395,14 @@ export const getEmbedCode = (agent) => {
               payload.new_convo = false;
               trackingData.chatbot_customer_id = data.customer_id;
               localStorage.setItem("chatbot_customer_id", data.customer_id);
-            }
-            // ✅ Store conversation ID
-            if (data.conversation_id) {
-              localStorage.setItem("chatbot_conversation_id", data.conversation_id);
-              console.log("💬 Conversation ID stored:", data.conversation_id);
+              console.log("🎯 Chatbot Customer ID received:", data);
+              updateCartNoteIfNeeded(data.customer_id);
+              monitorCart();
             }
 
-            if (data.response && data.type === "comprehensive_chat_response") {
-              hideTyping();
+           if (data.response && data.type === "comprehensive_chat_response") {
+              console.log("Response received:", data.response);
+              hideTyping(); // re-enable input when bot reply arrives
               addMessage(data.response, "bot");
             } else if (data.error) {
               addMessage("Error: " + data.error, "bot");
@@ -333,9 +413,18 @@ export const getEmbedCode = (agent) => {
           renderMessages();
         };
 
+        setInterval(() => {
+          if (trackingData.chatbot_customer_id) monitorCart();
+        }, 3000);
+
         bindEvents();
         renderMessages();
-        setTimeout(openChat, 2500);
+        await fetchActiveAgent();
+        monitorCart();
+        
+        setTimeout(() => {
+        openChat();
+      }, 2500);
       };
 
       document.addEventListener("DOMContentLoaded", initializeChatbot);
@@ -344,7 +433,6 @@ export const getEmbedCode = (agent) => {
 </html>`;
   return html;
 };
-
 
 
 
