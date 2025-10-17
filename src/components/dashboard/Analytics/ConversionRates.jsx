@@ -76,17 +76,17 @@ const ConversionRates = ({ data }) => {
       color: "blue",
       tooltip: null, 
     },
-    {
-      label: "Total Checkout Value",
-      value: formatCurrency(rates.total_checkout_value || 0),
-      icon: Sparkles,
-      color: "purple",
-      tooltip: {
-        "Checkout Subtotal": rates.checkout_subtotal,
-        "Checkout Tax": rates.checkout_tax,
-        "Shipping Charges": rates.checkout_shipping,
-      },
-    },
+    // {
+    //   label: "Total Checkout Value",
+    //   value: formatCurrency(rates.total_checkout_value || 0),
+    //   icon: Sparkles,
+    //   color: "purple",
+    //   tooltip: {
+    //     "Checkout Subtotal": rates.checkout_subtotal,
+    //     "Checkout Tax": rates.checkout_tax,
+    //     "Shipping Charges": rates.checkout_shipping,
+    //   },
+    // },
     {
       label: "Total Order Value",
       value: formatCurrency(rates.total_order_value || 0),
@@ -114,7 +114,7 @@ const ConversionRates = ({ data }) => {
         Summary
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {conversionMetrics.map((metric, index) => {
           const Card = (
             <div

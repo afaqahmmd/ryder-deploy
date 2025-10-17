@@ -42,7 +42,7 @@ const CustomRevenueTooltip = ({ active, payload, label }) => {
       </div>
 
       {/* Checkout Value */}
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <p className="font-medium text-yellow-600 dark:text-yellow-400">
           Checkout Value: {formatCurrency(values.checkout_value)}
         </p>
@@ -51,7 +51,7 @@ const CustomRevenueTooltip = ({ active, payload, label }) => {
           <p>Tax: {formatCurrency(values.checkout_tax)}</p>
           <p>Shipping: {formatCurrency(values.checkout_shipping)}</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Order Value */}
       <div>
@@ -169,14 +169,14 @@ const ChartContainer = ({ data }) => {
                 dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}
                 name="Cart Value"
               />
-              <Line
+              {/* <Line
                 type="monotone"
                 dataKey="values.checkout_value"
                 stroke="#f59e0b"
                 strokeWidth={3}
                 dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
                 name="Checkout Value"
-              />
+              /> */}
               <Line
                 type="monotone"
                 dataKey="values.order_value"
@@ -223,20 +223,20 @@ const ChartContainer = ({ data }) => {
                 name="Cart Creates"
                 radius={[2, 2, 0, 0]}
               />
-              <Bar
+              {/* <Bar
                 dataKey="events.cart_updates"
                 stackId="a"
                 fill="#8b5cf6"
                 name="Cart Updates"
                 radius={[2, 2, 0, 0]}
-              />
-              <Bar
+              /> */}
+              {/* <Bar
                 dataKey="events.checkout_creates"
                 stackId="a"
                 fill="#f59e0b"
                 name="Checkout Creates"
                 radius={[2, 2, 0, 0]}
-              />
+              /> */}
               <Bar
                 dataKey="events.order_creates"
                 stackId="a"
