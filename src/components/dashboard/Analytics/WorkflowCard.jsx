@@ -7,7 +7,7 @@ import {
 } from "recharts";
 import { CircleUserRound } from "lucide-react";
 
-const COLORS = ["#3072C0", "#4BA3F5", "#7A86FA", "#A0C4FF"]; // customize as you like
+const COLORS = ["#3072C0", "#4BA3F5", "#7A86FA", "#7A86FA"]; // customize as you like
 
 export default function WorkflowFunnel({ data }) {
   const data2 = [
@@ -38,11 +38,11 @@ export default function WorkflowFunnel({ data }) {
 
                 {/* Content */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span className="text-lg font-medium text-gray-700 dark:text-gray-300">
                     {item.name}
                   </span>
                   <span
-                    className="text-lg font-semibold mt-1 sm:mt-0"
+                    className="text-xl rounded-full bg-gray-100 h-10 w-10 flex items-center justify-center font-semibold mt-1 sm:mt-0"
                     style={{ color: COLORS[i % COLORS.length] }}
                   >
                     {item.value}

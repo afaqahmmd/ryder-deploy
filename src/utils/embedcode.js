@@ -268,31 +268,41 @@ export const getEmbedCode = (agent) => {
       };
 
       const showTyping = () => {
-        chatState.isTyping = true;
-        const { messagesContainer } = getDOMElements();
-        if (messagesContainer) {
-          const typingDiv = document.createElement("div");
-          typingDiv.id = "typing-indicator";
-          typingDiv.className = "flex justify-start";
-          typingDiv.innerHTML = \`
-            <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">
-              <div class="flex space-x-1">
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-              </div>
-            </div>\`;
-          messagesContainer.appendChild(typingDiv);
-          scrollToBottom();
-        }
-      };
+      chatState.isTyping = true;
+      const { messagesContainer, messageInput, sendButton } = getDOMElements();
+
+      // Disable input and send button
+      if (messageInput) messageInput.disabled = true;
+      if (sendButton) sendButton.disabled = true;
+
+      if (messagesContainer) {
+        const typingDiv = document.createElement("div");
+        typingDiv.id = "typing-indicator";
+        typingDiv.className = "flex justify-start";
+        typingDiv.innerHTML =
+          '<div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">' +
+          '  <div class="flex space-x-1">' +
+          '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>' +
+          '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>' +
+          '    <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>' +
+          '  </div>' +
+          '</div>';
+        messagesContainer.appendChild(typingDiv);
+        scrollToBottom();
+      }
+    };
 
       const hideTyping = () => {
         chatState.isTyping = false;
+        const { messageInput, sendButton } = getDOMElements();
+
+        // Re-enable input and send button
+        if (messageInput) messageInput.disabled = false;
+        if (sendButton) sendButton.disabled = false;
+
         const typingIndicator = document.getElementById("typing-indicator");
         if (typingIndicator) typingIndicator.remove();
       };
-
       const openChat = () => {
         chatState.isOpen = true;
         const { chatWindow, chatIcon, closeIcon } = getDOMElements();
@@ -390,8 +400,9 @@ export const getEmbedCode = (agent) => {
               monitorCart();
             }
 
-            if (data.response && data.type === "comprehensive_chat_response") {
+           if (data.response && data.type === "comprehensive_chat_response") {
               console.log("Response received:", data.response);
+              hideTyping(); // re-enable input when bot reply arrives
               addMessage(data.response, "bot");
             } else if (data.error) {
               addMessage("Error: " + data.error, "bot");
@@ -410,6 +421,10 @@ export const getEmbedCode = (agent) => {
         renderMessages();
         await fetchActiveAgent();
         monitorCart();
+        
+        setTimeout(() => {
+        openChat();
+      }, 2500);
       };
 
       document.addEventListener("DOMContentLoaded", initializeChatbot);
