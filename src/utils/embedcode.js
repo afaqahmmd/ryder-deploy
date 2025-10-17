@@ -297,7 +297,10 @@ export const getEmbedCode = (agent) => {
         const { messageInput, sendButton } = getDOMElements();
 
         // Re-enable input and send button
-        if (messageInput) messageInput.disabled = false;
+        if (messageInput) {
+          messageInput.disabled = false;
+          messageInput.focus();
+        }
         if (sendButton) sendButton.disabled = false;
 
         const typingIndicator = document.getElementById("typing-indicator");

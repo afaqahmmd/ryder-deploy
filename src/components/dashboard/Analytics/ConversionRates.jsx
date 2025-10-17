@@ -1,9 +1,22 @@
 import { Target, Sparkles, Trophy, TrendingUp } from "lucide-react";
 import { useState } from "react";
 
-// ✅ Reusable tooltip component
-const Tooltip = ({ children, text }) => {
+// ✅ Reusable Tooltip component — supports multi-line key/value display
+const Tooltip = ({ children, text, currency }) => {
   const [visible, setVisible] = useState(false);
+
+  const formatCurrency = (val) => {
+    if (typeof val === "number") {
+      return `${currency === "USD" ? "$" : currency} ${val.toLocaleString(
+        "en-US",
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }
+      )}`;
+    }
+    return val;
+  };
 
   return (
     <div
@@ -12,9 +25,30 @@ const Tooltip = ({ children, text }) => {
       onMouseLeave={() => setVisible(false)}
     >
       {children}
-      {visible && (
-        <div className="absolute max-w-sm left-1/2 -translate-x-1/2 -top-10 z-20 bg-gray-900 text-white text-xs px-3 py-1 rounded-md shadow-md whitespace-nowrap">
-          {text}
+
+      {visible && text && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 -top-28 z-20 bg-gray-900 text-white text-xs px-3 py-2 rounded-md shadow-md whitespace-nowrap transition-all duration-200"
+          style={{ minWidth: "180px" }}
+        >
+          {typeof text === "object" ? (
+            <div className="flex flex-col text-left space-y-1">
+              {Object.entries(text).map(([key, value], i) => (
+                <div
+                  key={i}
+                  className="flex justify-between gap-3 border-b border-gray-700 last:border-none pb-1"
+                >
+                  <span className="text-gray-300">{key}</span>
+                  <span className="font-semibold text-white">
+                    {formatCurrency(value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <span>{text}</span>
+          )}
+          {/* Tooltip arrow */}
           <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 bg-gray-900 rotate-45"></div>
         </div>
       )}
@@ -23,22 +57,16 @@ const Tooltip = ({ children, text }) => {
 };
 
 const ConversionRates = ({ data }) => {
-  if (!data.conversion_rates) {
-    return null;
-  }
+  if (!data.conversion_rates) return null;
 
   const rates = data.summary;
   const currency = data.currency;
 
-  const formatCurrency = (amount) => {
-    return `${currency === "USD" ? "$" : currency} ${amount.toLocaleString(
-      "en-US",
-      {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }
-    )}`;
-  };
+  const formatCurrency = (amount) =>
+    `${currency === "USD" ? "$" : currency} ${amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
 
   const conversionMetrics = [
     {
@@ -46,46 +74,36 @@ const ConversionRates = ({ data }) => {
       value: formatCurrency(rates.total_cart_value || 0),
       icon: Target,
       color: "blue",
-      tooltip: "Cart Subtotal: " + currency + rates.cart_subtotal,
+      tooltip: null, 
     },
     {
       label: "Total Checkout Value",
       value: formatCurrency(rates.total_checkout_value || 0),
       icon: Sparkles,
       color: "purple",
-      tooltip:
-        "Checkout subtotal: " +
-        currency +
-        rates.checkout_subtotal +
-        ", Checkout tax: " +
-        currency +
-        rates.checkout_tax +
-        ", Shipping charges: " +
-        currency +
-        rates.checkout_shipping,
+      tooltip: {
+        "Checkout Subtotal": rates.checkout_subtotal,
+        "Checkout Tax": rates.checkout_tax,
+        "Shipping Charges": rates.checkout_shipping,
+      },
     },
     {
       label: "Total Order Value",
       value: formatCurrency(rates.total_order_value || 0),
       icon: Trophy,
       color: "green",
-      tooltip:
-        "Order subtotal: " +
-        currency +
-        rates.order_subtotal +
-        ", Order tax: " +
-        currency +
-        rates.order_tax +
-        ", Order charges: " +
-        currency +
-        rates.order_shipping,
+      tooltip: {
+        "Order Subtotal": rates.order_subtotal,
+        "Order Tax": rates.order_tax,
+        "Order Shipping": rates.order_shipping,
+      },
     },
     {
       label: "Number of Orders",
       value: rates.number_of_orders || 0,
       icon: Trophy,
       color: "orange",
-      tooltip: "Count of all completed orders",
+      tooltip: null, 
     },
   ];
 
@@ -97,9 +115,12 @@ const ConversionRates = ({ data }) => {
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {conversionMetrics.map((metric, index) => (
-          <Tooltip key={index} text={metric.tooltip}>
-            <div className="text-center cursor-pointer transition-transform hover:scale-105">
+        {conversionMetrics.map((metric, index) => {
+          const Card = (
+            <div
+              key={index}
+              className="text-center cursor-pointer transition-transform hover:scale-105"
+            >
               <div
                 className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl ${
                   metric.color === "blue"
@@ -120,8 +141,16 @@ const ConversionRates = ({ data }) => {
                 {metric.label}
               </div>
             </div>
-          </Tooltip>
-        ))}
+          );
+
+          return metric.tooltip ? (
+            <Tooltip key={index} text={metric.tooltip} currency={currency}>
+              {Card}
+            </Tooltip>
+          ) : (
+            Card
+          );
+        })}
       </div>
     </div>
   );

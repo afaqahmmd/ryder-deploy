@@ -1,9 +1,75 @@
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import { TrendingUp, DollarSign, ShoppingCart } from 'lucide-react';
 
-const ChartContainer = ({ data }) => {
+// ✅ Custom tooltip for Revenue Analytics
+const CustomRevenueTooltip = ({ active, payload, label }) => {
+  if (!active || !payload || !payload.length) return null;
 
-  console.log("chart data received:", data);
+  const dataPoint = payload[0].payload;
+  const { values } = dataPoint;
+
+  const formatCurrency = (val) =>
+    val?.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md p-4 min-w-[220px]">
+      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+        {label}
+      </p>
+
+      {/* Cart Value */}
+      <div className="mb-3">
+        <p className="font-medium text-blue-600 dark:text-blue-400">
+          Cart Value: {formatCurrency(values.cart_value)}
+        </p>
+        <div className="ml-3 text-xs text-gray-700 dark:text-gray-300">
+          <p>Subtotal: {formatCurrency(values.cart_subtotal)}</p>
+        </div>
+      </div>
+
+      {/* Checkout Value */}
+      <div className="mb-3">
+        <p className="font-medium text-yellow-600 dark:text-yellow-400">
+          Checkout Value: {formatCurrency(values.checkout_value)}
+        </p>
+        <div className="ml-3 text-xs text-gray-700 dark:text-gray-300 space-y-0.5">
+          <p>Subtotal: {formatCurrency(values.checkout_subtotal)}</p>
+          <p>Tax: {formatCurrency(values.checkout_tax)}</p>
+          <p>Shipping: {formatCurrency(values.checkout_shipping)}</p>
+        </div>
+      </div>
+
+      {/* Order Value */}
+      <div>
+        <p className="font-medium text-green-600 dark:text-green-400">
+          Order Value: {formatCurrency(values.order_value)}
+        </p>
+        <div className="ml-3 text-xs text-gray-700 dark:text-gray-300 space-y-0.5">
+          <p>Subtotal: {formatCurrency(values.order_subtotal)}</p>
+          <p>Tax: {formatCurrency(values.order_tax)}</p>
+          <p>Shipping: {formatCurrency(values.order_shipping)}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ChartContainer = ({ data }) => {
+  console.log('chart data received:', data);
   if (!data?.graph_data) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
@@ -12,7 +78,9 @@ const ChartContainer = ({ data }) => {
           Daily Trends
         </h3>
         <div className="text-center py-8">
-          <div className="text-gray-500 dark:text-gray-400">No chart data available</div>
+          <div className="text-gray-500 dark:text-gray-400">
+            No chart data available
+          </div>
         </div>
       </div>
     );
@@ -44,12 +112,8 @@ const ChartContainer = ({ data }) => {
                 tickLine={false}
                 axisLine={false}
               />
-              <YAxis
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
+              <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+              <RechartsTooltip
                 formatter={formatTooltipValue}
                 labelStyle={{ color: '#374151' }}
                 contentStyle={{
@@ -62,7 +126,7 @@ const ChartContainer = ({ data }) => {
               <Line
                 type="monotone"
                 dataKey="engaged_conversations"
-                 name="Engaged Customers" 
+                name="Engaged Customers"
                 stroke="#6366f1"
                 strokeWidth={3}
                 dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }}
@@ -73,7 +137,7 @@ const ChartContainer = ({ data }) => {
         </div>
       </div>
 
-      {/* Revenue Chart */}
+      {/* Revenue Chart (Modified Tooltip) */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
           <DollarSign className="w-5 h-5 mr-2" />
@@ -95,15 +159,7 @@ const ChartContainer = ({ data }) => {
                 axisLine={false}
                 tickFormatter={formatCurrency}
               />
-              <Tooltip
-                formatter={formatTooltipValue}
-                labelStyle={{ color: '#374151' }}
-                contentStyle={{
-                  backgroundColor: '#F9FAFB',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                }}
-              />
+              <RechartsTooltip content={<CustomRevenueTooltip />} />
               <Legend />
               <Line
                 type="monotone"
@@ -150,12 +206,8 @@ const ChartContainer = ({ data }) => {
                 tickLine={false}
                 axisLine={false}
               />
-              <YAxis
-                tick={{ fontSize: 12 }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
+              <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+              <RechartsTooltip
                 labelStyle={{ color: '#374151' }}
                 contentStyle={{
                   backgroundColor: '#F9FAFB',

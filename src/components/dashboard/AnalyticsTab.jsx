@@ -58,11 +58,10 @@ useEffect(() => {
     const defaultStore = stores[0];
     setSelectedStore(defaultStore);
 
-    // 👇 Immediately trigger analytics fetch for the first store
+    // Immediately trigger analytics fetch for the first store
     triggerAnalyticsFetch(defaultStore.id, startDate, endDate);
   }
 }, [stores]);
-
 
   const getCurrentData = () => {
     const storeId = selectedStore?.id;

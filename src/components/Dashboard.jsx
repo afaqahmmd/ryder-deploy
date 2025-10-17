@@ -30,10 +30,22 @@ import SyncProductsModal from "./walkthroughGuide/ProductsModal";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const [activeMainTab, setActiveMainTab] = useState("dashboard");
+  const [activeMainTab, setActiveMainTab] = useState(localStorage.getItem("activeMainTab") || "dashboard");
   // const [products, setProducts] = useState([]);
   // const [isLoading, setIsLoading] = useState(false);
   // const [error, setError] = useState("");
+
+
+  // persist page on reload
+    useEffect(() => {
+    const savedTab = localStorage.getItem("activeMainTab");
+    if (savedTab) setActiveMainTab(savedTab);
+  }, []);
+
+  // Save tab to localStorage whenever it changes
+    useEffect(() => {
+    localStorage.setItem("activeMainTab", activeMainTab);
+  }, [activeMainTab]);
 
   // Knowledge Base status for dashboard display
   const [productDatabaseStatus, setProductDatabaseStatus] = useState("not_started");
