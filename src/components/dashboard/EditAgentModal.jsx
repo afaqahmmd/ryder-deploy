@@ -27,6 +27,7 @@ const EditAgentModal = ({ isOpen, onClose, agent }) => {
     instructions_text: "",
     country: "",
     store: "",
+    first_message: "",
   });
 
   // Country dropdown states
@@ -96,6 +97,7 @@ const EditAgentModal = ({ isOpen, onClose, agent }) => {
         instructions_text: agent.instructions_text || "",
         country: agent.country || "",
         store: agent.store || "",
+        first_message: agent.first_message || "",
       });
     }
   }, [agent]);
@@ -136,6 +138,7 @@ const EditAgentModal = ({ isOpen, onClose, agent }) => {
       instructions_text: "",
       country: "",
       store: "",
+      first_message: "",
     });
   };
 
@@ -212,6 +215,25 @@ const EditAgentModal = ({ isOpen, onClose, agent }) => {
                 className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white'
                 placeholder='Enter agent name'
               />
+            </div>
+
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                First Message
+              </label>
+              <textarea
+                name='first_message'
+                value={formData.first_message}
+                onChange={handleInputChange}
+                rows={3}
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none'
+                placeholder='Enter the first message your salesperson should send'
+              />
+              <div className='mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg'>
+                <p className='text-sm text-blue-800 dark:text-blue-300'>
+                  <span className='font-medium'>💡 Pro Tip:</span> Create a friendly, engaging opening message that reflects your brand voice and invites conversation.
+                </p>
+              </div>
             </div>
 
             <div className='grid grid-cols-2 gap-4'>

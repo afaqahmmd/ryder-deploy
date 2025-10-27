@@ -22,6 +22,7 @@ const AgentStep1 = ({ data, onUpdate }) => {
     country: "",
     communication_style: "friendly",
     behavior_prompt: "",
+    first_message: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -184,6 +185,7 @@ const AgentStep1 = ({ data, onUpdate }) => {
         country: data.step1.country || "",
         communication_style: data.step1.communication_style || data.step1.tone || "friendly",
         behavior_prompt: data.step1.behavior_prompt || "",
+        first_message: data.step1.first_message || "",
       });
 
       // Load selected traits from cache
@@ -369,7 +371,36 @@ const AgentStep1 = ({ data, onUpdate }) => {
               </div>
             </div>
 
-            {/* Age */}
+            {/* First Message */}
+            <div className='md:col-span-2'>
+              <div className='flex items-center gap-2 mb-2'>
+                <label
+                  htmlFor='first-message'
+                  className='block text-sm font-medium text-gray-700'
+                >
+                  What's the first message your salesperson should send?
+                </label>
+                <div className='group relative'>
+                  <RiInformationLine className='w-4 h-4 text-gray-400 cursor-help' />
+                  <div className='absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none'>
+                    The opening message or greeting your salesperson will use when starting conversations
+                  </div>
+                </div>
+              </div>
+              <textarea
+                id='first-message'
+                value={formData.first_message}
+                onChange={(e) => handleChange("first_message", e.target.value)}
+                placeholder='e.g., "Hi there! I noticed you might be interested in our services. How can I help you today?"'
+                rows={3}
+                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none'
+              />
+              <div className='mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg'>
+                <p className='text-sm text-blue-800'>
+                  <span className='font-medium'>💡 Pro Tip:</span> Create a friendly, engaging opening message that reflects your brand voice and invites conversation. Keep it personal and relevant to your customers' needs.
+                </p>
+              </div>
+            </div>
             <div>
               <div className='flex items-center gap-2 mb-2'>
                 <label

@@ -552,6 +552,17 @@ const AgentsTab = ({ setShowOnboarding }) => {
                     {selectedAgent.country || "Not specified"}
                   </p>
                 </div>
+
+                <div>
+                  <label className='block text-lg font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                    First Message
+                  </label>
+                  <div className='rounded-md max-h-24 overflow-y-auto'>
+                    <p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
+                      {selectedAgent.first_message || "Not specified"}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {selectedAgent.personality && (

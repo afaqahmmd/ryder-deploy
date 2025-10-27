@@ -127,48 +127,49 @@ export const completeAgentCreation = createAsyncThunk(
         return thunkAPI.rejectWithValue({ message: errorMsg });
       }
 
-                    // Prepare agent data according to new 6-step wizard structure
-        const agentData = {
-          // Required fields from Step 1 (Salesperson Personality)
-          name: step1.name,
-          behavior_prompt: step1.behavior_prompt || '',
+      // Prepare agent data according to new 6-step wizard structure
+      const agentData = {
+        // Required fields from Step 1 (Salesperson Personality)
+        name: step1.name,
+        behavior_prompt: step1.behavior_prompt || '',
+        
+        // Optional basic info fields from Step 1
+        age: step1.age || null,
+        gender: step1.gender || null,
+        country: step1.country || null,
+        tone: step1.communication_style || null, // Map from communication_style to tone
+        first_message: step1.first_message || null,
+        
+        // Personality - concatenate selected traits with base personality
+        personality: (() => {
+          const basePersonality = "Friendly and empathetic customer service representative with excellent communication skills. Always patient and understanding when helping customers with their inquiries and concerns.";
+          const selectedTraits = step1.selectedTraits || [];
           
-          // Optional basic info fields from Step 1
-          age: step1.age || null,
-          gender: step1.gender || null,
-          country: step1.country || null,
-          tone: step1.communication_style || null, // Map from communication_style to tone
+          if (selectedTraits.length > 0) {
+            const traitsText = selectedTraits.join(", ");
+            return `${basePersonality} Additional traits: ${traitsText}.`;
+          }
           
-          // Personality - concatenate selected traits with base personality
-          personality: (() => {
-            const basePersonality = "Friendly and empathetic customer service representative with excellent communication skills. Always patient and understanding when helping customers with their inquiries and concerns.";
-            const selectedTraits = step1.selectedTraits || [];
-            
-            if (selectedTraits.length > 0) {
-              const traitsText = selectedTraits.join(", ");
-              return `${basePersonality} Additional traits: ${traitsText}.`;
-            }
-            
-            return basePersonality;
-          })(),
-          
-          // Store connection from Step 2
-          store: step2?.store || null,
-          
-          // Rules from Step 3
-          instructions_text: step3?.rules_text || null, // Map from rules_text to instructions_text
-          
-          // Scraped instructions from Step 4 (contains the website data)
-          scrape_instructions: step4?.scrape_instructions || null,
-          
-                     // External resources from Step 5 - send as JSON string
-           external_websites: (step5?.external_websites && step5.external_websites.length > 0) 
-             ? JSON.stringify(step5.external_websites)
-             : '',
-          
-          // Status
-          status: status || 'draft'
-        };
+          return basePersonality;
+        })(),
+        
+        // Store connection from Step 2
+        store: step2?.store || null,
+        
+        // Rules from Step 3
+        instructions_text: step3?.rules_text || null, // Map from rules_text to instructions_text
+        
+        // Scraped instructions from Step 4 (contains the website data)
+        scrape_instructions: step4?.scrape_instructions || null,
+        
+        // External resources from Step 5 - send as JSON string
+        external_websites: (step5?.external_websites && step5.external_websites.length > 0) 
+          ? JSON.stringify(step5.external_websites)
+          : '',
+        
+        // Status
+        status: status || 'draft'
+      };
 
       // Use axios instance directly for agent creation
 
