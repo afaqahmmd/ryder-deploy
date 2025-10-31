@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -19,6 +25,7 @@ import { getCookie } from "cookies-next";
 import { restoreSession } from "./store/login/loginSlice";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useSessionPersistence } from "./hooks/useSessionPersistence";
+import { toast } from "react-toastify";
 
 const SignupRoute = () => {
   const navigate = useNavigate();
@@ -41,7 +48,12 @@ const SignupRoute = () => {
     navigate("/login");
   };
 
-  return <SignupPage onSuccessfulSignup={handleSuccessfulSignup} onSwitchToLogin={switchToLogin} />;
+  return (
+    <SignupPage
+      onSuccessfulSignup={handleSuccessfulSignup}
+      onSwitchToLogin={switchToLogin}
+    />
+  );
 };
 
 const LoginRoute = () => {
@@ -102,6 +114,24 @@ const AppContent = () => {
     const restoreSessionData = () => {
       try {
         const userSession = localStorage.getItem("user_session");
+        const userSessionData = JSON.parse(userSession);
+        const expiresAt = userSessionData.expiresAt;
+        const now = Date.now();
+
+        if (expiresAt && now > expiresAt) {
+          setTimeout(() => {
+            toast.error("Session has expired. Redirecting to login.");
+          }, 500);
+          toast.error("Session has expired. Redirecting to login.");
+          // Session has expired
+          localStorage.removeItem("user_session");
+          dispatch(clearSignupState());
+          setTimeout(() => {
+            tokenManager.logout();
+          }, 3000);
+          return;
+        }
+
         const token = getCookie("token");
 
         if (userSession && token) {
@@ -126,15 +156,15 @@ const AppContent = () => {
   }, [dispatch]);
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800'>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       {/* <DebugLogin /> */}
       <Routes>
-        <Route path='/' element={<LandingPage />} />
-        <Route path='/signup' element={<SignupRoute />} />
-        <Route path='/login' element={<LoginRoute />} />
-        <Route path='/password-reset' element={<PasswordResetRoute />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signup" element={<SignupRoute />} />
+        <Route path="/login" element={<LoginRoute />} />
+        <Route path="/password-reset" element={<PasswordResetRoute />} />
         <Route
-          path='/dashboard'
+          path="/dashboard"
           element={
             <AuthWrapper>
               <ProtectedRoute>
@@ -146,7 +176,7 @@ const AppContent = () => {
       </Routes>
 
       <ToastContainer
-        position='top-right'
+        position="top-right"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
