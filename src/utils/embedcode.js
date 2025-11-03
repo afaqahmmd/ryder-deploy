@@ -34,6 +34,24 @@ export const getEmbedCode = (agent) => {
         }
         90% { transform: translate3d(0, -1px, 0); }
       }
+      /* Make markdown links highly visible */
+      .markdown-content a {
+        color: #2563eb; /* blue-600 */
+        font-weight: 700; /* bold */
+        text-decoration: underline;
+        transition: color 150ms ease-in-out;
+      }
+      .markdown-content a:hover {
+        color: #1d4ed8; /* blue-700 */
+      }
+      /* If the link wraps an image, make the image visually linked */
+      .markdown-content a img {
+        outline: 2px solid #2563eb;
+        border-radius: 6px;
+      }
+      .markdown-content a:hover img {
+        outline-color: #1d4ed8;
+      }
     </style>
   </head>
 
@@ -231,30 +249,40 @@ export const getEmbedCode = (agent) => {
       };
 
       const createMessageElement = (message) => {
-        const messageDiv = document.createElement("div");
-        messageDiv.className = \`flex w-full break-words overflow-auto \${message.sender === "user" ? "justify-end" : "justify-start"}\`;
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'flex w-full break-words overflow-auto ' + (message.sender === 'user' ? 'justify-end' : 'justify-start');
 
-        const bubbleClass = message.sender === "user"
-          ? "bg-blue-600 text-white rounded-br-none"
-          : "bg-gray-100 text-gray-800 rounded-bl-none";
+        const bubbleClass = message.sender === 'user'
+          ? 'bg-blue-600 text-white rounded-br-none'
+          : 'bg-gray-100 text-gray-800 rounded-bl-none';
 
-        const timeClass = message.sender === "user" ? "text-blue-100" : "text-gray-500";
+        const timeClass = message.sender === 'user' ? 'text-blue-100' : 'text-gray-500';
 
         let content = message.text;
-        if (message.sender === "bot" && typeof marked !== "undefined") {
+        if (message.sender === 'bot' && typeof marked !== 'undefined') {
           try {
             marked.setOptions({ breaks: true, gfm: true });
             content = marked.parse(message.text);
           } catch { content = message.text; }
         }
 
-        messageDiv.innerHTML = \`
-          <div class="max-w-sm px-3 py-2 rounded-lg text-sm \${bubbleClass}">
-            <div class="\${message.sender === "bot" ? "markdown-content" : "whitespace-pre-line"}">\${content}</div>
-            <p class="text-xs mt-1 opacity-70 \${timeClass}">
-              \${formatTime(message.timestamp)}
-            </p>
-          </div>\`;
+        const innerClass = (message.sender === 'bot') ? 'markdown-content' : 'whitespace-pre-line';
+        messageDiv.innerHTML =
+          '<div class="max-w-sm px-3 py-2 rounded-lg text-sm ' + bubbleClass + '">' +
+            '<div class="' + innerClass + '">' + content + '</div>' +
+            '<p class="text-xs mt-1 opacity-70 ' + timeClass + '">' +
+              formatTime(message.timestamp) +
+            '</p>' +
+          '</div>';
+
+        // Ensure markdown links open in new tab and are safe
+        try {
+          const anchors = messageDiv.querySelectorAll('.markdown-content a');
+          anchors.forEach(a => {
+            a.setAttribute('target', '_blank');
+            a.setAttribute('rel', 'noopener noreferrer');
+          });
+        } catch (e) { /* no-op */ }
         return messageDiv;
       };
 
