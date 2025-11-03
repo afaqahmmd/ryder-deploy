@@ -4,6 +4,7 @@ export const SHOPIFY_CONFIG = {
   API_VERSION: '2023-10'
 }
 
+
 // Helper functions for building Shopify API URLs
 export const buildStorefrontURL = (shopDomain, apiVersion = '2023-10') => {
   return `https://${shopDomain}.myshopify.com/api/${apiVersion}/graphql.json`

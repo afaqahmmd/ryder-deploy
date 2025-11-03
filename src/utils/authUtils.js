@@ -57,4 +57,65 @@ export const isAuthenticated = () => {
  */
 export const getAccessToken = () => {
   return getCookie("token");
-}; 
+};
+
+/**
+ * Get the refresh token from localStorage
+ */
+export const getRefreshToken = () => {
+  try {
+    const userSession = localStorage.getItem("user_session");
+    if (userSession) {
+      const sessionData = JSON.parse(userSession);
+      return sessionData?.tokens?.refresh_token;
+    }
+  } catch (error) {
+    console.error("Error getting refresh token:", error);
+  }
+  return null;
+};
+
+/**
+ * Update tokens in localStorage and cookies
+ */
+export const updateTokens = (accessToken, refreshToken, expiresIn = 900) => {
+  try {
+    // Update cookie with new access token
+    const expiresAt = Date.now() + expiresIn * 1000;
+    
+    // Update localStorage session
+    const userSession = localStorage.getItem("user_session");
+    if (userSession) {
+      const sessionData = JSON.parse(userSession);
+      sessionData.tokens.access_token = accessToken;
+      sessionData.tokens.refresh_token = refreshToken;
+      sessionData.expiresAt = expiresAt;
+      sessionData.loginTime = new Date().toISOString();
+      localStorage.setItem("user_session", JSON.stringify(sessionData));
+    }
+    
+    // Update cookie
+    document.cookie = `token=${accessToken}; path=/; max-age=${expiresIn}`;
+    
+    console.log("Tokens updated successfully");
+    return true;
+  } catch (error) {
+    console.error("Error updating tokens:", error);
+    return false;
+  }
+};
+
+/**
+ * Show session expiry modal
+ */
+let sessionExpiryCallback = null;
+
+export const setSessionExpiryCallback = (callback) => {
+  sessionExpiryCallback = callback;
+};
+
+export const showSessionExpiryModal = () => {
+  if (sessionExpiryCallback) {
+    sessionExpiryCallback();
+  }
+};

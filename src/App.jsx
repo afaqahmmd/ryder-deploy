@@ -26,6 +26,8 @@ import { restoreSession } from "./store/login/loginSlice";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useSessionPersistence } from "./hooks/useSessionPersistence";
 import { toast } from "react-toastify";
+import SessionExpiryModal from "./components/SessionExpiryModal";
+import { useSessionExpiry } from "./hooks/useSessionExpiry";
 
 const SignupRoute = () => {
   const navigate = useNavigate();
@@ -109,6 +111,9 @@ const AppContent = () => {
   // Initialize session persistence
   useSessionPersistence();
 
+  // Initialize session expiry tracking
+  const { showModal, onCloseModal, onRetry } = useSessionExpiry();
+
   // Restore session on app initialization
   useEffect(() => {
     const restoreSessionData = () => {
@@ -174,6 +179,13 @@ const AppContent = () => {
           }
         />
       </Routes>
+
+      {/* Session Expiry Modal */}
+      <SessionExpiryModal 
+        isOpen={showModal} 
+        onClose={onCloseModal}
+        onRetry={onRetry}
+      />
 
       <ToastContainer
         position="top-right"

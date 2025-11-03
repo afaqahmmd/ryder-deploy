@@ -26,6 +26,10 @@ export const apiService = {
       return axiosInstance.post("/api/login/", { encryptedData });
     },
     resendOtp: (email) => axiosInstance.post("/api/resend-otp/", { email }),
+    
+    refreshToken: async (refreshToken) => {
+      return await axiosInstance.post("/api/refresh-token/", { refresh_token: refreshToken }, { skipAuth: true });
+    },
 
     logout: () => {
       // Clear tokens and redirect to login

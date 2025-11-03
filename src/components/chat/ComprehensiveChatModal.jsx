@@ -332,8 +332,21 @@ const ComprehensiveChatModal = ({
                   }`}
                 >
                   {message.sender === "bot" ? (
-                    <div className='prose dark:prose-invert max-w-none'>
-                      <ReactMarkdown>{message.message}</ReactMarkdown>
+                    <div className='prose dark:prose-invert max-w-none prose-a:text-blue-600 prose-a:font-bold prose-a:underline dark:prose-a:text-blue-400 hover:prose-a:text-blue-700 dark:hover:prose-a:text-blue-300'>
+                      <ReactMarkdown
+                        components={{
+                          a: ({ node, ...props }) => (
+                            <a
+                              {...props}
+                              className='text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors'
+                              target='_blank'
+                              rel='noopener noreferrer'
+                            />
+                          ),
+                        }}
+                      >
+                        {message.message}
+                      </ReactMarkdown>
                     </div>
                   ) : (
                     <p className='text-sm'>{message.message}</p>
