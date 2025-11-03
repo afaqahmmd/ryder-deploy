@@ -44,6 +44,14 @@ export const getEmbedCode = (agent) => {
       .markdown-content a:hover {
         color: #1d4ed8; /* blue-700 */
       }
+      .markdown-content a {
+        color: #2563eb; /* Tailwind's blue-600 */
+        text-decoration: underline;
+      }
+
+      .markdown-content a:hover {
+        color: #1e40af; /* Tailwind's blue-800 */
+      }
       /* If the link wraps an image, make the image visually linked */
       .markdown-content a img {
         outline: 2px solid #2563eb;
