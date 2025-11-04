@@ -145,27 +145,39 @@ export const getEmbedCode = (agent) => {
       };
 
       const loadAndRenderHistory = async (conversationId) => {
-        if (!conversationId || historyLoaded) return;
-        try {
-          console.log("📥 Fetching conversation history for ID:", conversationId);
-          const items = await fetchConversationMessages(conversationId, 1, 50);
-          if (Array.isArray(items) && items.length) {
-            console.log("✅ History loaded:", items.length, "messages");
-            chatState.messages = items.map(m => ({
-              id: m.id,
-              text: m.content,
-              sender: m.sender === 'customer' ? 'user' : 'bot',
-              timestamp: new Date(m.timestamp)
-            }));
-            renderMessages();
-          } else {
-            console.log("ℹ️ No history items found");
-          }
-        } catch (e) {
-          console.error("❌ Error loading history:", e);
-        }
-        historyLoaded = true;
-      };
+  if (!conversationId || historyLoaded) return;
+  try {
+    console.log("📥 Fetching conversation history for ID:", conversationId);
+    const items = await fetchConversationMessages(conversationId, 1, 50);
+    if (Array.isArray(items) && items.length) {
+      console.log("✅ History loaded:", items.length, "messages");
+
+      // Map messages
+      let messages = items.map(m => ({
+        id: m.id,
+        text: m.content,
+        sender: m.sender === 'customer' ? 'user' : 'bot',
+        timestamp: new Date(m.timestamp)
+      }));
+
+      // 🔹 Find index of first user message
+      const firstUserIndex = messages.findIndex(m => m.sender === 'user');
+      if (firstUserIndex !== -1) {
+        // Remove the first user message
+        messages.splice(firstUserIndex, 1);
+      }
+
+      chatState.messages = messages;
+      renderMessages();
+    } else {
+      console.log("ℹ️ No history items found");
+    }
+  } catch (e) {
+    console.error("❌ Error loading history:", e);
+  }
+  historyLoaded = true;
+};
+
 
       let trackingData = {
         chatbot_customer_id: null,
