@@ -36,21 +36,21 @@ export const getEmbedCode = (agent) => {
       }
       /* Make markdown links highly visible */
       .markdown-content a {
-        color: #2563eb; /* blue-600 */
-        font-weight: 700; /* bold */
-        text-decoration: underline;
+        color: #2563eb !important; /* blue-600 */
+        font-weight: 700 !important; /* bold */
+        text-decoration: underline !important;
         transition: color 150ms ease-in-out;
       }
       .markdown-content a:hover {
-        color: #1d4ed8; /* blue-700 */
+        color: #1d4ed8 !important; /* blue-700 */
       }
       .markdown-content a {
-        color: #2563eb; /* Tailwind's blue-600 */
-        text-decoration: underline;
+        color: #2563eb !important; /* Tailwind's blue-600 */
+        text-decoration: underline !important;
       }
 
       .markdown-content a:hover {
-        color: #1e40af; /* Tailwind's blue-800 */
+        color: #1e40af !important; /* Tailwind's blue-800 */
       }
       /* If the link wraps an image, make the image visually linked */
       .markdown-content a img {
@@ -270,7 +270,8 @@ export const getEmbedCode = (agent) => {
         if (message.sender === 'bot' && typeof marked !== 'undefined') {
           try {
             marked.setOptions({ breaks: true, gfm: true });
-            content = marked.parse(message.text);
+            const autoLinked = message.text.replace(/(https?:\/\/[^\s)]+)(?!\))/g, '[$1]($1)');
+            content = marked.parse(autoLinked);
           } catch { content = message.text; }
         }
 
