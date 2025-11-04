@@ -355,30 +355,52 @@ export const getEmbedCode = (agent) => {
       };
 
       const showTyping = () => {
-        chatState.isTyping = true;
-        const { messagesContainer } = getDOMElements();
-        if (messagesContainer) {
-          const typingDiv = document.createElement("div");
-          typingDiv.id = "typing-indicator";
-          typingDiv.className = "flex justify-start";
-          typingDiv.innerHTML = \`
-            <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">
-              <div class="flex space-x-1">
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-                <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-              </div>
-            </div>\`;
-          messagesContainer.appendChild(typingDiv);
-          scrollToBottom();
-        }
-      };
+  chatState.isTyping = true;
+  const { messagesContainer, messageInput, sendButton } = getDOMElements();
+  
+  // Disable input and button
+  if (messageInput) {
+    messageInput.disabled = true;
+    messageInput.classList.add('opacity-50', 'cursor-not-allowed');
+  }
+  if (sendButton) {
+    sendButton.disabled = true;
+  }
+  
+  if (messagesContainer) {
+    const typingDiv = document.createElement("div");
+    typingDiv.id = "typing-indicator";
+    typingDiv.className = "flex justify-start";
+    typingDiv.innerHTML = 
+        \` <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">
+            <div class="flex space-x-1">
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+          </div>\`;
+        messagesContainer.appendChild(typingDiv);
+        scrollToBottom();
+      }
+    };
 
       const hideTyping = () => {
-        chatState.isTyping = false;
-        const typingIndicator = document.getElementById("typing-indicator");
-        if (typingIndicator) typingIndicator.remove();
-      };
+  chatState.isTyping = false;
+  const { messageInput, sendButton } = getDOMElements();
+  
+  // Re-enable input and button
+  if (messageInput) {
+    messageInput.disabled = false;
+    messageInput.classList.remove('opacity-50', 'cursor-not-allowed');
+  }
+  if (sendButton) {
+    sendButton.disabled = false;
+  }
+  
+  const typingIndicator = document.getElementById("typing-indicator");
+  if (typingIndicator) typingIndicator.remove();
+};
+
 
       const openChat = () => {
         chatState.isOpen = true;
@@ -406,25 +428,28 @@ export const getEmbedCode = (agent) => {
       const toggleChat = () => (chatState.isOpen ? closeChat() : openChat());
 
       const sendMessage = () => {
-        const { messageInput } = getDOMElements();
-        if (!messageInput) return;
-        const message = messageInput.value.trim();
-        if (!message) return;
+  const { messageInput } = getDOMElements();
+  if (!messageInput) return;
+  
+  // Prevent sending if already typing
+  if (chatState.isTyping) return;
+  
+  const message = messageInput.value.trim();
+  if (!message) return;
 
-        addMessage(message, "user");
-        renderMessages();
-        messageInput.value = "";
-        showTyping();
+  addMessage(message, "user");
+  renderMessages();
+  messageInput.value = "";
+  showTyping();
 
-        if (socket && socket.readyState === WebSocket.OPEN) {
-          socket.send(JSON.stringify({ type: "comprehensive_chat", message, ...payload }));
-        } else {
-          hideTyping();
-          addMessage("⚠️ Cannot send message: not connected to server.", "bot");
-          renderMessages();
-        }
-      };
-
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type: "comprehensive_chat", message, ...payload }));
+  } else {
+    hideTyping();
+    addMessage("⚠️ Cannot send message: not connected to server.", "bot");
+    renderMessages();
+  }
+};
       const bindEvents = () => {
         const { chatToggle, closeChat: closeBtn, sendButton, messageInput } = getDOMElements();
         if (chatToggle) chatToggle.addEventListener("click", toggleChat);
@@ -488,13 +513,16 @@ export const getEmbedCode = (agent) => {
               if (!historyLoaded) loadAndRenderHistory(String(data.conversation_id)).catch(e => console.error("History load error:", e));
             }
 
-            if (data.response && data.type === "comprehensive_chat_response") {
-              console.log("Response received:", data.response);
-              addMessage(data.response, "bot");
-            } else if (data.error) {
-              addMessage("Error: " + data.error, "bot");
-            }
+           if (data.response && data.type === "comprehensive_chat_response") {
+      console.log("Response received:", data.response);
+      hideTyping(); // Add this line
+      addMessage(data.response, "bot");
+    } else if (data.error) {
+      hideTyping(); // Add this line
+      addMessage("Error: " + data.error, "bot");
+    }
           } catch {
+           hideTyping()
             addMessage(event.data, "bot");
           }
           renderMessages();
