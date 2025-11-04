@@ -146,15 +146,23 @@ export const getEmbedCode = (agent) => {
 
       const loadAndRenderHistory = async (conversationId) => {
         if (!conversationId || historyLoaded) return;
-        const items = await fetchConversationMessages(conversationId, 1, 50);
-        if (Array.isArray(items) && items.length) {
-          chatState.messages = items.map(m => ({
-            id: m.id,
-            text: m.content,
-            sender: m.sender === 'customer' ? 'user' : 'bot',
-            timestamp: new Date(m.timestamp)
-          }));
-          renderMessages();
+        try {
+          console.log("📥 Fetching conversation history for ID:", conversationId);
+          const items = await fetchConversationMessages(conversationId, 1, 50);
+          if (Array.isArray(items) && items.length) {
+            console.log("✅ History loaded:", items.length, "messages");
+            chatState.messages = items.map(m => ({
+              id: m.id,
+              text: m.content,
+              sender: m.sender === 'customer' ? 'user' : 'bot',
+              timestamp: new Date(m.timestamp)
+            }));
+            renderMessages();
+          } else {
+            console.log("ℹ️ No history items found");
+          }
+        } catch (e) {
+          console.error("❌ Error loading history:", e);
         }
         historyLoaded = true;
       };
@@ -427,7 +435,7 @@ export const getEmbedCode = (agent) => {
         }
         if (storedConversationId) {
           console.log("Loaded conversation ID from localStorage:", storedConversationId);
-          await loadAndRenderHistory(storedConversationId);
+          loadAndRenderHistory(storedConversationId).catch(e => console.error("History load error:", e));
         }
 
         socket = new WebSocket("wss://ryder-partner.cortechsocial.com/ws/chat/");
@@ -465,7 +473,7 @@ export const getEmbedCode = (agent) => {
 
             if (data.conversation_id) {
               localStorage.setItem("chatbot_conversation_id", String(data.conversation_id));
-              if (!historyLoaded) await loadAndRenderHistory(String(data.conversation_id));
+              if (!historyLoaded) loadAndRenderHistory(String(data.conversation_id)).catch(e => console.error("History load error:", e));
             }
 
             if (data.response && data.type === "comprehensive_chat_response") {
