@@ -169,7 +169,6 @@ const ConversationsTab = () => {
         .replace(/\n/g, "<br>");
     }
 
-    // For bot messages, apply markdown formatting
     let formattedContent = content
       // Bold text: **text** -> <strong>text</strong>
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
@@ -226,6 +225,36 @@ const ConversationsTab = () => {
       .replace(/&lt;li.*?&gt;/g, '<li class="ml-4 mb-1">')
       .replace(/&lt;\/li&gt;/g, "</li>")
       .replace(/&lt;br&gt;/g, "<br>");
+
+    // Markdown images ![alt](url) -> <img>
+    formattedContent = formattedContent.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<img src="$2" alt="$1" class="max-w-full h-auto rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" />'
+    );
+
+    // Markdown links [text](url) -> styled anchor
+    formattedContent = formattedContent.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      '<a href="$2" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+
+    // Auto-embed plain image URLs first (wrap image with a link)
+    formattedContent = formattedContent.replace(/(?<![\">])(https?:\/\/[^\s<]+\.(?:png|jpe?g|gif|webp|svg))/gi,
+      '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors"><img src="$1" alt="Image" class="max-w-full h-auto rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" /></a>'
+    );
+
+    // Auto-link plain URLs
+    formattedContent = formattedContent.replace(/(?<![\">])(https?:\/\/[^\s<]+)/g,
+      '<a href="$1" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+
+    // Ensure existing anchors get classes and attributes
+    formattedContent = formattedContent
+      .replace(/<a\s+(?![^>]*class=)/g, '<a class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" ')
+      .replace(/<a([^>]*)(?<!target=["']?_blank["']?)([^>]*)>/g, '<a$1 target="_blank"$2>')
+      .replace(/<a([^>]*)(?<!rel=["']?noopener noreferrer["']?)([^>]*)>/g, '<a$1 rel="noopener noreferrer"$2>');
+
+    // Restore escaped <img> tags just in case they were escaped earlier
+    formattedContent = formattedContent
+      .replace(/&lt;img(.*?)&gt;/g, '<img$1>');
 
     return formattedContent;
   };

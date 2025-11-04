@@ -129,6 +129,36 @@ export const getEmbedCode = (agent) => {
         include_timestamp: true,
       };
 
+      const API_BASE = "https://ryder-partner.cortechsocial.com";
+
+      const fetchConversationMessages = async (conversationId, page = 1, pageSize = 50) => {
+        try {
+          const url = \`\${API_BASE}/api/agents/conversations/\${conversationId}/messages/?page=\${page}&page_size=\${pageSize}\`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(\`Failed to fetch history: \${res.status}\`);
+          const json = await res.json();
+          return json?.details?.data?.messages || [];
+        } catch (e) {
+          console.error("❌ Error fetching conversation history:", e);
+          return [];
+        }
+      };
+
+      const loadAndRenderHistory = async (conversationId) => {
+        if (!conversationId || historyLoaded) return;
+        const items = await fetchConversationMessages(conversationId, 1, 50);
+        if (Array.isArray(items) && items.length) {
+          chatState.messages = items.map(m => ({
+            id: m.id,
+            text: m.content,
+            sender: m.sender === 'customer' ? 'user' : 'bot',
+            timestamp: new Date(m.timestamp)
+          }));
+          renderMessages();
+        }
+        historyLoaded = true;
+      };
+
       let trackingData = {
         chatbot_customer_id: null,
         chatbot_agent_id: payload.agent_id,
@@ -138,6 +168,7 @@ export const getEmbedCode = (agent) => {
       };
 
       let socket;
+      let historyLoaded = false;
 
       const fetchActiveAgent = async () => {
         try {
@@ -386,12 +417,17 @@ export const getEmbedCode = (agent) => {
 
       const initializeChatbot = async () => {
         const storedCustomerId = localStorage.getItem("chatbot_customer_id");
+        const storedConversationId = localStorage.getItem("chatbot_conversation_id");
         if (storedCustomerId) {
           payload.customer_id = storedCustomerId;
           payload.new_convo = false;
           trackingData.chatbot_customer_id = storedCustomerId;
           console.log("Loaded customer ID from localStorage:", storedCustomerId);
           await updateCartNoteIfNeeded(storedCustomerId);
+        }
+        if (storedConversationId) {
+          console.log("Loaded conversation ID from localStorage:", storedConversationId);
+          await loadAndRenderHistory(storedConversationId);
         }
 
         socket = new WebSocket("wss://ryder-partner.cortechsocial.com/ws/chat/");
@@ -413,9 +449,10 @@ export const getEmbedCode = (agent) => {
         socket.onclose = () => console.log("❌ Disconnected from server");
         socket.onerror = (error) => console.error("⚠️ WebSocket Error:", error);
 
-        socket.onmessage = (event) => {
+        socket.onmessage = async (event) => {
           try {
             const data = JSON.parse(event.data);
+
             if (data.customer_id) {
               payload.customer_id = data.customer_id;
               payload.new_convo = false;
@@ -424,6 +461,11 @@ export const getEmbedCode = (agent) => {
               console.log("🎯 Chatbot Customer ID received:", data);
               updateCartNoteIfNeeded(data.customer_id);
               monitorCart();
+            }
+
+            if (data.conversation_id) {
+              localStorage.setItem("chatbot_conversation_id", String(data.conversation_id));
+              if (!historyLoaded) await loadAndRenderHistory(String(data.conversation_id));
             }
 
             if (data.response && data.type === "comprehensive_chat_response") {
