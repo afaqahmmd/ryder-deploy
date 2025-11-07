@@ -227,34 +227,46 @@ const ConversationsTab = () => {
       .replace(/&lt;br&gt;/g, "<br>");
 
     // Markdown images ![alt](url) -> <img>
-    formattedContent = formattedContent.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,
+    formattedContent = formattedContent.replace(
+      /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,
       '<img src="$2" alt="$1" class="max-w-full h-auto rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" />'
     );
 
     // Markdown links [text](url) -> styled anchor
-    formattedContent = formattedContent.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+    formattedContent = formattedContent.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">$1</a>'
     );
 
     // Auto-embed plain image URLs first (wrap image with a link)
-    formattedContent = formattedContent.replace(/(?<![\">])(https?:\/\/[^\s<]+\.(?:png|jpe?g|gif|webp|svg))/gi,
+    formattedContent = formattedContent.replace(
+      /(?<![\">])(https?:\/\/[^\s<]+\.(?:png|jpe?g|gif|webp|svg))/gi,
       '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors"><img src="$1" alt="Image" class="max-w-full h-auto rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" /></a>'
     );
 
     // Auto-link plain URLs
-    formattedContent = formattedContent.replace(/(?<![\">])(https?:\/\/[^\s<]+)/g,
+    formattedContent = formattedContent.replace(
+      /(?<![\">])(https?:\/\/[^\s<]+)/g,
       '<a href="$1" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">$1</a>'
     );
 
     // Ensure existing anchors get classes and attributes
     formattedContent = formattedContent
-      .replace(/<a\s+(?![^>]*class=)/g, '<a class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" ')
-      .replace(/<a([^>]*)(?<!target=["']?_blank["']?)([^>]*)>/g, '<a$1 target="_blank"$2>')
-      .replace(/<a([^>]*)(?<!rel=["']?noopener noreferrer["']?)([^>]*)>/g, '<a$1 rel="noopener noreferrer"$2>');
+      .replace(
+        /<a\s+(?![^>]*class=)/g,
+        '<a class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" '
+      )
+      .replace(
+        /<a([^>]*)(?<!target=["']?_blank["']?)([^>]*)>/g,
+        '<a$1 target="_blank"$2>'
+      )
+      .replace(
+        /<a([^>]*)(?<!rel=["']?noopener noreferrer["']?)([^>]*)>/g,
+        '<a$1 rel="noopener noreferrer"$2>'
+      );
 
     // Restore escaped <img> tags just in case they were escaped earlier
-    formattedContent = formattedContent
-      .replace(/&lt;img(.*?)&gt;/g, '<img$1>');
+    formattedContent = formattedContent.replace(/&lt;img(.*?)&gt;/g, "<img$1>");
 
     return formattedContent;
   };
@@ -395,62 +407,69 @@ const ConversationsTab = () => {
               </div>
 
               {/* Messages Area - Scrollable */}
-              <div
-                className="flex-1 overflow-y-auto p-4"
-                style={{
-                  scrollbarWidth: "thin",
-                  scrollbarColor: "rgb(209 213 219) transparent",
-                }}
-              >
-                {isLoadingMessages ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  </div>
-                ) : currentMessages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400">
-                    <FiMessageSquare className="w-12 h-12 mb-2" />
-                    <p>No messages in this conversation</p>
-                  </div>
-                ) : (
-                  currentMessages.map((message, index) => (
-                    <div
-                      key={message.id || index}
-                      className={`flex ${
-                        message.sender === "customer"
-                          ? "justify-end"
-                          : "justify-start"
-                      } mb-4`}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
-                          message.sender === "customer"
-                            ? "bg-blue-600 text-white rounded-br-md"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md"
-                        }`}
-                      >
-                        <div
-                          className="text-sm whitespace-pre-wrap break-words leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: formatMessageContent(
-                              message.content,
-                              message.sender === "customer"
-                            ),
-                          }}
-                        />
-                        <p
-                          className={`text-xs mt-2 opacity-75 ${
-                            message.sender === "customer"
-                              ? "text-blue-100"
-                              : "text-gray-500 dark:text-gray-400"
-                          }`}
-                        >
-                          {formatTimestamp(message.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+             <div
+  className="flex-1 overflow-y-auto p-4"
+  style={{
+    scrollbarWidth: "thin",
+    scrollbarColor: "rgb(209 213 219) transparent",
+  }}
+>
+  {isLoadingMessages ? (
+    <div className="flex items-center justify-center h-32">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  ) : currentMessages.length === 0 ? (
+    <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400">
+      <FiMessageSquare className="w-12 h-12 mb-2" />
+      <p>No messages in this conversation</p>
+    </div>
+  ) : (
+    currentMessages
+      // ✅ Skip the first customer message
+      .filter((message, index, arr) => {
+        const firstCustomerIndex = arr.findIndex(
+          (m) => m.sender === "customer"
+        );
+        return index !== firstCustomerIndex;
+      })
+      .map((message, index) => (
+        <div
+          key={message.id || index}
+          className={`flex ${
+            message.sender === "customer" ? "justify-end" : "justify-start"
+          } mb-4`}
+        >
+          <div
+            className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
+              message.sender === "customer"
+                ? "bg-blue-600 text-white rounded-br-md"
+                : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md"
+            }`}
+          >
+            <div
+              className="text-sm whitespace-pre-wrap break-words leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: formatMessageContent(
+                  message.content,
+                  message.sender === "customer"
+                ),
+              }}
+            />
+            <p
+              className={`text-xs mt-2 opacity-75 ${
+                message.sender === "customer"
+                  ? "text-blue-100"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              {formatTimestamp(message.timestamp)}
+            </p>
+          </div>
+        </div>
+      ))
+  )}
+</div>
+
 
               {/* Message Input (Read-only for now) - Fixed */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
