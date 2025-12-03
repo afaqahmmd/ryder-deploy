@@ -1,549 +1,766 @@
 export const getEmbedCode = (agent) => {
-  const html = `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Shopify Chatbot</title>
+  const html = `<script src="https://ryder-chat.netlify.app/widget.js" data-store-id="${agent.store}" data-agent-id="${agent.id}"></script>`
+  //   const html = `<!DOCTYPE html>
+  // <html lang="en">
+  //   <head>
+  //     <meta charset="UTF-8" />
+  //     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  //     <title>Shopify Chatbot</title>
 
-    <!-- Tailwind & Marked -->
-    <script src="https://cdn.tailwindcss.com" async></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  //     <!-- Tailwind & Marked -->
+  //     <script src="https://cdn.tailwindcss.com" async></script>
+  //     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
-        background: transparent;
-      }
-      .bred { border: 1px solid red; }
-      .animate-bounce { animation: bounce 1s infinite; }
-      @keyframes bounce {
-        0%, 20%, 53%, 80%, 100% {
-          animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-          transform: translate3d(0, 0, 0);
-        }
-        40%, 43% {
-          animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-          transform: translate3d(0, -8px, 0);
-        }
-        70% {
-          animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-          transform: translate3d(0, -4px, 0);
-        }
-        90% { transform: translate3d(0, -1px, 0); }
-      }
-      /* Make markdown links highly visible */
-      .markdown-content a {
-        color: #2563eb; /* blue-600 */
-        font-weight: 700; /* bold */
-        text-decoration: underline;
-        transition: color 150ms ease-in-out;
-      }
-      .markdown-content a:hover {
-        color: #1d4ed8; /* blue-700 */
-      }
-      .markdown-content a {
-        color: #2563eb; /* Tailwind's blue-600 */
-        text-decoration: underline;
-      }
+  //     <style>
+  //       body {
+  //         margin: 0;
+  //         padding: 0;
+  //         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  //         background: transparent;
+  //       }
+  //       .bred {
+  //         border: 1px solid red;
+  //       }
+  //       .animate-bounce {
+  //         animation: bounce 1s infinite;
+  //       }
+  //       @keyframes bounce {
+  //         0%,
+  //         20%,
+  //         53%,
+  //         80%,
+  //         100% {
+  //           animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  //           transform: translate3d(0, 0, 0);
+  //         }
+  //         40%,
+  //         43% {
+  //           animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+  //           transform: translate3d(0, -8px, 0);
+  //         }
+  //         70% {
+  //           animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+  //           transform: translate3d(0, -4px, 0);
+  //         }
+  //         90% {
+  //           transform: translate3d(0, -1px, 0);
+  //         }
+  //       }
+  //       /* Make markdown links highly visible */
+  //       .markdown-content a {
+  //         color: #2563eb; /* blue-600 */
+  //         font-weight: 700; /* bold */
+  //         text-decoration: underline;
+  //         transition: color 150ms ease-in-out;
+  //       }
+  //       .markdown-content a:hover {
+  //         color: #1d4ed8; /* blue-700 */
+  //       }
+  //       .markdown-content a {
+  //         color: #2563eb; /* Tailwind's blue-600 */
+  //         text-decoration: underline;
+  //       }
 
-      .markdown-content a:hover {
-        color: #1e40af; /* Tailwind's blue-800 */
-      }
-      /* If the link wraps an image, make the image visually linked */
-      .markdown-content a img {
-        outline: 2px solid #2563eb;
-        border-radius: 6px;
-      }
-      .markdown-content a:hover img {
-        outline-color: #1d4ed8;
-      }
-    </style>
-  </head>
+  //       .markdown-content a:hover {
+  //         color: #1e40af; /* Tailwind's blue-800 */
+  //       }
+  //       /* If the link wraps an image, make the image visually linked */
+  //       .markdown-content a img {
+  //         outline: 2px solid #2563eb;
+  //         border-radius: 6px;
+  //       }
+  //       .markdown-content a:hover img {
+  //         outline-color: #1d4ed8;
+  //       }
+  //       /* Pulsing animation for chat icon */
+  //       @keyframes pulse {
+  //         0%,
+  //         100% {
+  //           transform: scale(1);
+  //           opacity: 1;
+  //         }
+  //         50% {
+  //           transform: scale(1.1);
+  //           opacity: 0.8;
+  //         }
+  //       }
+  //       /* Only animate icon when chat is closed */
+  //       .chat-closed .animate-pulse-icon {
+  //         animation: pulse 2s ease-in-out infinite;
+  //       }
+  //       /* Radiating pulse animation */
+  //       @keyframes radiate {
+  //         0% {
+  //           transform: translate(-50%, -50%) scale(0.95);
+  //           opacity: 0.4;
+  //         }
+  //         100% {
+  //           transform: translate(-50%, -50%) scale(2.5);
+  //           opacity: 0;
+  //         }
+  //       }
+  //       #chat-toggle {
+  //         position: relative;
+  //         overflow: visible;
+  //       }
+  //       #chat-toggle.chat-closed::before,
+  //       #chat-toggle.chat-closed::after {
+  //         content: "";
+  //         position: absolute;
+  //         top: 50%;
+  //         left: 50%;
+  //         width: 100%;
+  //         height: 100%;
+  //         border-radius: 50%;
+  //         border: 2px solid rgba(6, 16, 49, 1); /* blue-800 with opacity - darker blue */
+  //         pointer-events: none;
+  //         z-index: -1;
+  //         animation: radiate 2s ease-out infinite;
+  //         animation-fill-mode: backwards;
+  //       }
+  //       #chat-toggle.chat-closed::after {
+  //         animation-delay: 1s;
+  //       }
+  //     </style>
+  //   </head>
 
-  <body>
-    <div id="chatbot-container">
-      <!-- Floating Chat Icon -->
-      <div class="fixed bottom-6 right-6 z-50">
-        <button
-          id="chat-toggle"
-          class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
-          aria-label="Open chat"
-        >
-          <svg id="chat-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-          <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
+  //   <body>
+  //     <div id="chatbot-container" style="display: none">
+  //       <!-- Floating Chat Icon -->
+  //       <div id="chat-toggle-container" class="fixed bottom-6 right-6 z-50">
+  //         <button
+  //           id="chat-toggle"
+  //           class="bg-[#1F1F1F] hover:bg-[#303030] text-white rounded-full p-[2px] shadow-lg transition-all duration-300 hover:scale-110 chat-closed relative"
+  //           aria-label="Open chat"
+  //         >
+  //           <!-- Green online indicator dot -->
+  //           <span
+  //             class="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"
+  //           ></span>
 
-      <!-- Chat Window -->
-      <div id="chat-window"
-        class="fixed bottom-24 right-6 w-96 h-[28rem] bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex-col hidden">
-        <div class="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
-          <div class="flex items-center">
-            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">🤖</div>
-            <div>
-              <h3 id="agent-name" class="font-semibold text-sm">Shopify Assistant</h3>
-              <p class="text-xs text-blue-100">Online now</p>
-            </div>
-          </div>
-          <button id="close-chat" class="text-blue-100 hover:text-white">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+  //           <img
+  //             id="chat-icon"
+  //             src="https://ryder-chat.netlify.app/agent.jpg"
+  //             alt="Agent"
+  //             class="w-14 h-14 rounded-full object-cover object-top"
+  //           />
 
-        <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 h-80"></div>
+  //           <!-- <svg
+  //             id="chat-icon"
+  //             class="w-9 h-9 animate-pulse-icon"
+  //             data-name="Layer 1"
+  //             xmlns="http://www.w3.org/2000/svg"
+  //             viewBox="0 0 121.85 122.88"
+  //           >
+  //             <defs>
+  //               <style>
+  //                 .cls-1 {
+  //                   fill: white;
+  //                   fill-rule: evenodd;
+  //                 }
+  //               </style>
+  //             </defs>
+  //             <path
+  //               class="cls-1"
+  //               d="M42.18,72.75A47.21,47.21,0,0,1,38.28,65c-8.39-4.72-9.73-25.71-4.56-24.12,0-.79-.14-3-.14-4.52,0-34.07,54.74-34.09,54.74,0,0,1.56-.16,3.73-.14,4.52C93.34,39.26,92,60.25,83.62,65c-2.13,5.9-5.93,9.86-5.62,12.45,0,8.89-9.77,12.11-17,12.19-.66,0-1.33,0-2-.1a17.8,17.8,0,0,0,4.52-1.9h0c3.11-1.9,5.21-4.71,5.21-8.08s-2.09-6.2-5.2-8.09h0a18.68,18.68,0,0,0-9.4-2.57,19.54,19.54,0,0,0-7.51,1.35,12.78,12.78,0,0,0-4,2.58l-.37,0Zm58.25-41.14h-.37C96.63,17.08,87.81,7,77.3,2.83A44.05,44.05,0,0,0,58,.15a46.75,46.75,0,0,0-18.44,5.4A34.24,34.24,0,0,0,22.15,31.61h-.69c-3.3,0-6.64,2.71-6.64,6V59.28c0,3.3,3.34,6,6.64,6h1.95C25.54,73.93,34.17,81.85,43,81.85h1.73c1.51,2.22,4.44,3.79,9.32,3.79s10.08-2.75,10.08-6.13S59,73.39,54.05,73.39,46.1,75,44.64,77.32H43c-7.54,0-15-8-15.53-15.22V32A29.1,29.1,0,0,1,42.13,10.2,41.46,41.46,0,0,1,58.4,5.47,38.8,38.8,0,0,1,75.33,7.79c8.71,3.44,16.06,12,19.23,23.82h-.13V65.28h6c3.3,0,6.64-2.7,6.64-6V37.62c0-3.31-3.34-6-6.64-6ZM64.59,104.44h1.86a3,3,0,0,0,3-3v-5a3,3,0,0,0-3-3h-11a3.05,3.05,0,0,0-3,3v5a3.06,3.06,0,0,0,3,3H57.3l-3.64,18.43H68.07l-3.48-18.44ZM0,122.88c1.43-18.54-2.21-17.79,13.32-23.6a128.67,128.67,0,0,0,22.78-11l13.27,34.63ZM86.4,86.67a95.25,95.25,0,0,0,21.07,10c14.5,4.82,14.5,5.5,14.36,26.17H72.65L86.4,86.67Z"
+  //             />
+  //           </svg> -->
 
-        <div class="border-t border-gray-200 p-3">
-          <div class="flex space-x-2">
-            <input type="text" id="message-input" placeholder="Type your message..."
-              class="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-blue-500" />
-            <button id="send-button"
-              class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-full p-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  //           <svg
+  //             id="close-icon"
+  //             class="w-9 h-9 hidden"
+  //             fill="none"
+  //             stroke="currentColor"
+  //             viewBox="0 0 24 24"
+  //           >
+  //             <path
+  //               stroke-linecap="round"
+  //               stroke-linejoin="round"
+  //               stroke-width="2"
+  //               d="M6 18L18 6M6 6l12 12"
+  //             />
+  //           </svg>
+  //         </button>
+  //       </div>
 
-    <script>
-      const payload = {
-        type: "comprehensive_chat",
-        agent_id: ${agent.id},
-        store_id: ${agent.store},
-        new_convo: true,
-        include_timestamp: true,
-      };
+  //       <!-- Chat Window -->
+  //       <div
+  //         id="chat-window"
+  //         class="fixed bottom-24 right-6 w-96 h-[28rem] bg-white rounded-lg shadow-2xl border border-gray-200 z-50 flex-col hidden"
+  //       >
+  //         <div class="bg-[#1F1F1F] text-white p-4 rounded-t-lg flex items-center justify-between">
+  //           <div class="flex items-center">
+  //             <div class="w-8 h-8 bg-[#616161] rounded-full flex items-center justify-center mr-3">
+  //               <!-- 🤖 -->
+  //               <img
+  //                 src="https://ryder-chat.netlify.app/agent.jpg"
+  //                 alt="Agent"
+  //                 class="w-8 h-8 rounded-full object-cover object-top"
+  //               />
+  //             </div>
+  //             <div>
+  //               <h3 id="agent-name" class="font-semibold text-sm">Shopify Assistant</h3>
+  //               <p class="text-xs text-blue-100">Online now</p>
+  //             </div>
+  //           </div>
+  //           <button id="close-chat" class="text-blue-100 hover:text-white">
+  //             <svg class="w-5 h-5" fill="none" stroke="currentColor">
+  //               <path
+  //                 stroke-linecap="round"
+  //                 stroke-linejoin="round"
+  //                 stroke-width="2"
+  //                 d="M6 18L18 6M6 6l12 12"
+  //               />
+  //             </svg>
+  //           </button>
+  //         </div>
 
-      const API_BASE = "https://ryder-partner.cortechsocial.com";
+  //         <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 h-80"></div>
 
-      const fetchConversationMessages = async (conversationId, page = 1, pageSize = 50) => {
-        try {
-          const url = \`\${API_BASE}/api/agents/conversations/\${conversationId}/messages/?page=\${page}&page_size=\${pageSize}\`;
-          const res = await fetch(url);
-          if (!res.ok) throw new Error(\`Failed to fetch history: \${res.status}\`);
-          const json = await res.json();
-          return json?.details?.data?.messages || [];
-        } catch (e) {
-          console.error("❌ Error fetching conversation history:", e);
-          return [];
-        }
-      };
+  //         <div class="border-t-0 border-gray-200 px-3 pb-3">
+  //           <div class="relative">
+  //             <input
+  //               type="text"
+  //               id="message-input"
+  //               placeholder="Type your message..."
+  //               class="w-full border border-gray-300 rounded-2xl px-4 py-4 pr-12 text-sm focus:outline-none focus:border-blue-500 shadow-md shadow-gray-50"
+  //             />
+  //             <button
+  //               id="send-button"
+  //               class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center p-2 text-gray-600 hover:text-gray-800 transition-colors"
+  //             >
+  //               <svg class="w-6 h-6 rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  //                 <path
+  //                   stroke-linecap="round"
+  //                   stroke-linejoin="round"
+  //                   stroke-width="1.5"
+  //                   d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+  //                 />
+  //               </svg>
+  //             </button>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
 
-      const loadAndRenderHistory = async (conversationId) => {
-  if (!conversationId || historyLoaded) return;
-  try {
-    console.log("📥 Fetching conversation history for ID:", conversationId);
-    const items = await fetchConversationMessages(conversationId, 1, 50);
-    if (Array.isArray(items) && items.length) {
-      console.log("✅ History loaded:", items.length, "messages");
+  //     <script>
+  //       const payload = {
+  //         type: "comprehensive_chat",
+  //         agent_id: ${agent.id},
+  //         store_id: ${agent.store},
+  //         new_convo: true,
+  //         include_timestamp: true,
+  //       };
 
-      // Map messages
-      let messages = items.map(m => ({
-        id: m.id,
-        text: m.content,
-        sender: m.sender === 'customer' ? 'user' : 'bot',
-        timestamp: new Date(m.timestamp)
-      }));
+  //       const API_BASE = "https://ryder-partner.cortechsocial.com";
 
-      // 🔹 Find index of first user message
-      const firstUserIndex = messages.findIndex(m => m.sender === 'user');
-      if (firstUserIndex !== -1) {
-        // Remove the first user message
-        messages.splice(firstUserIndex, 1);
-      }
+  //       const fetchConversationMessages = async (conversationId, page = 1, pageSize = 50) => {
+  //         try {
+  //           const url =
+  //             API_BASE +
+  //             "/api/agents/conversations/" +
+  //             conversationId +
+  //             "/messages/?page=" +
+  //             page +
+  //             "&page_size=" +
+  //             pageSize;
+  //           const res = await fetch(url);
+  //           if (!res.ok) throw new Error("Failed to fetch history: " + res.status);
+  //           const json = await res.json();
+  //           return json?.details?.data?.messages || [];
+  //         } catch (e) {
+  //           console.error("❌ Error fetching conversation history:", e);
+  //           return [];
+  //         }
+  //       };
 
-      chatState.messages = messages;
-      renderMessages();
-    } else {
-      console.log("ℹ️ No history items found");
-    }
-  } catch (e) {
-    console.error("❌ Error loading history:", e);
-  }
-  historyLoaded = true;
-};
+  //       const loadAndRenderHistory = async (conversationId) => {
+  //         if (!conversationId || historyLoaded) return;
+  //         try {
+  //           console.log("📥 Fetching conversation history for ID:", conversationId);
+  //           const items = await fetchConversationMessages(conversationId, 1, 50);
+  //           if (Array.isArray(items) && items.length) {
+  //             console.log("✅ History loaded:", items.length, "messages");
 
+  //             // Map messages
+  //             let messages = items.map((m) => ({
+  //               id: m.id,
+  //               text: m.content,
+  //               sender: m.sender === "customer" ? "user" : "bot",
+  //               timestamp: new Date(m.timestamp),
+  //             }));
 
-      let trackingData = {
-        chatbot_customer_id: null,
-        chatbot_agent_id: payload.agent_id,
-        chatbot_store_id: payload.store_id,
-        cart_token: null,
-        session_start: new Date().toISOString(),
-      };
+  //             // 🔹 Find index of first user message
+  //             const firstUserIndex = messages.findIndex((m) => m.sender === "user");
+  //             if (firstUserIndex !== -1) {
+  //               // Remove the first user message
+  //               messages.splice(firstUserIndex, 1);
+  //             }
 
-      let socket;
-      let historyLoaded = false;
+  //             chatState.messages = messages;
+  //             renderMessages();
+  //           } else {
+  //             console.log("ℹ️ No history items found");
+  //           }
+  //         } catch (e) {
+  //           console.error("❌ Error loading history:", e);
+  //         }
+  //         historyLoaded = true;
+  //       };
 
-      const fetchActiveAgent = async () => {
-        try {
-          const response = await fetch(
-            \`https://ryder-partner.cortechsocial.com/api/agents/public/active-agent/?store_id=\${payload.store_id}\`
-          );
-          const data = await response.json();
-          if (data?.details?.data?.id) {
-            payload.agent_id = data.details.data.id;
-            trackingData.chatbot_agent_id = data.details.data.id;
-          }
-          if (data?.details?.data?.name) {
-            const agentNameElement = document.getElementById("agent-name");
-            if (agentNameElement) agentNameElement.textContent = data.details.data.name;
-          }
-          return data;
-        } catch (error) {
-          console.error("Error fetching active agent:", error);
-        }
-      };
+  //       let trackingData = {
+  //         chatbot_customer_id: null,
+  //         chatbot_agent_id: payload.agent_id,
+  //         chatbot_store_id: payload.store_id,
+  //         cart_token: null,
+  //         session_start: new Date().toISOString(),
+  //       };
 
-      const monitorCart = async () => {
-        try {
-          const response = await fetch("/cart.js");
-          const cart = await response.json();
-          if (cart.token && cart.token !== trackingData.cart_token) {
-            trackingData.cart_token = cart.token;
-            console.log("Cart token captured:", cart.token);
-          }
-        } catch (error) {
-          console.error("Error monitoring cart:", error);
-        }
-      };
+  //       let socket;
+  //       let historyLoaded = false;
+  //       let agentName = "Shopify Assistant"; // Default agent name
 
-      const sendToWebhook = async (cartData) => {
-        try {
-          const webhookUrl = "https://ryder-partner.cortechsocial.com/api/core/track/event/";
-          const response = await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(cartData),
-          });
-          if (response.ok) console.log("✅ Cart data sent to webhook successfully");
-          else console.error("❌ Error sending cart data:", response.statusText);
-        } catch (error) {
-          console.error("❌ Error sending to webhook:", error);
-        }
-      };
+  //       const fetchActiveAgent = async () => {
+  //         try {
+  //           const response = await fetch(
+  //             "https://ryder-partner.cortechsocial.com/api/agents/public/active-agent/?store_id=" +
+  //               payload.store_id
+  //           );
+  //           const data = await response.json();
 
-      const updateCartNoteIfNeeded = async (customerId) => {
-        try {
-          const cartResponse = await fetch("/cart.js");
-          const currentCart = await cartResponse.json();
-          let currentNoteData = {};
-          if (currentCart.note) {
-            try { currentNoteData = JSON.parse(currentCart.note); }
-            catch { currentNoteData = {}; }
-          }
+  //           // Check if data is null or doesn't have the expected structure
+  //           if (!data || !data?.details?.data) {
+  //             // Hide chatbot icon and close chat window
+  //             const chatbotContainer = document.getElementById("chatbot-container");
+  //             if (chatbotContainer) {
+  //               chatbotContainer.style.display = "none";
+  //             }
+  //             // Close chat if it's open
+  //             if (chatState.isOpen) {
+  //               closeChat();
+  //             }
+  //             return null;
+  //           }
 
-          if (!currentNoteData.Chatbot_Session || currentNoteData.Chatbot_Session !== customerId) {
-            const newNoteData = {
-              ...currentNoteData,
-              Chatbot_Session: customerId,
-              agent_id: payload.agent_id,
-              store_id: payload.store_id,
-            };
-            const sessionNote = JSON.stringify(newNoteData);
-            const updateResponse = await fetch("/cart/update.js", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Accept: "application/json" },
-              body: JSON.stringify({ note: sessionNote }),
-            });
+  //           // Show chatbot if data is present
+  //           const chatbotContainer = document.getElementById("chatbot-container");
+  //           if (chatbotContainer) {
+  //             chatbotContainer.style.display = "block";
+  //           }
 
-            if (updateResponse.ok) {
-              const updatedCart = await updateResponse.json();
-              console.log("✅ Cart note updated with customer ID:", customerId);
-              trackingData.cart_token = updatedCart.token;
-              await sendToWebhook(updatedCart);
-            } else console.error("❌ Error updating cart note");
-          } else {
-            console.log("✅ Cart note already contains correct session info, skipping");
-            trackingData.cart_token = currentCart.token;
-          }
-        } catch (error) {
-          console.error("❌ Error updating cart note:", error);
-        }
-      };
+  //           if (data?.details?.data?.id) {
+  //             payload.agent_id = data.details.data.id;
+  //             trackingData.chatbot_agent_id = data.details.data.id;
+  //           }
+  //           if (data?.details?.data?.name) {
+  //             agentName = data.details.data.name; // Store agent name in variable
+  //             const agentNameElement = document.getElementById("agent-name");
+  //             if (agentNameElement) agentNameElement.textContent = agentName;
+  //             // Re-render messages to update agent name in bot messages
+  //             renderMessages();
+  //           }
+  //           return data;
+  //         } catch (error) {
+  //           console.error("Error fetching active agent:", error);
+  //           // Hide chatbot on error as well
+  //           const chatbotContainer = document.getElementById("chatbot-container");
+  //           if (chatbotContainer) {
+  //             chatbotContainer.style.display = "none";
+  //           }
+  //           if (chatState.isOpen) {
+  //             closeChat();
+  //           }
+  //           return null;
+  //         }
+  //       };
 
-      let chatState = { isOpen: false, isTyping: false, messages: [] };
+  //       const monitorCart = async () => {
+  //         try {
+  //           const response = await fetch("/cart.js");
+  //           const cart = await response.json();
+  //           if (cart.token && cart.token !== trackingData.cart_token) {
+  //             trackingData.cart_token = cart.token;
+  //             console.log("Cart token captured:", cart.token);
+  //           }
+  //         } catch (error) {
+  //           console.error("Error monitoring cart:", error);
+  //         }
+  //       };
 
-      const getDOMElements = () => ({
-        chatToggle: document.getElementById("chat-toggle"),
-        closeChat: document.getElementById("close-chat"),
-        sendButton: document.getElementById("send-button"),
-        messageInput: document.getElementById("message-input"),
-        chatWindow: document.getElementById("chat-window"),
-        chatIcon: document.getElementById("chat-icon"),
-        closeIcon: document.getElementById("close-icon"),
-        messagesContainer: document.getElementById("messages-container"),
-      });
+  //       const sendToWebhook = async (cartData) => {
+  //         try {
+  //           const webhookUrl = "https://ryder-partner.cortechsocial.com/api/core/track/event/";
+  //           const response = await fetch(webhookUrl, {
+  //             method: "POST",
+  //             headers: { "Content-Type": "application/json" },
+  //             body: JSON.stringify(cartData),
+  //           });
+  //           if (response.ok) console.log("✅ Cart data sent to webhook successfully");
+  //           else console.error("❌ Error sending cart data:", response.statusText);
+  //         } catch (error) {
+  //           console.error("❌ Error sending to webhook:", error);
+  //         }
+  //       };
 
-      const formatTime = (timestamp) =>
-        timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  //       const updateCartNoteIfNeeded = async (customerId) => {
+  //         try {
+  //           const cartResponse = await fetch("/cart.js");
+  //           const currentCart = await cartResponse.json();
+  //           let currentNoteData = {};
+  //           if (currentCart.note) {
+  //             try {
+  //               currentNoteData = JSON.parse(currentCart.note);
+  //             } catch {
+  //               currentNoteData = {};
+  //             }
+  //           }
 
-      const scrollToBottom = () => {
-        setTimeout(() => {
-          const { messagesContainer } = getDOMElements();
-          if (messagesContainer)
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }, 100);
-      };
+  //           if (!currentNoteData.Chatbot_Session || currentNoteData.Chatbot_Session !== customerId) {
+  //             const newNoteData = {
+  //               ...currentNoteData,
+  //               Chatbot_Session: customerId,
+  //               agent_id: payload.agent_id,
+  //               store_id: payload.store_id,
+  //             };
+  //             const sessionNote = JSON.stringify(newNoteData);
+  //             const updateResponse = await fetch("/cart/update.js", {
+  //               method: "POST",
+  //               headers: { "Content-Type": "application/json", Accept: "application/json" },
+  //               body: JSON.stringify({ note: sessionNote }),
+  //             });
 
-      const addMessage = (text, sender) => {
-        const message = { id: chatState.messages.length + 1, text, sender, timestamp: new Date() };
-        chatState.messages.push(message);
-        return message;
-      };
+  //             if (updateResponse.ok) {
+  //               const updatedCart = await updateResponse.json();
+  //               console.log("✅ Cart note updated with customer ID:", customerId);
+  //               trackingData.cart_token = updatedCart.token;
+  //               await sendToWebhook(updatedCart);
+  //             } else console.error("❌ Error updating cart note");
+  //           } else {
+  //             console.log("✅ Cart note already contains correct session info, skipping");
+  //             trackingData.cart_token = currentCart.token;
+  //           }
+  //         } catch (error) {
+  //           console.error("❌ Error updating cart note:", error);
+  //         }
+  //       };
 
-      const createMessageElement = (message) => {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'flex w-full break-words overflow-auto ' + (message.sender === 'user' ? 'justify-end' : 'justify-start');
+  //       let chatState = { isOpen: false, isTyping: false, messages: [] };
 
-        const bubbleClass = message.sender === 'user'
-          ? 'bg-blue-600 text-white rounded-br-none'
-          : 'bg-gray-100 text-gray-800 rounded-bl-none';
+  //       const getDOMElements = () => ({
+  //         chatToggle: document.getElementById("chat-toggle"),
+  //         chatToggleContainer: document.getElementById("chat-toggle-container"),
+  //         closeChat: document.getElementById("close-chat"),
+  //         sendButton: document.getElementById("send-button"),
+  //         messageInput: document.getElementById("message-input"),
+  //         chatWindow: document.getElementById("chat-window"),
+  //         chatIcon: document.getElementById("chat-icon"),
+  //         closeIcon: document.getElementById("close-icon"),
+  //         messagesContainer: document.getElementById("messages-container"),
+  //       });
 
-        const timeClass = message.sender === 'user' ? 'text-blue-100' : 'text-gray-500';
+  //       const formatTime = (timestamp) =>
+  //         timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-        let content = message.text;
-        if (message.sender === 'bot' && typeof marked !== 'undefined') {
-          try {
-            marked.setOptions({ breaks: true, gfm: true });
-            content = marked.parse(message.text);
-          } catch { content = message.text; }
-        }
+  //       const scrollToBottom = () => {
+  //         setTimeout(() => {
+  //           const { messagesContainer } = getDOMElements();
+  //           if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  //         }, 100);
+  //       };
 
-        const innerClass = (message.sender === 'bot') ? 'markdown-content' : 'whitespace-pre-line';
-        messageDiv.innerHTML =
-          '<div class="max-w-sm px-3 py-2 rounded-lg text-sm ' + bubbleClass + '">' +
-            '<div class="' + innerClass + '">' + content + '</div>' +
-            '<p class="text-xs mt-1 opacity-70 ' + timeClass + '">' +
-              formatTime(message.timestamp) +
-            '</p>' +
-          '</div>';
+  //       const addMessage = (text, sender) => {
+  //         const message = { id: chatState.messages.length + 1, text, sender, timestamp: new Date() };
+  //         chatState.messages.push(message);
+  //         return message;
+  //       };
 
-        // Ensure markdown links open in new tab and are safe
-        try {
-          const anchors = messageDiv.querySelectorAll('.markdown-content a');
-          anchors.forEach(a => {
-            a.setAttribute('target', '_blank');
-            a.setAttribute('rel', 'noopener noreferrer');
-          });
-        } catch (e) { /* no-op */ }
-        return messageDiv;
-      };
+  //       const createMessageElement = (message) => {
+  //         const messageDiv = document.createElement("div");
+  //         messageDiv.className =
+  //           "flex w-full break-words overflow-auto flex-col " +
+  //           (message.sender === "user" ? "items-end" : "items-start");
 
-      const renderMessages = () => {
-        const { messagesContainer } = getDOMElements();
-        if (messagesContainer) {
-          messagesContainer.innerHTML = "";
-          chatState.messages.forEach((m) => messagesContainer.appendChild(createMessageElement(m)));
-          scrollToBottom();
-        }
-      };
+  //         const bubbleClass =
+  //           message.sender === "user"
+  //             ? "bg-[#1F1F1F] text-white rounded-br-none"
+  //             : "bg-gray-100 text-gray-800 rounded-bl-none";
 
-      const showTyping = () => {
-  chatState.isTyping = true;
-  const { messagesContainer, messageInput, sendButton } = getDOMElements();
-  
-  // Disable input and button
-  if (messageInput) {
-    messageInput.disabled = true;
-    messageInput.classList.add('opacity-50', 'cursor-not-allowed');
-  }
-  if (sendButton) {
-    sendButton.disabled = true;
-  }
-  
-  if (messagesContainer) {
-    const typingDiv = document.createElement("div");
-    typingDiv.id = "typing-indicator";
-    typingDiv.className = "flex justify-start";
-    typingDiv.innerHTML = 
-        \` <div class="bg-gray-100 text-gray-800 rounded-lg rounded-bl-none px-3 py-2 max-w-sm">
-            <div class="flex space-x-1">
-              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-              <div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-            </div>
-          </div>\`;
-        messagesContainer.appendChild(typingDiv);
-        scrollToBottom();
-      }
-    };
+  //         const timeClass = message.sender === "user" ? "text-gray-500" : "text-gray-500";
 
-      const hideTyping = () => {
-  chatState.isTyping = false;
-  const { messageInput, sendButton } = getDOMElements();
-  
-  // Re-enable input and button
-  if (messageInput) {
-    messageInput.disabled = false;
-    messageInput.classList.remove('opacity-50', 'cursor-not-allowed');
-  }
-  if (sendButton) {
-    sendButton.disabled = false;
-  }
-  
-  const typingIndicator = document.getElementById("typing-indicator");
-  if (typingIndicator) typingIndicator.remove();
-};
+  //         let content = message.text;
+  //         if (message.sender === "bot" && typeof marked !== "undefined") {
+  //           try {
+  //             marked.setOptions({ breaks: true, gfm: true });
+  //             content = marked.parse(message.text);
+  //           } catch {
+  //             content = message.text;
+  //           }
+  //         }
 
+  //         const innerClass = message.sender === "bot" ? "markdown-content" : "whitespace-pre-line";
 
-      const openChat = () => {
-        chatState.isOpen = true;
-        const { chatWindow, chatIcon, closeIcon } = getDOMElements();
-        if (chatWindow && chatIcon && closeIcon) {
-          chatWindow.classList.remove("hidden");
-          chatWindow.classList.add("flex");
-          chatIcon.classList.add("hidden");
-          closeIcon.classList.remove("hidden");
-          scrollToBottom();
-        }
-      };
+  //         // Get agent name for bot messages
+  //         let agentInfoHtml = "";
+  //         if (message.sender === "bot") {
+  //           agentInfoHtml =
+  //             '<div class="flex items-center mb-1">' +
+  //             '<div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mr-2">' +
+  //             '<img src="https://ryder-chat.netlify.app/agent.jpg" alt="Agent" class="w-6 h-6 rounded-full object-cover object-top" />' +
+  //             "</div>" +
+  //             "<div>" +
+  //             '<h3 class="font-semibold text-sm">' +
+  //             agentName +
+  //             "</h3>" +
+  //             "</div>" +
+  //             "</div>";
+  //         }
 
-      const closeChat = () => {
-        chatState.isOpen = false;
-        const { chatWindow, chatIcon, closeIcon } = getDOMElements();
-        if (chatWindow && chatIcon && closeIcon) {
-          chatWindow.classList.add("hidden");
-          chatWindow.classList.remove("flex");
-          chatIcon.classList.remove("hidden");
-          closeIcon.classList.add("hidden");
-        }
-      };
+  //         messageDiv.innerHTML =
+  //           '<div class="max-w-sm px-3 py-2 rounded-2xl text-sm ' +
+  //           bubbleClass +
+  //           '">' +
+  //           agentInfoHtml +
+  //           '<div class="' +
+  //           innerClass +
+  //           '">' +
+  //           content +
+  //           "</div>" +
+  //           "</div>" +
+  //           '<p class="text-xs mt-1 opacity-70 ' +
+  //           timeClass +
+  //           ' px-0">' +
+  //           formatTime(message.timestamp) +
+  //           "</p>";
 
-      const toggleChat = () => (chatState.isOpen ? closeChat() : openChat());
+  //         // Ensure markdown links open in new tab and are safe
+  //         try {
+  //           const anchors = messageDiv.querySelectorAll(".markdown-content a");
+  //           anchors.forEach((a) => {
+  //             a.setAttribute("target", "_blank");
+  //             a.setAttribute("rel", "noopener noreferrer");
+  //           });
+  //         } catch (e) {
+  //           /* no-op */
+  //         }
+  //         return messageDiv;
+  //       };
 
-      const sendMessage = () => {
-  const { messageInput } = getDOMElements();
-  if (!messageInput) return;
-  
-  // Prevent sending if already typing
-  if (chatState.isTyping) return;
-  
-  const message = messageInput.value.trim();
-  if (!message) return;
+  //       const renderMessages = () => {
+  //         const { messagesContainer } = getDOMElements();
+  //         if (messagesContainer) {
+  //           messagesContainer.innerHTML = "";
+  //           chatState.messages.forEach((m) => messagesContainer.appendChild(createMessageElement(m)));
+  //           scrollToBottom();
+  //         }
+  //       };
 
-  addMessage(message, "user");
-  renderMessages();
-  messageInput.value = "";
-  showTyping();
+  //       const showTyping = () => {
+  //         chatState.isTyping = true;
+  //         const { messagesContainer, messageInput, sendButton } = getDOMElements();
 
-  if (socket && socket.readyState === WebSocket.OPEN) {
-    socket.send(JSON.stringify({ type: "comprehensive_chat", message, ...payload }));
-  } else {
-    hideTyping();
-    addMessage("⚠️ Cannot send message: not connected to server.", "bot");
-    renderMessages();
-  }
-};
-      const bindEvents = () => {
-        const { chatToggle, closeChat: closeBtn, sendButton, messageInput } = getDOMElements();
-        if (chatToggle) chatToggle.addEventListener("click", toggleChat);
-        if (closeBtn) closeBtn.addEventListener("click", closeChat);
-        if (sendButton) sendButton.addEventListener("click", sendMessage);
-        if (messageInput) messageInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") sendMessage();
-        });
-      };
+  //         // Disable input and button
+  //         if (messageInput) {
+  //           messageInput.disabled = true;
+  //           messageInput.classList.add("opacity-50", "cursor-not-allowed");
+  //         }
+  //         if (sendButton) {
+  //           sendButton.disabled = true;
+  //         }
 
-      const initializeChatbot = async () => {
-        const storedCustomerId = localStorage.getItem("chatbot_customer_id");
-        const storedConversationId = localStorage.getItem("chatbot_conversation_id");
-        if (storedCustomerId) {
-          payload.customer_id = storedCustomerId;
-          payload.new_convo = false;
-          trackingData.chatbot_customer_id = storedCustomerId;
-          console.log("Loaded customer ID from localStorage:", storedCustomerId);
-          await updateCartNoteIfNeeded(storedCustomerId);
-        }
-        if (storedConversationId) {
-          console.log("Loaded conversation ID from localStorage:", storedConversationId);
-          loadAndRenderHistory(storedConversationId).catch(e => console.error("History load error:", e));
-        }
+  //         if (messagesContainer) {
+  //           const typingDiv = document.createElement("div");
+  //           typingDiv.id = "typing-indicator";
+  //           typingDiv.className = "flex justify-start";
+  //           typingDiv.innerHTML =
+  //             ' <div class="bg-gray-100 text-gray-800 rounded-2xl rounded-bl-none px-3 py-2 max-w-sm">' +
+  //             '<div class="flex space-x-1">' +
+  //             '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>' +
+  //             '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>' +
+  //             '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>' +
+  //             "</div>" +
+  //             "</div>";
+  //           messagesContainer.appendChild(typingDiv);
+  //           scrollToBottom();
+  //         }
+  //       };
 
-        socket = new WebSocket("wss://ryder-partner.cortechsocial.com/ws/chat/");
+  //       const hideTyping = () => {
+  //         chatState.isTyping = false;
+  //         const { messageInput, sendButton } = getDOMElements();
 
-        socket.onopen = () => {
-          console.log("✅ Connected to server");
-          if (!payload.customer_id) {
-            socket.send(JSON.stringify({
-              type: "comprehensive_chat",
-              message: "Who are you?",
-              agent_id: payload.agent_id,
-              store_id: payload.store_id,
-              new_convo: true,
-              include_timestamp: true,
-            }));
-          }
-        };
+  //         // Re-enable input and button
+  //         if (messageInput) {
+  //           messageInput.disabled = false;
+  //           messageInput.classList.remove("opacity-50", "cursor-not-allowed");
+  //         }
+  //         if (sendButton) {
+  //           sendButton.disabled = false;
+  //         }
 
-        socket.onclose = () => console.log("❌ Disconnected from server");
-        socket.onerror = (error) => console.error("⚠️ WebSocket Error:", error);
+  //         const typingIndicator = document.getElementById("typing-indicator");
+  //         if (typingIndicator) typingIndicator.remove();
+  //       };
 
-        socket.onmessage = async (event) => {
-          try {
-            const data = JSON.parse(event.data);
+  //       const openChat = () => {
+  //         chatState.isOpen = true;
+  //         const { chatWindow, chatIcon, closeIcon, chatToggle, chatToggleContainer } =
+  //           getDOMElements();
+  //         if (chatWindow && chatIcon && closeIcon) {
+  //           chatWindow.classList.remove("hidden");
+  //           chatWindow.classList.add("flex");
+  //           chatIcon.classList.add("hidden");
+  //           closeIcon.classList.remove("hidden");
+  //           if (chatToggle) chatToggle.classList.remove("chat-closed");
+  //           if (chatToggleContainer) chatToggleContainer.classList.add("hidden");
+  //           scrollToBottom();
+  //         }
+  //       };
 
-            if (data.customer_id) {
-              payload.customer_id = data.customer_id;
-              payload.new_convo = false;
-              trackingData.chatbot_customer_id = data.customer_id;
-              localStorage.setItem("chatbot_customer_id", data.customer_id);
-              console.log("🎯 Chatbot Customer ID received:", data);
-              updateCartNoteIfNeeded(data.customer_id);
-              monitorCart();
-            }
+  //       const closeChat = () => {
+  //         chatState.isOpen = false;
+  //         const { chatWindow, chatIcon, closeIcon, chatToggle, chatToggleContainer } =
+  //           getDOMElements();
+  //         if (chatWindow && chatIcon && closeIcon) {
+  //           chatWindow.classList.add("hidden");
+  //           chatWindow.classList.remove("flex");
+  //           chatIcon.classList.remove("hidden");
+  //           closeIcon.classList.add("hidden");
+  //           if (chatToggle) chatToggle.classList.add("chat-closed");
+  //           if (chatToggleContainer) chatToggleContainer.classList.remove("hidden");
+  //         }
+  //       };
 
-            if (data.conversation_id) {
-              localStorage.setItem("chatbot_conversation_id", String(data.conversation_id));
-              if (!historyLoaded) loadAndRenderHistory(String(data.conversation_id)).catch(e => console.error("History load error:", e));
-            }
+  //       const toggleChat = () => (chatState.isOpen ? closeChat() : openChat());
 
-           if (data.response && data.type === "comprehensive_chat_response") {
-      console.log("Response received:", data.response);
-      hideTyping(); // Add this line
-      addMessage(data.response, "bot");
-    } else if (data.error) {
-      hideTyping(); // Add this line
-      addMessage("Error: " + data.error, "bot");
-    }
-          } catch {
-           hideTyping()
-            addMessage(event.data, "bot");
-          }
-          renderMessages();
-        };
+  //       const sendMessage = () => {
+  //         const { messageInput } = getDOMElements();
+  //         if (!messageInput) return;
 
-        setInterval(() => {
-          if (trackingData.chatbot_customer_id) monitorCart();
-        }, 3000);
+  //         // Prevent sending if already typing
+  //         if (chatState.isTyping) return;
 
-        bindEvents();
-        renderMessages();
-        await fetchActiveAgent();
-        monitorCart();
-         setTimeout(() => {
-        openChat();
-      }, 2500);
-      };
+  //         const message = messageInput.value.trim();
+  //         if (!message) return;
 
-      document.addEventListener("DOMContentLoaded", initializeChatbot);
-    </script>
-  </body>
-</html>`;
+  //         addMessage(message, "user");
+  //         renderMessages();
+  //         messageInput.value = "";
+  //         showTyping();
+
+  //         if (socket && socket.readyState === WebSocket.OPEN) {
+  //           socket.send(JSON.stringify({ type: "comprehensive_chat", message, ...payload }));
+  //         } else {
+  //           hideTyping();
+  //           addMessage("⚠️ Cannot send message: not connected to server.", "bot");
+  //           renderMessages();
+  //         }
+  //       };
+  //       const bindEvents = () => {
+  //         const { chatToggle, closeChat: closeBtn, sendButton, messageInput } = getDOMElements();
+  //         if (chatToggle) chatToggle.addEventListener("click", toggleChat);
+  //         if (closeBtn) closeBtn.addEventListener("click", closeChat);
+  //         if (sendButton) sendButton.addEventListener("click", sendMessage);
+  //         if (messageInput)
+  //           messageInput.addEventListener("keypress", (e) => {
+  //             if (e.key === "Enter") sendMessage();
+  //           });
+  //       };
+
+  //       const initializeChatbot = async () => {
+  //         const storedCustomerId = localStorage.getItem("chatbot_customer_id");
+  //         const storedConversationId = localStorage.getItem("chatbot_conversation_id");
+  //         if (storedCustomerId) {
+  //           payload.customer_id = storedCustomerId;
+  //           payload.new_convo = false;
+  //           trackingData.chatbot_customer_id = storedCustomerId;
+  //           console.log("Loaded customer ID from localStorage:", storedCustomerId);
+  //           await updateCartNoteIfNeeded(storedCustomerId);
+  //         }
+  //         if (storedConversationId) {
+  //           console.log("Loaded conversation ID from localStorage:", storedConversationId);
+  //           loadAndRenderHistory(storedConversationId).catch((e) =>
+  //             console.error("History load error:", e)
+  //           );
+  //         }
+
+  //         socket = new WebSocket("wss://ryder-partner.cortechsocial.com/ws/chat/");
+
+  //         socket.onopen = () => {
+  //           console.log("✅ Connected to server");
+  //           if (!payload.customer_id) {
+  //             socket.send(
+  //               JSON.stringify({
+  //                 type: "comprehensive_chat",
+  //                 message: "Who are you?",
+  //                 agent_id: payload.agent_id,
+  //                 store_id: payload.store_id,
+  //                 new_convo: true,
+  //                 include_timestamp: true,
+  //               })
+  //             );
+  //           }
+  //         };
+
+  //         socket.onclose = () => console.log("❌ Disconnected from server");
+  //         socket.onerror = (error) => console.error("⚠️ WebSocket Error:", error);
+
+  //         socket.onmessage = async (event) => {
+  //           try {
+  //             const data = JSON.parse(event.data);
+
+  //             if (data.customer_id) {
+  //               payload.customer_id = data.customer_id;
+  //               payload.new_convo = false;
+  //               trackingData.chatbot_customer_id = data.customer_id;
+  //               localStorage.setItem("chatbot_customer_id", data.customer_id);
+  //               console.log("🎯 Chatbot Customer ID received:", data);
+  //               updateCartNoteIfNeeded(data.customer_id);
+  //               monitorCart();
+  //             }
+
+  //             if (data.conversation_id) {
+  //               localStorage.setItem("chatbot_conversation_id", String(data.conversation_id));
+  //               if (!historyLoaded)
+  //                 loadAndRenderHistory(String(data.conversation_id)).catch((e) =>
+  //                   console.error("History load error:", e)
+  //                 );
+  //             }
+
+  //             if (data.response && data.type === "comprehensive_chat_response") {
+  //               console.log("Response received:", data.response);
+  //               hideTyping(); // Add this line
+  //               addMessage(data.response, "bot");
+  //             } else if (data.error) {
+  //               hideTyping(); // Add this line
+  //               addMessage("Error: " + data.error, "bot");
+  //             }
+  //           } catch {
+  //             hideTyping();
+  //             addMessage(event.data, "bot");
+  //           }
+  //           renderMessages();
+  //         };
+
+  //         setInterval(() => {
+  //           if (trackingData.chatbot_customer_id) monitorCart();
+  //         }, 3000);
+
+  //         bindEvents();
+  //         const agentData = await fetchActiveAgent();
+  //         renderMessages(); // Render messages after agent name is fetched
+  //         monitorCart();
+  //         // Only open chat if agent data is present
+  //         if (agentData) {
+  //           setTimeout(() => {
+  //             openChat();
+  //           }, 2500);
+  //         }
+  //       };
+
+  //       document.addEventListener("DOMContentLoaded", initializeChatbot);
+  //     </script>
+  //   </body>
+  // </html>
+  // `;
   return html;
 };

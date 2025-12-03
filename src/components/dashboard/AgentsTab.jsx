@@ -425,7 +425,7 @@ const AgentsTab = ({ setShowOnboarding }) => {
                             <button
                               onClick={() => getAgentEmbedCode(agent)}
                               className='p-2 text-green-400 hover:text-green-600 rounded hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center space-x-2'
-                              title='Test Agent'
+                              // title='Test Agent'
                             >
                               <RiCodeSSlashFill className='w-5 h-5' />
                               <span className='text-sm'>Get Embed Code</span>
