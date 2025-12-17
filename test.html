@@ -1,6 +1,4 @@
-export const getEmbedCode = (agent) => {
-  // const html = `<script src="https://ryder-chat.netlify.app/widget.js" data-store-id="${agent.store}" data-agent-id="${agent.id}"></script>`
-  const html = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -259,13 +257,13 @@ export const getEmbedCode = (agent) => {
     </div>
 
     <script>
-       	const payload = {
-          type: "comprehensive_chat",
-          agent_id: ${agent.id},
-          store_id: ${agent.store},
-          new_convo: true,
-          include_timestamp: true,
-        };
+      const payload = {
+        type: "comprehensive_chat",
+        agent_id: 86,
+        store_id: 60,
+        new_convo: true,
+        include_timestamp: true,
+      };
 
       const API_BASE = "https://ryder-partner.cortechsocial.com";
 
@@ -855,6 +853,3 @@ export const getEmbedCode = (agent) => {
     </script>
   </body>
 </html>
-`;
-  return html;
-};

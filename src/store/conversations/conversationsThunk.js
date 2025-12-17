@@ -8,9 +8,7 @@ export const fetchConversations = createAsyncThunk(
     try {
       const response = await apiService.conversations.getAll(filters);
       const data = extractApiData(response);
-      
-      // Handle new response structure with conversations array and pagination
-      if (data.conversations && Array.isArray(data.conversations)) {
+     if (data.conversations && Array.isArray(data.conversations)) {
         return {
           conversations: data.conversations,
           pagination: data.pagination || {}
@@ -25,7 +23,6 @@ export const fetchConversations = createAsyncThunk(
     }
   }
 );
-
 
 // Fetch messages for a specific conversation
 export const fetchConversationMessages = createAsyncThunk(
