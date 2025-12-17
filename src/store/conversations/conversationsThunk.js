@@ -8,13 +8,24 @@ export const fetchConversations = createAsyncThunk(
     try {
       const response = await apiService.conversations.getAll(filters);
       const data = extractApiData(response);
-      return data;
+      
+      // Handle new response structure with conversations array and pagination
+      if (data.conversations && Array.isArray(data.conversations)) {
+        return {
+          conversations: data.conversations,
+          pagination: data.pagination || {}
+        };
+      }
+      
+      // Fallback for old response structure
+      return Array.isArray(data) ? { conversations: data, pagination: {} } : data;
     } catch (error) {
       const errorMessage = handleApiError(error);
       return rejectWithValue({ message: errorMessage });
     }
   }
 );
+
 
 // Fetch messages for a specific conversation
 export const fetchConversationMessages = createAsyncThunk(

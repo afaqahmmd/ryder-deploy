@@ -222,23 +222,45 @@ export const apiService = {
   // Conversations API
   conversations: {
     // Get all conversations with optional filters
-    getAll: async (filters = {}) => {
+   getAll: async (filters = {}) => {
       const params = new URLSearchParams();
-      Object.keys(filters).forEach((key) => {
-        if (
-          filters[key] !== null &&
-          filters[key] !== undefined &&
-          filters[key] !== ""
-        ) {
-          params.append(key, filters[key]);
-        }
-      });
+      
+      // Handle date filters
+      if (filters.startDate) {
+        params.append("start_date", filters.startDate);
+      }
+      if (filters.endDate) {
+        params.append("end_date", filters.endDate);
+      }
+      
+      // Handle engagement filters
+      if (filters.hasEngagement !== undefined && filters.hasEngagement !== null) {
+        params.append("has_engagement", filters.hasEngagement ? "true" : "false");
+      }
+      if (filters.hasCartCreation !== undefined && filters.hasCartCreation !== null) {
+        params.append("has_cart_creation", filters.hasCartCreation ? "true" : "false");
+      }
+      if (filters.hasOrderComplete !== undefined && filters.hasOrderComplete !== null) {
+        params.append("has_order_complete", filters.hasOrderComplete ? "true" : "false");
+      }
+      if (filters.hasCheckout !== undefined && filters.hasCheckout !== null) {
+        params.append("has_checkout", filters.hasCheckout ? "true" : "false");
+      }
+      
+      // Handle pagination
+      if (filters.page) {
+        params.append("page", filters.page);
+      }
+      if (filters.pageSize) {
+        params.append("page_size", filters.pageSize);
+      }
 
       const queryString = params.toString();
       return await axiosInstance.get(
         `/api/agents/conversations/${queryString ? `?${queryString}` : ""}`
       );
     },
+
 
     // Get messages for a specific conversation
     getMessages: async (conversationId, page = 1, pageSize = 50) => {

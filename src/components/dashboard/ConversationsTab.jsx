@@ -18,7 +18,6 @@ import { RiRobot2Fill } from "react-icons/ri";
 import {
   fetchConversations,
   fetchConversationMessages,
-  fetchConversationByCustomerId,
 } from "../../store/conversations/conversationsThunk";
 import {
   clearConversationError,
@@ -30,22 +29,29 @@ const ConversationsTab = () => {
   const dispatch = useDispatch();
   const {
     conversations,
-    currentConversation,
     currentMessages,
     isLoading,
     isLoadingMessages,
     error,
-    pagination,
-    messagesPagination,
   } = useSelector((state) => state.conversations);
 
-  const { agents } = useSelector((state) => state.agents);
-  const { stores } = useSelector((state) => state.stores);
+  // const { agents } = useSelector((state) => state.agents);
+  // const { stores } = useSelector((state) => state.stores);
 
   // State for WhatsApp-like layout
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [messagesPage, setMessagesPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    startDate: "",
+    endDate: "",
+    hasEngagement: false,
+    hasCartCreation: false,
+    hasOrderComplete: false,
+    hasCheckout: false,
+  });
 
   // Disable overall page scrolling when component mounts
   useEffect(() => {
@@ -66,8 +72,11 @@ const ConversationsTab = () => {
 
   // Load conversations on mount
   useEffect(() => {
-    dispatch(fetchConversations({ page: 1 }));
-  }, [dispatch]);
+    dispatch(fetchConversations({ 
+      ...filters,
+      page: 1 
+    }));
+  }, [dispatch, filters]);
 
   // Clear error on unmount
   useEffect(() => {
@@ -79,7 +88,6 @@ const ConversationsTab = () => {
   // Handle conversation selection
   const handleConversationClick = async (conversationId) => {
     setSelectedConversationId(conversationId);
-    setMessagesPage(1);
     dispatch(clearMessages());
 
     try {
@@ -100,6 +108,27 @@ const ConversationsTab = () => {
     setSelectedConversationId(null);
     dispatch(clearCurrentConversation());
     dispatch(clearMessages());
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (filterName, value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterName]: value,
+    }));
+  };
+
+  // Handle reset filters
+  const handleResetFilters = () => {
+    setFilters({
+      startDate: "",
+      endDate: "",
+      hasEngagement: false,
+      hasCartCreation: false,
+      hasOrderComplete: false,
+      hasCheckout: false,
+    });
+    setShowFilters(false);
   };
 
   // Filter conversations based on search query
@@ -138,23 +167,23 @@ const ConversationsTab = () => {
   };
 
   // Get agent name by ID
-  const getAgentName = (agentId) => {
-    console.log("--------------------------------");
-    console.log(agentId);
-    console.log("--------------------------------");
-    console.log(agents);
-    console.log("--------------------------------");
-    console.log(agents.find((a) => a.id === agentId));
-    const agent = agents.find((a) => a.id === agentId);
-    console.log(agent);
-    return agent?.name || "Unknown Agent";
-  };
+  // const getAgentName = (agentId) => {
+  //   console.log("--------------------------------");
+  //   console.log(agentId);
+  //   console.log("--------------------------------");
+  //   console.log(agents);
+  //   console.log("--------------------------------");
+  //   console.log(agents.find((a) => a.id === agentId));
+  //   const agent = agents.find((a) => a.id === agentId);
+  //   console.log(agent);
+  //   return agent?.name || "Unknown Agent";
+  // };
 
-  // Get store name by ID
-  const getStoreName = (storeId) => {
-    const store = stores.find((s) => s.id === storeId);
-    return store?.store_name || "Unknown Store";
-  };
+  // // Get store name by ID
+  // const getStoreName = (storeId) => {
+  //   const store = stores.find((s) => s.id === storeId);
+  //   return store?.store_name || "Unknown Store";
+  // };
 
   // Format message content with markdown support for bot messages
   const formatMessageContent = (content, isCustomerMessage) => {
@@ -169,6 +198,7 @@ const ConversationsTab = () => {
         .replace(/\n/g, "<br>");
     }
 
+    // For bot messages, apply markdown formatting
     let formattedContent = content
       // Bold text: **text** -> <strong>text</strong>
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
@@ -226,48 +256,6 @@ const ConversationsTab = () => {
       .replace(/&lt;\/li&gt;/g, "</li>")
       .replace(/&lt;br&gt;/g, "<br>");
 
-    // Markdown images ![alt](url) -> <img>
-    formattedContent = formattedContent.replace(
-      /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g,
-      '<img src="$2" alt="$1" class="max-w-full h-auto rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" />'
-    );
-
-    // Markdown links [text](url) -> styled anchor
-    formattedContent = formattedContent.replace(
-      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-      '<a href="$2" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">$1</a>'
-    );
-
-    // Auto-embed plain image URLs first (wrap image with a link)
-    formattedContent = formattedContent.replace(
-      /(?<![\">])(https?:\/\/[^\s<]+\.(?:png|jpe?g|gif|webp|svg))/gi,
-      '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors"><img src="$1" alt="Image" class="max-w-full h-auto rounded-md border border-gray-200 dark:border-gray-600 shadow-sm" /></a>'
-    );
-
-    // Auto-link plain URLs
-    formattedContent = formattedContent.replace(
-      /(?<![\">])(https?:\/\/[^\s<]+)/g,
-      '<a href="$1" class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" target="_blank" rel="noopener noreferrer">$1</a>'
-    );
-
-    // Ensure existing anchors get classes and attributes
-    formattedContent = formattedContent
-      .replace(
-        /<a\s+(?![^>]*class=)/g,
-        '<a class="text-blue-600 dark:text-blue-400 font-bold underline hover:text-blue-700 dark:hover:text-blue-300 transition-colors" '
-      )
-      .replace(
-        /<a([^>]*)(?<!target=["']?_blank["']?)([^>]*)>/g,
-        '<a$1 target="_blank"$2>'
-      )
-      .replace(
-        /<a([^>]*)(?<!rel=["']?noopener noreferrer["']?)([^>]*)>/g,
-        '<a$1 rel="noopener noreferrer"$2>'
-      );
-
-    // Restore escaped <img> tags just in case they were escaped earlier
-    formattedContent = formattedContent.replace(/&lt;img(.*?)&gt;/g, "<img$1>");
-
     return formattedContent;
   };
 
@@ -296,6 +284,108 @@ const ConversationsTab = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
+          </div>
+
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
+            {/* Filter Toggle Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-3"
+            >
+              <FiFilter className="w-4 h-4" />
+              <span>{showFilters ? "Hide Filters" : "Show Filters"}</span>
+            </button>
+
+            {/* Filters Section - Collapsible */}
+            {showFilters && (
+              <div className="space-y-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                {/* Date Range Filters */}
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block">
+                    Date Range
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={filters.startDate}
+                      onChange={(e) => handleFilterChange("startDate", e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Start date"
+                    />
+                    <input
+                      type="date"
+                      value={filters.endDate}
+                      onChange={(e) => handleFilterChange("endDate", e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="End date"
+                    />
+                  </div>
+                </div>
+
+                {/* Checkbox Filters */}
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="hasEngagement"
+                      checked={filters.hasEngagement}
+                      onChange={(e) => handleFilterChange("hasEngagement", e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="hasEngagement" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
+                      Has Engagement
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="hasCartCreation"
+                      checked={filters.hasCartCreation}
+                      onChange={(e) => handleFilterChange("hasCartCreation", e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="hasCartCreation" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
+                      Has Cart Creation
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="hasOrderComplete"
+                      checked={filters.hasOrderComplete}
+                      onChange={(e) => handleFilterChange("hasOrderComplete", e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="hasOrderComplete" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
+                      Order Complete
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="hasCheckout"
+                      checked={filters.hasCheckout}
+                      onChange={(e) => handleFilterChange("hasCheckout", e.target.checked)}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <label htmlFor="hasCheckout" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
+                      Has Checkout
+                    </label>
+                  </div>
+                </div>
+
+                {/* Reset Filters Button */}
+                <button
+                  onClick={handleResetFilters}
+                  className="w-full px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-500 transition-colors"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Conversations List - Scrollable */}
@@ -407,69 +497,62 @@ const ConversationsTab = () => {
               </div>
 
               {/* Messages Area - Scrollable */}
-             <div
-  className="flex-1 overflow-y-auto p-4"
-  style={{
-    scrollbarWidth: "thin",
-    scrollbarColor: "rgb(209 213 219) transparent",
-  }}
->
-  {isLoadingMessages ? (
-    <div className="flex items-center justify-center h-32">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-    </div>
-  ) : currentMessages.length === 0 ? (
-    <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400">
-      <FiMessageSquare className="w-12 h-12 mb-2" />
-      <p>No messages in this conversation</p>
-    </div>
-  ) : (
-    currentMessages
-      // ✅ Skip the first customer message
-      .filter((message, index, arr) => {
-        const firstCustomerIndex = arr.findIndex(
-          (m) => m.sender === "customer"
-        );
-        return index !== firstCustomerIndex;
-      })
-      .map((message, index) => (
-        <div
-          key={message.id || index}
-          className={`flex ${
-            message.sender === "customer" ? "justify-end" : "justify-start"
-          } mb-4`}
-        >
-          <div
-            className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
-              message.sender === "customer"
-                ? "bg-blue-600 text-white rounded-br-md"
-                : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md"
-            }`}
-          >
-            <div
-              className="text-sm whitespace-pre-wrap break-words leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: formatMessageContent(
-                  message.content,
-                  message.sender === "customer"
-                ),
-              }}
-            />
-            <p
-              className={`text-xs mt-2 opacity-75 ${
-                message.sender === "customer"
-                  ? "text-blue-100"
-                  : "text-gray-500 dark:text-gray-400"
-              }`}
-            >
-              {formatTimestamp(message.timestamp)}
-            </p>
-          </div>
-        </div>
-      ))
-  )}
-</div>
-
+              <div
+                className="flex-1 overflow-y-auto p-4"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "rgb(209 213 219) transparent",
+                }}
+              >
+                {isLoadingMessages ? (
+                  <div className="flex items-center justify-center h-32">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : currentMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400">
+                    <FiMessageSquare className="w-12 h-12 mb-2" />
+                    <p>No messages in this conversation</p>
+                  </div>
+                ) : (
+                  currentMessages.map((message, index) => (
+                    <div
+                      key={message.id || index}
+                      className={`flex ${
+                        message.sender === "customer"
+                          ? "justify-end"
+                          : "justify-start"
+                      } mb-4`}
+                    >
+                      <div
+                        className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
+                          message.sender === "customer"
+                            ? "bg-blue-600 text-white rounded-br-md"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-bl-md"
+                        }`}
+                      >
+                        <div
+                          className="text-sm whitespace-pre-wrap break-words leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: formatMessageContent(
+                              message.content,
+                              message.sender === "customer"
+                            ),
+                          }}
+                        />
+                        <p
+                          className={`text-xs mt-2 opacity-75 ${
+                            message.sender === "customer"
+                              ? "text-blue-100"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
+                          {formatTimestamp(message.timestamp)}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
 
               {/* Message Input (Read-only for now) - Fixed */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
