@@ -9,7 +9,10 @@ export const getEmbedCode = (agent) => {
 
     <!-- Tailwind & Marked -->
     <script src="https://cdn.tailwindcss.com" async></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+      async
+    ></script>
 
     <style>
       body {
@@ -128,7 +131,7 @@ export const getEmbedCode = (agent) => {
   <body>
     <div id="chatbot-container" style="display: none">
       <!-- Floating Chat Icon -->
-      <div id="chat-toggle-container" class="fixed bottom-6 right-6 z-50">
+      <div id="chat-toggle-container" class="fixed bottom-16 right-16 z-50">
         <button
           id="chat-toggle"
           class="bg-[#1F1F1F] hover:bg-[#303030] text-white rounded-full p-[2px] shadow-lg transition-all duration-300 hover:scale-110 chat-closed relative"
@@ -187,14 +190,14 @@ export const getEmbedCode = (agent) => {
       <!-- Chat Window -->
       <div
         id="chat-window"
-        class="fixed bottom-24 right-6 w-96 h-[28rem] bg-white rounded-lg shadow-2xl z-50 flex-col hidden"
+        class="fixed bottom-24 right-6 w-96 h-[36rem] bg-white rounded-lg shadow-2xl z-50 flex-col hidden"
       >
         <div
           class="bg-[#1F1F1F] text-white p-4 rounded-t-lg flex items-center justify-between"
         >
           <div class="flex items-center">
             <div
-              class="w-8 h-8 bg-[#616161] rounded-full flex items-center justify-center mr-0"
+              class="w-8 h-8 bg-[#616161] rounded-full flex items-center justify-center mr-3"
             >
               <!-- 🤖 -->
               <img
@@ -204,7 +207,7 @@ export const getEmbedCode = (agent) => {
               />
             </div>
             <div>
-              <h3 id="agent-name" class="font-semibold text-sm">
+              <h3 id="agent-name" class="font-semibold !text-white text-sm">
                 Shopify Assistant
               </h3>
               <p class="text-xs text-blue-100">Online now</p>
@@ -224,12 +227,13 @@ export const getEmbedCode = (agent) => {
 
         <div
           id="messages-container"
-          class="flex-1 overflow-y-auto p-4 space-y-3 h-80"
+          class="flex-1 overflow-y-auto p-4 space-y-3"
         ></div>
 
         <div class="border-t-0 border-gray-200 px-3 pb-3">
           <div class="relative">
             <input
+              style="border: 1px solid #d1d5db !important"
               type="text"
               id="message-input"
               placeholder="Type your message..."
@@ -439,7 +443,7 @@ export const getEmbedCode = (agent) => {
           if (currentCart.note) {
             try {
               currentNoteData = JSON.parse(currentCart.note);
-            } catch (e) {
+            } catch {
               currentNoteData = {};
             }
           }
@@ -539,7 +543,7 @@ export const getEmbedCode = (agent) => {
           try {
             marked.setOptions({ breaks: true, gfm: true });
             content = marked.parse(message.text);
-          } catch (e) {
+          } catch {
             content = message.text;
           }
         }
@@ -552,7 +556,7 @@ export const getEmbedCode = (agent) => {
         if (message.sender === "bot") {
           agentInfoHtml =
             '<div class="flex items-center mb-1">' +
-            '<div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mr-0">' +
+            '<div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mr-2">' +
             '<img src="https://ryder-chat.netlify.app/agent.jpg" alt="Agent" class="w-6 h-6 rounded-full object-cover object-top" />' +
             "</div>" +
             "<div>" +
@@ -574,7 +578,7 @@ export const getEmbedCode = (agent) => {
           content +
           "</div>" +
           "</div>" +
-          '<p class="text-xs mt-0 opacity-70 ' +
+          '<p class="text-xs mt-1 opacity-70 ' +
           timeClass +
           ' px-0">' +
           formatTime(message.timestamp) +
@@ -624,7 +628,7 @@ export const getEmbedCode = (agent) => {
           typingDiv.className = "flex justify-start";
           typingDiv.innerHTML =
             ' <div class="bg-gray-100 text-gray-800 rounded-2xl rounded-bl-none px-3 py-2 max-w-sm">' +
-            '<div class="flex space-x-0">' +
+            '<div class="flex space-x-1">' +
             '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>' +
             '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>' +
             '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>' +
@@ -816,7 +820,7 @@ export const getEmbedCode = (agent) => {
               hideTyping(); // Add this line
               addMessage("Error: " + data.error, "bot");
             }
-          } catch (e) {
+          } catch {
             hideTyping();
             addMessage(event.data, "bot");
           }
@@ -840,7 +844,7 @@ export const getEmbedCode = (agent) => {
           const lastTimestamp = localStorage.getItem(STORAGE_KEY);
           const timeDiff = now - Number(lastTimestamp);
           // Open Chat Every 2 hours
-          if (!lastTimestamp || timeDiff >= 7200000) {
+          if (!lastTimestamp || timeDiff >= 3600000) {
             setTimeout(() => {
               localStorage.setItem(STORAGE_KEY, now.toString());
               openChat();
