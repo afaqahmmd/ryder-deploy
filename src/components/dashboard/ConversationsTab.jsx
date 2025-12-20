@@ -62,7 +62,7 @@ const ConversationsTab = () => {
   const [filters, setFilters] = useState({
     startDate: formatDate(sevenDaysAgo),
     endDate: formatDate(today),
-    hasEngagement: false,
+    hasEngagement: true,
     hasCartCreation: false,
     hasOrderComplete: false,
     hasCheckout: false,
@@ -85,13 +85,35 @@ const ConversationsTab = () => {
     };
   }, []);
 
+  // Build API filters - only send filters that are true, exclude false values
+  const buildApiFilters = (pageNum = 1) => {
+    const apiFilters = {
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      page: pageNum,
+      page_size: 10,
+    };
+    
+    // Only add boolean filters if they are explicitly true
+    if (filters.hasEngagement) {
+      apiFilters.hasEngagement = true;
+    }
+    if (filters.hasCartCreation) {
+      apiFilters.hasCartCreation = true;
+    }
+    if (filters.hasCheckout) {
+      apiFilters.hasCheckout = true;
+    }
+    if (filters.hasOrderComplete) {
+      apiFilters.hasOrderComplete = true;
+    }
+    
+    return apiFilters;
+  };
+
   // Load conversations on mount
   useEffect(() => {
-    dispatch(fetchConversations({ 
-      ...filters,
-      page: 1,
-      page_size: 10
-    }));
+    dispatch(fetchConversations(buildApiFilters(1)));
   }, [dispatch, filters]);
 
   // Clear error on unmount
@@ -155,9 +177,9 @@ const ConversationsTab = () => {
   // Handle reset filters
   const handleResetFilters = () => {
     setFilters({
-      startDate: "",
-      endDate: "",
-      hasEngagement: false,
+      startDate: formatDate(sevenDaysAgo),
+      endDate: formatDate(today),
+      hasEngagement: true,
       hasCartCreation: false,
       hasOrderComplete: false,
       hasCheckout: false,
@@ -168,11 +190,7 @@ const ConversationsTab = () => {
   // Handle load more conversations
   const handleLoadMore = () => {
     const nextPage = (pagination?.current_page || 1) + 1;
-    dispatch(fetchConversations({
-      ...filters,
-      page: nextPage,
-      page_size: 10
-    }));
+    dispatch(fetchConversations(buildApiFilters(nextPage)));
   };
 
   // Filter conversations based on search query
@@ -307,11 +325,11 @@ const ConversationsTab = () => {
     <div className="h-full flex flex-col">
       {/* WhatsApp-like Layout */}
       <div className="flex h-full max-h-[1080px] bg-gray-50 dark:bg-gray-900">
-        {/* Conversations List - Left Side - Static */}
+        {/* Conversations List - Left Side - Scrollable */}
         <div
           className={`${
-            selectedConversationId ? "hidden md:block" : "block"
-          } w-full md:w-1/3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col sticky top-0 h-[calc(100vh-2rem)] `}
+            selectedConversationId ? "hidden md:flex" : "flex"
+          } w-full md:w-1/3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col h-[calc(100vh-2rem)] overflow-hidden`}
         >
           {/* Header - Fixed */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
