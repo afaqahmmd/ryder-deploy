@@ -6,6 +6,7 @@ import {
   FiFilter,
   FiChevronLeft,
   FiChevronRight,
+  FiChevronDown,
   FiUser,
   FiCalendar,
   FiClock,
@@ -23,9 +24,22 @@ import {
   clearConversationError,
   clearCurrentConversation,
   clearMessages,
+  resetConversations,
 } from "../../store/conversations/conversationsSlice";
 
 const ConversationsTab = () => {
+  // Calculate default date range (last 7 days)
+  const today = new Date();
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(today.getDate() - 7);
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const dispatch = useDispatch();
   const {
     conversations,
@@ -33,6 +47,7 @@ const ConversationsTab = () => {
     isLoading,
     isLoadingMessages,
     error,
+    pagination,
   } = useSelector((state) => state.conversations);
 
   // const { agents } = useSelector((state) => state.agents);
@@ -43,10 +58,10 @@ const ConversationsTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   
-  // Filter states
+  // Filter states with default date range (last 7 days)
   const [filters, setFilters] = useState({
-    startDate: "",
-    endDate: "",
+    startDate: formatDate(sevenDaysAgo),
+    endDate: formatDate(today),
     hasEngagement: false,
     hasCartCreation: false,
     hasOrderComplete: false,
@@ -74,7 +89,8 @@ const ConversationsTab = () => {
   useEffect(() => {
     dispatch(fetchConversations({ 
       ...filters,
-      page: 1 
+      page: 1,
+      page_size: 10
     }));
   }, [dispatch, filters]);
 
@@ -110,12 +126,30 @@ const ConversationsTab = () => {
     dispatch(clearMessages());
   };
 
-  // Handle filter changes
+  // Handle filter changes with cascading logic
   const handleFilterChange = (filterName, value) => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [filterName]: value,
-    }));
+    setFilters((prevFilters) => {
+      const updatedFilters = {
+        ...prevFilters,
+        [filterName]: value,
+      };
+
+      // Cascading logic: if a filter is checked, all higher-tier filters must be checked
+      if (value) {
+        if (filterName === "hasCartCreation") {
+          updatedFilters.hasEngagement = true;
+        } else if (filterName === "hasCheckout") {
+          updatedFilters.hasEngagement = true;
+          updatedFilters.hasCartCreation = true;
+        } else if (filterName === "hasOrderComplete") {
+          updatedFilters.hasEngagement = true;
+          updatedFilters.hasCartCreation = true;
+          updatedFilters.hasCheckout = true;
+        }
+      }
+
+      return updatedFilters;
+    });
   };
 
   // Handle reset filters
@@ -129,6 +163,16 @@ const ConversationsTab = () => {
       hasCheckout: false,
     });
     setShowFilters(false);
+  };
+
+  // Handle load more conversations
+  const handleLoadMore = () => {
+    const nextPage = (pagination?.current_page || 1) + 1;
+    dispatch(fetchConversations({
+      ...filters,
+      page: nextPage,
+      page_size: 10
+    }));
   };
 
   // Filter conversations based on search query
@@ -290,113 +334,116 @@ const ConversationsTab = () => {
             {/* Filter Toggle Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors mb-3"
+              className="flex items-center space-x-2 text-sm font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-3"
             >
-              <FiFilter className="w-4 h-4" />
+              <FiFilter className="w-5 h-5" />
               <span>{showFilters ? "Hide Filters" : "Show Filters"}</span>
             </button>
 
             {/* Filters Section - Collapsible */}
             {showFilters && (
-              <div className="space-y-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="space-y-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
                 {/* Date Range Filters */}
                 <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block">
-                    Date Range
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 block uppercase tracking-wide">
+                    📅 Date Range
                   </label>
                   <div className="flex gap-2">
-                    <input
-                      type="date"
-                      value={filters.startDate}
-                      onChange={(e) => handleFilterChange("startDate", e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Start date"
-                    />
-                    <input
-                      type="date"
-                      value={filters.endDate}
-                      onChange={(e) => handleFilterChange("endDate", e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="End date"
-                    />
+                    <div className="flex-1">
+                      <input
+                        type="date"
+                        value={filters.startDate}
+                        onChange={(e) => handleFilterChange("startDate", e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="Start date"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="date"
+                        value={filters.endDate}
+                        onChange={(e) => handleFilterChange("endDate", e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        placeholder="End date"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Checkbox Filters */}
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="hasEngagement"
-                      checked={filters.hasEngagement}
-                      onChange={(e) => handleFilterChange("hasEngagement", e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <label htmlFor="hasEngagement" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
-                      Has Engagement
-                    </label>
-                  </div>
+                {/* Conversation Status Filters */}
+                <div className="space-y-3">
+                  <label className="text-xs font-bold text-gray-800 dark:text-gray-200 block uppercase tracking-wide">
+                    🎯 Conversation Status
+                  </label>
+                  <div className="bg-white dark:bg-gray-600/50 p-3 rounded-lg grid grid-cols-2 gap-3">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="hasEngagement"
+                        checked={filters.hasEngagement}
+                        onChange={(e) => handleFilterChange("hasEngagement", e.target.checked)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-500 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <label htmlFor="hasEngagement" className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer font-medium">
+                        Has Engagement
+                      </label>
+                    </div>
 
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="hasCartCreation"
-                      checked={filters.hasCartCreation}
-                      onChange={(e) => handleFilterChange("hasCartCreation", e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <label htmlFor="hasCartCreation" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
-                      Has Cart Creation
-                    </label>
-                  </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="hasCartCreation"
+                        checked={filters.hasCartCreation}
+                        onChange={(e) => handleFilterChange("hasCartCreation", e.target.checked)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-500 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <label htmlFor="hasCartCreation" className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer font-medium">
+                        Has Cart Creation
+                      </label>
+                    </div>
 
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="hasOrderComplete"
-                      checked={filters.hasOrderComplete}
-                      onChange={(e) => handleFilterChange("hasOrderComplete", e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <label htmlFor="hasOrderComplete" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
-                      Order Complete
-                    </label>
-                  </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="hasCheckout"
+                        checked={filters.hasCheckout}
+                        onChange={(e) => handleFilterChange("hasCheckout", e.target.checked)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-500 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <label htmlFor="hasCheckout" className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer font-medium">
+                        Has Checkout
+                      </label>
+                    </div>
 
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="hasCheckout"
-                      checked={filters.hasCheckout}
-                      onChange={(e) => handleFilterChange("hasCheckout", e.target.checked)}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <label htmlFor="hasCheckout" className="ml-2 text-xs text-gray-700 dark:text-gray-300 cursor-pointer">
-                      Has Checkout
-                    </label>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="hasOrderComplete"
+                        checked={filters.hasOrderComplete}
+                        onChange={(e) => handleFilterChange("hasOrderComplete", e.target.checked)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-500 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <label htmlFor="hasOrderComplete" className="ml-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer font-medium">
+                        Order Complete
+                      </label>
+                    </div>
                   </div>
                 </div>
 
                 {/* Reset Filters Button */}
                 <button
                   onClick={handleResetFilters}
-                  className="w-full px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-500 transition-colors"
+                  className="w-full px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-500 transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                  Reset Filters
+                  ↺ Reset Filters
                 </button>
               </div>
             )}
           </div>
 
           {/* Conversations List - Scrollable */}
-          <div
-            className="flex-1 h-full border-sm overflow-y-scroll"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "rgb(209 213 219) transparent",
-            }}
-          >
-            {isLoading ? (
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {isLoading && conversations.length === 0 ? (
               <div className="flex items-center justify-center h-32">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               </div>
@@ -406,8 +453,8 @@ const ConversationsTab = () => {
                 <p>No conversations found</p>
               </div>
             ) : (
-              <div className="flex flex-col max-h-[500px] overflow-auto">
-                <div className="divide-y divide-gray-200 dark:divide-gray-700 ">
+              <>
+                <div className="divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredConversations.map((conversation) => (
                     <div
                       key={conversation.id}
@@ -434,23 +481,64 @@ const ConversationsTab = () => {
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             Customer ID: {conversation.customer_id}
                           </p>
-                          <div className="flex items-center space-x-2 mt-1">
+                          <div className="flex items-center space-x-2 mt-1 mb-2">
                             <span className="text-xs text-gray-400 dark:text-gray-500">
                               {conversation.agent_name}
                             </span>
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              •
-                            </span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">•</span>
                             <span className="text-xs text-gray-400 dark:text-gray-500">
                               {conversation.store_name}
                             </span>
                           </div>
+                          {conversation.tags && conversation.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mt-2">
+                              {conversation.tags.map((tag, index) => {
+                                const tagColors = {
+                                  'engaged': 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700',
+                                  'cart created': 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700',
+                                  'checkout created': 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700',
+                                  'ordered': 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-700'
+                                };
+                                const colorClass = tagColors[tag.toLowerCase()] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600';
+                                return (
+                                  <span
+                                    key={index}
+                                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colorClass} transition-all duration-200`}
+                                  >
+                                    {tag}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+
+                {pagination?.has_next && (
+                  <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky bottom-0">
+                    <button
+                      onClick={handleLoadMore}
+                      disabled={isLoading}
+                      className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <FiChevronDown className="w-4 h-4" />
+                          Load More
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

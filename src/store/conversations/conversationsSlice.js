@@ -55,6 +55,17 @@ export const conversationsSlice = createSlice({
         has_previous: false,
         page_size: 50
       };
+    },
+    resetConversations: (state) => {
+      state.conversations = [];
+      state.pagination = {
+        current_page: 1,
+        total_pages: 1,
+        total_count: 0,
+        has_next: false,
+        has_previous: false,
+        page_size: 10
+      };
     }
   },
   extraReducers: (builder) => {
@@ -66,14 +77,21 @@ export const conversationsSlice = createSlice({
       })
       .addCase(fetchConversations.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.conversations = action.payload.conversations || [];
+        const currentPage = action.payload.pagination?.current_page || 1;
+        
+        if (currentPage === 1) {
+          state.conversations = action.payload.conversations || [];
+        } else {
+          state.conversations = [...state.conversations, ...(action.payload.conversations || [])];
+        }
+        
         state.pagination = action.payload.pagination || {
           current_page: 1,
           total_pages: 1,
           total_count: 0,
           has_next: false,
           has_previous: false,
-          page_size: 20
+          page_size: 10
         };
         state.error = null;
       })
@@ -131,7 +149,8 @@ export const {
   clearConversationError, 
   setCurrentConversation, 
   clearCurrentConversation,
-  clearMessages
+  clearMessages,
+  resetConversations
 } = conversationsSlice.actions;
 
 export default conversationsSlice.reducer;

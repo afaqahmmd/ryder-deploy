@@ -274,8 +274,8 @@ export const apiService = {
       if (filters.page) {
         params.append("page", filters.page);
       }
-      if (filters.pageSize) {
-        params.append("page_size", filters.pageSize);
+      if (filters.page_size || filters.pageSize) {
+        params.append("page_size", filters.page_size || filters.pageSize);
       }
 
       const queryString = params.toString();
