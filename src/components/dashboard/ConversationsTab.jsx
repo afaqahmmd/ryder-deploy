@@ -193,16 +193,36 @@ const ConversationsTab = () => {
     dispatch(fetchConversations(buildApiFilters(nextPage)));
   };
 
-  // Filter conversations based on search query
-  const filteredConversations = conversations.filter(
-    (conversation) =>
+  // Filter conversations based on search query and selected tags
+  const filteredConversations = conversations.filter((conversation) => {
+    // First, check search query match
+    const matchesSearch =
       conversation.customer_name
         ?.toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
       conversation.customer_id
         ?.toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+        .includes(searchQuery.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    // Then, check tag filters
+    const conversationTags = (conversation.tags || []).map((t) => t.toLowerCase());
+    
+    // Build list of allowed tags based on selected filters
+    const allowedTags = [];
+    if (filters.hasEngagement) allowedTags.push("engaged");
+    if (filters.hasCartCreation) allowedTags.push("cart created");
+    if (filters.hasCheckout) allowedTags.push("checkout created");
+    if (filters.hasOrderComplete) allowedTags.push("ordered");
+
+    // If no filters are selected, show all conversations
+    if (allowedTags.length === 0) return true;
+
+    // Show conversation if it has ALL the required/selected tags
+    // (it can have additional tags - we just won't display them in the UI)
+    return allowedTags.every((tag) => conversationTags.includes(tag));
+  });
 
   // Get selected conversation details
   const selectedConversation = conversations.find(
@@ -510,7 +530,17 @@ const ConversationsTab = () => {
                           </div>
                           {conversation.tags && conversation.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mt-2">
-                              {conversation.tags.map((tag, index) => {
+                              {conversation.tags
+                                .filter((tag) => {
+                                  // Only show tags that match selected filters
+                                  const tagLower = tag.toLowerCase();
+                                  if (tagLower === "engaged" && filters.hasEngagement) return true;
+                                  if (tagLower === "cart created" && filters.hasCartCreation) return true;
+                                  if (tagLower === "checkout created" && filters.hasCheckout) return true;
+                                  if (tagLower === "ordered" && filters.hasOrderComplete) return true;
+                                  return false;
+                                })
+                                .map((tag, index) => {
                                 const tagColors = {
                                   'engaged': 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700',
                                   'cart created': 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700',

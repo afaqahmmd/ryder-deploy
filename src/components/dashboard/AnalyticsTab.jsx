@@ -138,6 +138,19 @@ useEffect(() => {
     dispatch(fetchStoreGraph({ storeId, ...dateParams }));
   };
 
+  // 🔄 Auto-refresh analytics every 1 minute
+  useEffect(() => {
+    const storeId = selectedStore?.id;
+    if (!storeId) return;
+
+    const intervalId = setInterval(() => {
+      console.log(`🔄 Auto-refreshing analytics for store ID: ${storeId}`);
+      triggerAnalyticsFetch(storeId, startDate, endDate);
+    }, 60000); // 60000ms = 1 minute
+
+    return () => clearInterval(intervalId);
+  }, [selectedStore, startDate, endDate]);
+
   // 🧠 Fetch analytics automatically when selectedStore changes
   useEffect(() => {
     const storeId = selectedStore?.id;
