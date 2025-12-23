@@ -229,7 +229,7 @@ const ConversationsTab = () => {
     (c) => c.id === selectedConversationId
   );
 
-  const visibleMessages = currentMessages.length > 2 ? currentMessages.slice(2) : [];
+  const visibleMessages = currentMessages.length > 1 ? currentMessages.slice(1) : [];
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
