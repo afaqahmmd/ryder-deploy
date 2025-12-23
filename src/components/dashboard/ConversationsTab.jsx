@@ -532,8 +532,8 @@ const ConversationsTab = () => {
                           </div>
                           {conversation.tags && conversation.tags.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mt-2">
-                              {conversation.tags
-                                .filter((tag) => {
+                              {(() => {
+                                const filteredTags = conversation.tags.filter((tag) => {
                                   // Only show tags that match selected filters
                                   const tagLower = tag.toLowerCase();
                                   if (tagLower === "engaged" && filters.hasEngagement) return true;
@@ -541,24 +541,28 @@ const ConversationsTab = () => {
                                   if (tagLower === "checkout created" && filters.hasCheckout) return true;
                                   if (tagLower === "ordered" && filters.hasOrderComplete) return true;
                                   return false;
-                                })
-                                .map((tag, index) => {
+                                });
+                                
+                                // Show only the last tag
+                                if (filteredTags.length === 0) return null;
+                                const lastTag = filteredTags[filteredTags.length - 1];
+                                
                                 const tagColors = {
                                   'engaged': 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700',
                                   'cart created': 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700',
                                   'checkout created': 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700',
                                   'ordered': 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-700'
                                 };
-                                const colorClass = tagColors[tag.toLowerCase()] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600';
+                                const colorClass = tagColors[lastTag.toLowerCase()] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600';
+                                
                                 return (
                                   <span
-                                    key={index}
                                     className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${colorClass} transition-all duration-200`}
                                   >
-                                    {tag}
+                                    {lastTag}
                                   </span>
                                 );
-                              })}
+                              })()}
                             </div>
                           )}
                         </div>
