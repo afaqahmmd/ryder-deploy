@@ -229,6 +229,8 @@ const ConversationsTab = () => {
     (c) => c.id === selectedConversationId
   );
 
+  const visibleMessages = currentMessages.length > 2 ? currentMessages.slice(2) : [];
+
   // Format timestamp
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "";
@@ -625,7 +627,6 @@ const ConversationsTab = () => {
                       {selectedConversation.agent_name}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {/* {getStoreName(selectedConversation.store_id)} */}
                       {selectedConversation.store_name}
                     </p>
                   </div>
@@ -644,13 +645,13 @@ const ConversationsTab = () => {
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   </div>
-                ) : currentMessages.length === 0 ? (
+                ) : visibleMessages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-32 text-gray-500 dark:text-gray-400">
                     <FiMessageSquare className="w-12 h-12 mb-2" />
                     <p>No messages in this conversation</p>
                   </div>
                 ) : (
-                  currentMessages.map((message, index) => (
+                  visibleMessages.map((message, index) => (
                     <div
                       key={message.id || index}
                       className={`flex ${
