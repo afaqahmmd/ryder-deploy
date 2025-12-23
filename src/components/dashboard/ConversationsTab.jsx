@@ -148,30 +148,12 @@ const ConversationsTab = () => {
     dispatch(clearMessages());
   };
 
-  // Handle filter changes with cascading logic
+  // Handle filter changes - no cascading logic
   const handleFilterChange = (filterName, value) => {
-    setFilters((prevFilters) => {
-      const updatedFilters = {
-        ...prevFilters,
-        [filterName]: value,
-      };
-
-      // Cascading logic: if a filter is checked, all higher-tier filters must be checked
-      if (value) {
-        if (filterName === "hasCartCreation") {
-          updatedFilters.hasEngagement = true;
-        } else if (filterName === "hasCheckout") {
-          updatedFilters.hasEngagement = true;
-          updatedFilters.hasCartCreation = true;
-        } else if (filterName === "hasOrderComplete") {
-          updatedFilters.hasEngagement = true;
-          updatedFilters.hasCartCreation = true;
-          updatedFilters.hasCheckout = true;
-        }
-      }
-
-      return updatedFilters;
-    });
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterName]: value,
+    }));
   };
 
   // Handle reset filters
