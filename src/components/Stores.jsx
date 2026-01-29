@@ -629,7 +629,13 @@ const Stores = ({ showConnectStoreModal, setShowConnectStoreModal }) => {
                         <input
                           type="text"
                           required
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                          className={`w-full px-4 py-2 rounded-lg border ${
+                            storeForCoupons?.coupons?.some(
+                              (c) => c.code === newCouponData.code
+                            )
+                              ? "border-red-500 focus:ring-red-500"
+                              : "border-gray-300 dark:border-gray-600 focus:ring-green-500"
+                          } dark:bg-gray-800 dark:text-white focus:ring-2 outline-none transition-all`}
                           placeholder="e.g. SUMMER30"
                           value={newCouponData.code}
                           onChange={(e) =>
@@ -662,15 +668,24 @@ const Stores = ({ showConnectStoreModal, setShowConnectStoreModal }) => {
                         </label>
                         <input
                           type="number"
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                          min="0"
+                          max="100"
+                          disabled={!!newCouponData.fixed_amount_off}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           placeholder="0"
                           value={newCouponData.percentage_off}
-                          onChange={(e) =>
-                            setNewCouponData({
-                              ...newCouponData,
-                              percentage_off: e.target.value,
-                            })
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (
+                              val === "" ||
+                              (Number(val) >= 0 && Number(val) <= 100)
+                            ) {
+                              setNewCouponData({
+                                ...newCouponData,
+                                percentage_off: val,
+                              });
+                            }
+                          }}
                         />
                       </div>
                       <div className="space-y-1">
@@ -679,7 +694,8 @@ const Stores = ({ showConnectStoreModal, setShowConnectStoreModal }) => {
                         </label>
                         <input
                           type="number"
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 outline-none transition-all"
+                          disabled={!!newCouponData.percentage_off}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-green-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                           placeholder="0.00"
                           value={newCouponData.fixed_amount_off}
                           onChange={(e) =>
@@ -701,8 +717,13 @@ const Stores = ({ showConnectStoreModal, setShowConnectStoreModal }) => {
                       </button>
                       <button
                         type="submit"
-                        disabled={isProcessingCoupon}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold transition-all shadow-lg shadow-green-600/20 flex items-center"
+                        disabled={
+                          isProcessingCoupon ||
+                          storeForCoupons?.coupons?.some(
+                            (c) => c.code === newCouponData.code
+                          )
+                        }
+                        className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-bold transition-all shadow-lg shadow-green-600/20 flex items-center"
                       >
                         {isProcessingCoupon ? (
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
@@ -719,13 +740,24 @@ const Stores = ({ showConnectStoreModal, setShowConnectStoreModal }) => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     Active Coupons ({storeForCoupons.coupons.length})
                   </h3>
+                  <div className="flex flex-col space-y-2 justify-end items-end">
+                  <div>
                   <button
                     onClick={() => setIsAddingCoupon(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-lg shadow-green-600/20 flex items-center text-sm"
-                  >
+                    disabled={storeForCoupons?.coupons?.length >= 1}
+                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-bold transition-all shadow-lg shadow-green-600/20 flex items-center text-sm"
+                    >
                     <MdAdd className="w-5 h-5 mr-1" />
                     New Coupon
                   </button>
+                    </div>
+                  {storeForCoupons?.coupons?.length >= 1 && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      You have reached the maximum number of coupons for this
+                      store.
+                    </p>
+                  )}
+                  </div>
                 </div>
               )}
 
