@@ -1,6 +1,8 @@
 export const getEmbedCode = (agent) => {
   // const html = `<script src="https://ryder-chat.netlify.app/widget.js" data-store-id="${agent.store}" data-agent-id="${agent.id}"></script>`
-  const html = `<!DOCTYPE html>
+  const html = `
+  
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -18,8 +20,8 @@ export const getEmbedCode = (agent) => {
       body {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
         background: transparent;
       }
       .bred {
@@ -108,7 +110,7 @@ export const getEmbedCode = (agent) => {
         overflow: visible;
       }
       #chat-toggle.chat-closed::before,
-      #chat-toggle.chat-closed::after {
+      /* #chat-toggle.chat-closed::after {
         content: "";
         position: absolute;
         top: 50%;
@@ -116,20 +118,73 @@ export const getEmbedCode = (agent) => {
         width: 100%;
         height: 100%;
         border-radius: 50%;
-        border: 2px solid rgba(6, 16, 49, 1); /* blue-800 with opacity - darker blue */
+        border: 2px solid rgba(6, 16, 49, 1); 
         pointer-events: none;
         z-index: -1;
         animation: radiate 2s ease-out infinite;
         animation-fill-mode: backwards;
-      }
+      } */
       #chat-toggle.chat-closed::after {
         animation-delay: 1s;
+      }
+      /* Floating Message Animation */
+      @keyframes floatUp {
+        0% {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .floating-message {
+        animation: floatUp 0.5s ease-out forwards;
+      }
+      #messages-container {
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
       }
     </style>
   </head>
 
   <body>
     <div id="chatbot-container" style="display: none">
+      <!-- Floating Welcome Message (New) -->
+      <div
+        id="chat-floating-message"
+        class="fixed bottom-36 right-16 z-40 bg-white p-4 rounded-xl shadow-xl max-w-[250px] hidden flex-col items-start border border-gray-100 floating-message md:max-w-xs"
+      >
+        <button
+          id="close-floating-message"
+          class="absolute top-1 right-1 text-gray-400 hover:text-gray-600 p-1"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+        <p
+          class="text-sm text-gray-800 font-medium cursor-pointer break-words w-full overflow-hidden"
+          id="floating-message-text"
+        >
+          ...
+        </p>
+        <!-- Arrow pointing down -->
+        <div
+          class="absolute -bottom-2 right-6 w-4 h-4 bg-white transform rotate-45 border-b border-r border-gray-100"
+        ></div>
+      </div>
+
       <!-- Floating Chat Icon -->
       <div id="chat-toggle-container" class="fixed bottom-16 right-16 z-50">
         <button
@@ -141,10 +196,11 @@ export const getEmbedCode = (agent) => {
           <span
             class="absolute top-1 right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"
           ></span>
-
+          <!-- https://ryder-partner.vercel.app/agent.gif -->
+          <!-- src="https://ryder-chat.netlify.app/agent.jpg" -->
           <img
             id="chat-icon"
-            src="https://ryder-chat.netlify.app/agent.jpg"
+            src="https://ryder-media.netlify.app/agent.gif"
             alt="Agent"
             class="w-14 h-14 rounded-full object-cover object-top"
           />
@@ -190,18 +246,19 @@ export const getEmbedCode = (agent) => {
       <!-- Chat Window -->
       <div
         id="chat-window"
-        class="fixed bottom-24 right-6 w-96 h-[36rem] bg-white rounded-lg shadow-2xl z-50 flex-col hidden"
+        class="fixed bottom-0 left-0 w-full h-[70%] md:bottom-6 md:right-6 md:w-96 md:left-auto bg-white rounded-t-lg md:rounded-lg shadow-2xl z-50 flex-col hidden"
       >
         <div
-          class="bg-[#1F1F1F] text-white p-4 rounded-t-lg flex items-center justify-between"
+          class="bg-[#1F1F1F] text-white p-4 rounded-t-lg flex items-center justify-between flex-shrink-0"
         >
           <div class="flex items-center">
             <div
               class="w-8 h-8 bg-[#616161] rounded-full flex items-center justify-center mr-3"
             >
-              <!-- 🤖 -->
+              <!-- :robot_face: -->
+              <!-- src="https://ryder-chat.netlify.app/agent.jpg" -->
               <img
-                src="https://ryder-chat.netlify.app/agent.jpg"
+                src="https://ryder-media.netlify.app/agent.png"
                 alt="Agent"
                 class="w-8 h-8 rounded-full object-cover object-top"
               />
@@ -224,20 +281,18 @@ export const getEmbedCode = (agent) => {
             </svg>
           </button>
         </div>
-
         <div
           id="messages-container"
-          class="flex-1 overflow-y-auto p-4 space-y-3"
+          class="!block flex-1 overflow-y-auto p-4 space-y-3 min-h-0"
         ></div>
-
-        <div class="border-t-0 border-gray-200 px-3 pb-3">
+        <div class="border-t-0 border-gray-200 px-3 pb-3 flex-shrink-0">
           <div class="relative">
             <input
               style="border: 1px solid #d1d5db !important"
               type="text"
               id="message-input"
               placeholder="Type your message..."
-              class="w-full border border-gray-300 rounded-2xl px-4 py-4 pr-12 text-sm focus:outline-none focus:border-blue-500 shadow-md shadow-gray-50"
+              class="w-full border border-gray-300 rounded-2xl px-4 py-4 pr-12 text-base focus:outline-none focus:border-blue-500 shadow-md shadow-gray-50"
             />
             <button
               id="send-button"
@@ -263,20 +318,20 @@ export const getEmbedCode = (agent) => {
     </div>
 
     <script>
-       	const payload = {
-          type: "comprehensive_chat",
-          agent_id: ${agent.id},
-          store_id: ${agent.store},
-          new_convo: true,
-          include_timestamp: true,
-        };
+      const payload = {
+        type: "comprehensive_chat",
+        agent_id: ${agent.id},
+        store_id: ${agent.store},
+        new_convo: true,
+        include_timestamp: true,
+      };
 
       const API_BASE = "https://ryder-partner.cortechsocial.com";
 
       const fetchConversationMessages = async (
         conversationId,
         page = 1,
-        pageSize = 50
+        pageSize = 50,
       ) => {
         try {
           const url =
@@ -303,7 +358,7 @@ export const getEmbedCode = (agent) => {
         try {
           console.log(
             "📥 Fetching conversation history for ID:",
-            conversationId
+            conversationId,
           );
           const items = await fetchConversationMessages(conversationId, 1, 50);
           if (Array.isArray(items) && items.length) {
@@ -319,7 +374,7 @@ export const getEmbedCode = (agent) => {
 
             // 🔹 Find index of first user message
             const firstUserIndex = messages.findIndex(
-              (m) => m.sender === "user"
+              (m) => m.sender === "user",
             );
             if (firstUserIndex !== -1) {
               // Remove the first user message
@@ -327,7 +382,17 @@ export const getEmbedCode = (agent) => {
             }
 
             chatState.messages = messages;
+            chatState.messages = messages;
             renderMessages();
+
+            // Set floating message to the last bot message from history
+            const lastBotMessage = [...messages]
+              .reverse()
+              .find((m) => m.sender === "bot");
+            if (lastBotMessage) {
+              updateFloatingMessage(lastBotMessage.text);
+              showFloatingMessage();
+            }
           } else {
             console.log("ℹ️ No history items found");
           }
@@ -353,7 +418,7 @@ export const getEmbedCode = (agent) => {
         try {
           const response = await fetch(
             "https://ryder-partner.cortechsocial.com/api/agents/public/active-agent/?store_id=" +
-              payload.store_id
+              payload.store_id,
           );
           const data = await response.json();
 
@@ -476,7 +541,7 @@ export const getEmbedCode = (agent) => {
             } else console.error("❌ Error updating cart note");
           } else {
             console.log(
-              "✅ Cart note already contains correct session info, skipping"
+              "✅ Cart note already contains correct session info, skipping",
             );
             trackingData.cart_token = currentCart.token;
           }
@@ -485,7 +550,12 @@ export const getEmbedCode = (agent) => {
         }
       };
 
-      let chatState = { isOpen: false, isTyping: false, messages: [] };
+      let chatState = {
+        isOpen: false,
+        isTyping: false,
+        messages: [],
+        isFloatingDismissed: false,
+      };
 
       const getDOMElements = () => ({
         chatToggle: document.getElementById("chat-toggle"),
@@ -497,6 +567,9 @@ export const getEmbedCode = (agent) => {
         chatIcon: document.getElementById("chat-icon"),
         closeIcon: document.getElementById("close-icon"),
         messagesContainer: document.getElementById("messages-container"),
+        floatingMessage: document.getElementById("chat-floating-message"),
+        closeFloatingMessage: document.getElementById("close-floating-message"),
+        floatingMessageText: document.getElementById("floating-message-text"),
       });
 
       const formatTime = (timestamp) =>
@@ -557,7 +630,7 @@ export const getEmbedCode = (agent) => {
           agentInfoHtml =
             '<div class="flex items-center mb-1">' +
             '<div class="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center mr-2">' +
-            '<img src="https://ryder-chat.netlify.app/agent.jpg" alt="Agent" class="w-6 h-6 rounded-full object-cover object-top" />' +
+            '<img src="https://ryder-media.netlify.app/agent.png" alt="Agent" class="w-6 h-6 rounded-full object-cover object-top" />' +
             "</div>" +
             "<div>" +
             '<h3 class="font-semibold text-sm">' +
@@ -602,7 +675,7 @@ export const getEmbedCode = (agent) => {
         if (messagesContainer) {
           messagesContainer.innerHTML = "";
           chatState.messages.forEach((m) =>
-            messagesContainer.appendChild(createMessageElement(m))
+            messagesContainer.appendChild(createMessageElement(m)),
           );
           scrollToBottom();
         }
@@ -610,28 +683,32 @@ export const getEmbedCode = (agent) => {
 
       const showTyping = () => {
         chatState.isTyping = true;
-        const { messagesContainer, messageInput, sendButton } =
+        const { messagesContainer, sendButton, messageInput } =
           getDOMElements();
 
-        // Disable input and button
+        // Focus input even while typing (as per user request)
         if (messageInput) {
-          messageInput.disabled = true;
-          messageInput.classList.add("opacity-50", "cursor-not-allowed");
+          messageInput.focus();
         }
+
+        // Disable ONLY send button
         if (sendButton) {
           sendButton.disabled = true;
+          sendButton.classList.add("opacity-50", "cursor-not-allowed");
         }
 
         if (messagesContainer) {
+          // Prevent duplicate typing indicators
+          if (document.getElementById("typing-indicator")) return;
           const typingDiv = document.createElement("div");
           typingDiv.id = "typing-indicator";
-          typingDiv.className = "flex justify-start";
+          typingDiv.className = "flex justify-start !inline-block";
           typingDiv.innerHTML =
             ' <div class="bg-gray-100 text-gray-800 rounded-2xl rounded-bl-none px-3 py-2 max-w-sm">' +
             '<div class="flex space-x-1">' +
-            '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>' +
-            '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>' +
-            '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>' +
+            '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce !block"></div>' +
+            '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce !block" style="animation-delay: 0.1s"></div>' +
+            '<div class="w-2 h-2 bg-gray-400 rounded-full animate-bounce !block" style="animation-delay: 0.2s"></div>' +
             "</div>" +
             "</div>";
           messagesContainer.appendChild(typingDiv);
@@ -641,22 +718,71 @@ export const getEmbedCode = (agent) => {
 
       const hideTyping = () => {
         chatState.isTyping = false;
-        const { messageInput, sendButton } = getDOMElements();
+        const { sendButton, messageInput } = getDOMElements();
 
-        // Re-enable input and button
-        if (messageInput) {
-          messageInput.disabled = false;
-          messageInput.classList.remove("opacity-50", "cursor-not-allowed");
-        }
+        // Enable send button
         if (sendButton) {
           sendButton.disabled = false;
+          sendButton.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+
+        // Ensure input is focused and active
+        if (messageInput) {
+          messageInput.disabled = false;
+          messageInput.focus();
         }
 
         const typingIndicator = document.getElementById("typing-indicator");
         if (typingIndicator) typingIndicator.remove();
       };
 
+      const showFloatingMessage = () => {
+        const { floatingMessage } = getDOMElements();
+        
+        // Check if already shown in this session
+        const alreadyShown = sessionStorage.getItem("chatbot_popup_shown");
+        
+        if (
+          floatingMessage &&
+          !chatState.isOpen &&
+          !chatState.isFloatingDismissed &&
+          !alreadyShown
+        ) {
+          floatingMessage.classList.remove("hidden");
+          floatingMessage.classList.add("flex");
+          
+          // Mark as shown in this session
+          sessionStorage.setItem("chatbot_popup_shown", "true");
+          
+          // Auto-hide after 10 seconds
+          setTimeout(() => {
+            hideFloatingMessage();
+          }, 10000);
+        }
+      };
+
+      const updateFloatingMessage = (text) => {
+        const { floatingMessageText } = getDOMElements();
+        if (floatingMessageText && text) {
+          // Truncate if too long
+          const maxLength = 300;
+          floatingMessageText.textContent =
+            text.length > maxLength
+              ? text.substring(0, maxLength) + "..."
+              : text;
+        }
+      };
+
+      const hideFloatingMessage = () => {
+        const { floatingMessage } = getDOMElements();
+        if (floatingMessage) {
+          floatingMessage.classList.add("hidden");
+          floatingMessage.classList.remove("flex");
+        }
+      };
+
       const openChat = () => {
+        hideFloatingMessage();
         chatState.isOpen = true;
         const {
           chatWindow,
@@ -673,6 +799,8 @@ export const getEmbedCode = (agent) => {
           if (chatToggle) chatToggle.classList.remove("chat-closed");
           if (chatToggleContainer) chatToggleContainer.classList.add("hidden");
           scrollToBottom();
+          const { messageInput } = getDOMElements();
+          if (messageInput) setTimeout(() => messageInput.focus(), 100);
         }
       };
 
@@ -694,6 +822,7 @@ export const getEmbedCode = (agent) => {
           if (chatToggleContainer)
             chatToggleContainer.classList.remove("hidden");
         }
+        // showFloatingMessage();
       };
 
       const toggleChat = () => (chatState.isOpen ? closeChat() : openChat());
@@ -702,20 +831,18 @@ export const getEmbedCode = (agent) => {
         const { messageInput } = getDOMElements();
         if (!messageInput) return;
 
-        // Prevent sending if already typing
-        if (chatState.isTyping) return;
-
         const message = messageInput.value.trim();
         if (!message) return;
 
         addMessage(message, "user");
         renderMessages();
         messageInput.value = "";
+        messageInput.focus();
         showTyping();
 
         if (socket && socket.readyState === WebSocket.OPEN) {
           socket.send(
-            JSON.stringify({ type: "comprehensive_chat", message, ...payload })
+            JSON.stringify({ type: "comprehensive_chat", message, ...payload }),
           );
         } else {
           hideTyping();
@@ -737,12 +864,24 @@ export const getEmbedCode = (agent) => {
           messageInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") sendMessage();
           });
+
+        const { floatingMessageText, closeFloatingMessage } = getDOMElements();
+        if (floatingMessageText) {
+          floatingMessageText.addEventListener("click", openChat);
+        }
+        if (closeFloatingMessage) {
+          closeFloatingMessage.addEventListener("click", (e) => {
+            e.stopPropagation();
+            chatState.isFloatingDismissed = true;
+            hideFloatingMessage();
+          });
+        }
       };
 
       const initializeChatbot = async () => {
         const storedCustomerId = localStorage.getItem("chatbot_customer_id");
         const storedConversationId = localStorage.getItem(
-          "chatbot_conversation_id"
+          "chatbot_conversation_id",
         );
         if (storedCustomerId) {
           payload.customer_id = storedCustomerId;
@@ -750,22 +889,22 @@ export const getEmbedCode = (agent) => {
           trackingData.chatbot_customer_id = storedCustomerId;
           console.log(
             "Loaded customer ID from localStorage:",
-            storedCustomerId
+            storedCustomerId,
           );
           await updateCartNoteIfNeeded(storedCustomerId);
         }
         if (storedConversationId) {
           console.log(
             "Loaded conversation ID from localStorage:",
-            storedConversationId
+            storedConversationId,
           );
           loadAndRenderHistory(storedConversationId).catch((e) =>
-            console.error("History load error:", e)
+            console.error("History load error:", e),
           );
         }
 
         socket = new WebSocket(
-          "wss://ryder-partner.cortechsocial.com/ws/chat/"
+          "wss://ryder-partner.cortechsocial.com/ws/chat/",
         );
 
         socket.onopen = () => {
@@ -779,7 +918,7 @@ export const getEmbedCode = (agent) => {
                 store_id: payload.store_id,
                 new_convo: true,
                 include_timestamp: true,
-              })
+              }),
             );
           }
         };
@@ -804,11 +943,11 @@ export const getEmbedCode = (agent) => {
             if (data.conversation_id) {
               localStorage.setItem(
                 "chatbot_conversation_id",
-                String(data.conversation_id)
+                String(data.conversation_id),
               );
               if (!historyLoaded)
                 loadAndRenderHistory(String(data.conversation_id)).catch((e) =>
-                  console.error("History load error:", e)
+                  console.error("History load error:", e),
                 );
             }
 
@@ -821,8 +960,15 @@ export const getEmbedCode = (agent) => {
               addMessage("Error: " + data.error, "bot");
             }
           } catch {
-            hideTyping();
-            addMessage(event.data, "bot");
+            if (data.message || data.content) {
+              const msgContent = data.message || data.content;
+              addMessage(msgContent, "bot");
+              updateFloatingMessage(msgContent);
+              showFloatingMessage(); // Find 'Who are you?' response and show it
+            } else {
+              // Fallback if structure is unknown, though raw JSON is risky
+              addMessage(event.data, "bot");
+            }
           }
           renderMessages();
         };
@@ -835,23 +981,12 @@ export const getEmbedCode = (agent) => {
         const agentData = await fetchActiveAgent();
         renderMessages(); // Render messages after agent name is fetched
         monitorCart();
-        // Only open chat if agent data is present
+
         if (agentData) {
-          const STORAGE_KEY = "openChat";
-          const now = Date.now();
-
-          // Get the saved timestamp
-          const lastTimestamp = localStorage.getItem(STORAGE_KEY);
-          const timeDiff = now - Number(lastTimestamp);
-          // Open Chat Every 2 hours
-          if (!lastTimestamp || timeDiff >= 3600000) {
-            setTimeout(() => {
-              localStorage.setItem(STORAGE_KEY, now.toString());
-              openChat();
-            }, 2500);
-
-            // Update timestamp after running
-          }
+          // Show floating message shortly after load
+          setTimeout(() => {
+            showFloatingMessage();
+          }, 1000);
         }
       };
 
@@ -859,6 +994,7 @@ export const getEmbedCode = (agent) => {
     </script>
   </body>
 </html>
+
 `;
   return html;
 };
