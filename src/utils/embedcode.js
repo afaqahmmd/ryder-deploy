@@ -187,6 +187,12 @@ export const getEmbedCode = (agent) => {
           right: 20px;
           bottom: 24px;
         }
+
+        #chat-floating-message {
+          right: 20px !important;
+          bottom: 78px !important;
+          max-width: min(250px, calc(100vw - 40px));
+        }
       }
     </style>
   </head>
