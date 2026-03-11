@@ -145,6 +145,49 @@ export const getEmbedCode = (agent) => {
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
       }
+     #mobile-avatar-dismiss {
+        display: none;
+        position: absolute;
+        top: 30%;
+        right: -10px;
+        transform: translateY(-50%);
+        width: 10px;
+        height: 10px;
+        border-radius: 9999px;
+        border: 1px solid #ef4444;
+        background: #ffffff;
+        color: #ef4444;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+        z-index: 9999;
+      }
+
+      #mobile-avatar-dismiss svg {
+        width: 10px;
+        height: 10px;
+      }
+
+      @media (max-width: 799px) {
+        #chat-toggle.mobile-avatar {
+          transform: scale(0.6);
+          transform-origin: bottom right;
+        }
+
+        #chat-toggle.mobile-avatar:hover {
+          transform: scale(0.6);
+        }
+
+        #mobile-avatar-dismiss {
+          display: flex;
+        }
+
+        #chat-toggle-container {
+          right: 20px;
+          bottom: 24px;
+        }
+      }
     </style>
   </head>
 
@@ -186,7 +229,17 @@ export const getEmbedCode = (agent) => {
       </div>
 
       <!-- Floating Chat Icon -->
-      <div id="chat-toggle-container" class="fixed bottom-16 right-16 z-50">
+      <div id="chat-toggle-container" class="fixed bottom-16 right-16 z-50 overflow-visible">
+        <button id="mobile-avatar-dismiss" aria-label="Dismiss chat avatar">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
         <button
           id="chat-toggle"
           class="bg-[#1F1F1F] hover:bg-[#303030] text-white rounded-full p-[2px] shadow-lg transition-all duration-300 hover:scale-110 chat-closed relative"
@@ -570,6 +623,7 @@ export const getEmbedCode = (agent) => {
         floatingMessage: document.getElementById("chat-floating-message"),
         closeFloatingMessage: document.getElementById("close-floating-message"),
         floatingMessageText: document.getElementById("floating-message-text"),
+        mobileAvatarDismiss: document.getElementById("mobile-avatar-dismiss"),
       });
 
       const formatTime = (timestamp) =>
@@ -781,6 +835,33 @@ export const getEmbedCode = (agent) => {
         }
       };
 
+      const isMobileView = () => window.matchMedia("(max-width: 767px)").matches;
+
+      const hideMobileAvatarForSession = () => {
+        if (!isMobileView()) return;
+        const { chatToggleContainer } = getDOMElements();
+        hideFloatingMessage();
+        if (chatToggleContainer) {
+          chatToggleContainer.classList.add("hidden");
+        }
+        sessionStorage.setItem("chatbot_avatar_hidden", "true");
+      };
+
+      const applyMobileAvatarState = () => {
+        const { chatToggle, chatToggleContainer } = getDOMElements();
+        const shouldHide = sessionStorage.getItem("chatbot_avatar_hidden") === "true";
+        if (chatToggle) {
+          if (isMobileView()) {
+            chatToggle.classList.add("mobile-avatar");
+          } else {
+            chatToggle.classList.remove("mobile-avatar");
+          }
+        }
+        if (chatToggleContainer && isMobileView() && shouldHide) {
+          chatToggleContainer.classList.add("hidden");
+        }
+      };
+
       const openChat = () => {
         hideFloatingMessage();
         chatState.isOpen = true;
@@ -856,6 +937,7 @@ export const getEmbedCode = (agent) => {
           closeChat: closeBtn,
           sendButton,
           messageInput,
+          mobileAvatarDismiss,
         } = getDOMElements();
         if (chatToggle) chatToggle.addEventListener("click", toggleChat);
         if (closeBtn) closeBtn.addEventListener("click", closeChat);
@@ -876,6 +958,13 @@ export const getEmbedCode = (agent) => {
             hideFloatingMessage();
           });
         }
+        if (mobileAvatarDismiss) {
+          mobileAvatarDismiss.addEventListener("click", (e) => {
+            e.stopPropagation();
+            hideMobileAvatarForSession();
+          });
+        }
+        window.addEventListener("resize", applyMobileAvatarState);
       };
 
       const initializeChatbot = async () => {
@@ -978,6 +1067,7 @@ export const getEmbedCode = (agent) => {
         }, 3000);
 
         bindEvents();
+        applyMobileAvatarState();
         const agentData = await fetchActiveAgent();
         renderMessages(); // Render messages after agent name is fetched
         monitorCart();
