@@ -141,6 +141,13 @@ export const getEmbedCode = (agent) => {
       .floating-message {
         animation: floatUp 0.5s ease-out forwards;
       }
+      .floating-message-preview {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
       #messages-container {
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
@@ -223,7 +230,7 @@ export const getEmbedCode = (agent) => {
           </svg>
         </button>
         <p
-          class="text-sm text-gray-800 font-medium cursor-pointer break-words w-full overflow-hidden"
+          class="floating-message-preview text-sm text-gray-800 font-medium cursor-pointer break-words w-full overflow-hidden"
           id="floating-message-text"
         >
           ...
@@ -450,7 +457,7 @@ export const getEmbedCode = (agent) => {
               .find((m) => m.sender === "bot");
             if (lastBotMessage) {
               updateFloatingMessage(lastBotMessage.text);
-              showFloatingMessage();
+              scheduleFloatingMessage();
             }
           } else {
             console.log("ℹ️ No history items found");
@@ -469,9 +476,14 @@ export const getEmbedCode = (agent) => {
         session_start: new Date().toISOString(),
       };
 
+      const FLOATING_MESSAGE_INITIAL_DELAY_MS = 10000;
+      const FLOATING_MESSAGE_AUTO_HIDE_MS = 10000;
+      const chatbotBootTime = Date.now();
+
       let socket;
       let historyLoaded = false;
       let agentName = "Shopify Assistant"; // Default agent name
+      let floatingMessageTimer = null;
 
       const fetchActiveAgent = async () => {
         try {
@@ -796,6 +808,30 @@ export const getEmbedCode = (agent) => {
         if (typingIndicator) typingIndicator.remove();
       };
 
+      const getFloatingMessageDelay = () =>
+        Math.max(
+          0,
+          FLOATING_MESSAGE_INITIAL_DELAY_MS - (Date.now() - chatbotBootTime),
+        );
+
+      const clearFloatingMessageTimer = () => {
+        if (floatingMessageTimer) {
+          clearTimeout(floatingMessageTimer);
+          floatingMessageTimer = null;
+        }
+      };
+
+      const scheduleFloatingMessage = () => {
+        const alreadyShown = sessionStorage.getItem("chatbot_popup_shown");
+        if (alreadyShown || chatState.isFloatingDismissed) return;
+
+        clearFloatingMessageTimer();
+        floatingMessageTimer = setTimeout(() => {
+          floatingMessageTimer = null;
+          showFloatingMessage();
+        }, getFloatingMessageDelay());
+      };
+
       const showFloatingMessage = () => {
         const { floatingMessage } = getDOMElements();
         
@@ -817,19 +853,14 @@ export const getEmbedCode = (agent) => {
           // Auto-hide after 10 seconds
           setTimeout(() => {
             hideFloatingMessage();
-          }, 10000);
+          }, FLOATING_MESSAGE_AUTO_HIDE_MS);
         }
       };
 
       const updateFloatingMessage = (text) => {
         const { floatingMessageText } = getDOMElements();
         if (floatingMessageText && text) {
-          // Truncate if too long
-          const maxLength = 300;
-          floatingMessageText.textContent =
-            text.length > maxLength
-              ? text.substring(0, maxLength) + "..."
-              : text;
+          floatingMessageText.textContent = text;
         }
       };
 
@@ -846,6 +877,7 @@ export const getEmbedCode = (agent) => {
       const hideMobileAvatarForSession = () => {
         if (!isMobileView()) return;
         const { chatToggleContainer } = getDOMElements();
+        clearFloatingMessageTimer();
         hideFloatingMessage();
         if (chatToggleContainer) {
           chatToggleContainer.classList.add("hidden");
@@ -869,6 +901,7 @@ export const getEmbedCode = (agent) => {
       };
 
       const openChat = () => {
+        clearFloatingMessageTimer();
         hideFloatingMessage();
         chatState.isOpen = true;
         const {
@@ -1059,7 +1092,7 @@ export const getEmbedCode = (agent) => {
               const msgContent = data.message || data.content;
               addMessage(msgContent, "bot");
               updateFloatingMessage(msgContent);
-              showFloatingMessage(); // Find 'Who are you?' response and show it
+              scheduleFloatingMessage();
             } else {
               // Fallback if structure is unknown, though raw JSON is risky
               addMessage(event.data, "bot");
@@ -1080,9 +1113,7 @@ export const getEmbedCode = (agent) => {
 
         if (agentData) {
           // Show floating message shortly after load
-          setTimeout(() => {
-            showFloatingMessage();
-          }, 1000);
+          scheduleFloatingMessage();
         }
       };
 
